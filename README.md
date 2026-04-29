@@ -35,6 +35,7 @@
 - [Showcase](#showcase)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
+- [Development Journey](#development-journey)
 - [License](#license)
 - [Contact](#contact)
 
@@ -201,6 +202,12 @@ Contributions are welcome! Please review the [Contributing Guide](https://github
 Thanks to everyone who has contributed to Markdown Viewer.
 
 [![Contributors](https://contrib.rocks/image?repo=ThisIs-Developer/Markdown-Viewer)](https://github.com/ThisIs-Developer/Markdown-Viewer/graphs/contributors)
+
+---
+
+## 📈 Development Journey
+
+Markdown Viewer has grown from a lightweight Markdown parser into a full-featured, professional application with advanced rendering, workflow, and export capabilities. Compare the [current version](https://markdownviewer.pages.dev/) with the [original version](https://a1b91221.markdownviewer.pages.dev/) to see the progress in UI design, performance optimization, and feature depth.
 
 ---
 
