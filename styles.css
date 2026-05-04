@@ -277,46 +277,38 @@ body {
 }
 
 .tool-button {
-  background-color: transparent;
-  border: none;
+  background-color: var(--button-bg);
+  border: 1px solid var(--border-color);
   color: var(--text-color);
-  border-radius: 4px;
-  padding: 6px 8px;
-  font-size: 0.9rem;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 14px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  opacity: 0.8;
-  transition: color 0.2s ease, opacity 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .tool-button:hover {
-  background-color: transparent;
-  color: var(--accent-color);
-  opacity: 1;
+  background-color: var(--button-hover);
 }
 
 .tool-button:active {
-  background-color: transparent;
-  opacity: 0.6;
+  background-color: var(--button-active);
 }
 
 .tool-button i {
-  font-size: 1rem;
+  font-size: 16px;
 }
 
 .btn-text {
   display: none;
 }
 
-.toolbar .dropdown-toggle::after {
-  display: none;
-}
-
 .toolbar .tool-button.sync-active {
+  border-color: var(--accent-color);
   color: var(--accent-color);
-  opacity: 1;
 }
 
 .file-input {
