@@ -936,13 +936,15 @@ a:focus {
 }
 
 .header-left {
-  flex: 1;
+  flex: 1 0 auto;
   justify-content: flex-start;
+  white-space: nowrap;
 }
 
 .header-right {
-  flex: 1;
+  flex: 1 0 auto;
   justify-content: flex-end;
+  white-space: nowrap;
 }
 
 /* View Mode Button Group */
