@@ -277,29 +277,46 @@ body {
 }
 
 .tool-button {
-  background-color: var(--button-bg);
-  border: 1px solid var(--border-color);
+  background-color: transparent;
+  border: none;
   color: var(--text-color);
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 14px;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 0.9rem;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  transition: all 0.2s ease;
+  opacity: 0.8;
+  transition: color 0.2s ease, opacity 0.2s ease;
 }
 
 .tool-button:hover {
-  background-color: var(--button-hover);
+  background-color: transparent;
+  color: var(--accent-color);
+  opacity: 1;
 }
 
 .tool-button:active {
-  background-color: var(--button-active);
+  background-color: transparent;
+  opacity: 0.6;
 }
 
 .tool-button i {
-  font-size: 16px;
+  font-size: 1rem;
+}
+
+.btn-text {
+  display: none;
+}
+
+.toolbar .dropdown-toggle::after {
+  display: none;
+}
+
+.toolbar .tool-button.sync-active {
+  color: var(--accent-color);
+  opacity: 1;
 }
 
 .file-input {
@@ -1028,16 +1045,8 @@ a:focus {
   }
 
   /* Compact toolbar at medium widths */
-  .btn-text {
-    display: none;
-  }
-
   .toolbar {
     gap: 4px;
-  }
-
-  .tool-button {
-    padding: 5px 10px;
   }
 }
 
