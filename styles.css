@@ -940,6 +940,8 @@ a:focus {
 .view-mode-group {
   display: flex;
   gap: 0;
+  flex: 1;
+  justify-content: center;
 }
 
 .view-mode-btn {
