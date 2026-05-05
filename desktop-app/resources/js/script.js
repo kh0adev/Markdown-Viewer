@@ -959,12 +959,14 @@ This is a fully client-side application. Your content never leaves your browser 
     try {
       const { frontmatter, body } = parseFrontmatter(markdownEditor.value);
       const tableHtml = frontmatter ? renderFrontmatterTable(frontmatter) : '';
+      const usedReferenceNumbers = getUsedReferenceNumbers(body);
       const html = tableHtml + marked.parse(body);
       const sanitizedHtml = DOMPurify.sanitize(html, {
         ADD_TAGS: ['mjx-container'],
         ADD_ATTR: ['id', 'class', 'style']
       });
       markdownPreview.innerHTML = sanitizedHtml;
+      applyReferencePreviewLinks(markdownPreview, usedReferenceNumbers);
       enhanceGitHubAlerts(markdownPreview);
 
       processEmojis(markdownPreview);
@@ -1875,6 +1877,25 @@ This is a fully client-side application. Your content never leaves your browser 
       .replace(/"/g, '\\"');
   }
 
+  function applyReferencePreviewLinks(container, usedNumbers) {
+    if (!container || !usedNumbers || usedNumbers.size === 0) return;
+    const links = container.querySelectorAll('a');
+    links.forEach(function(link) {
+      const text = link.textContent.trim();
+      let number = null;
+      if (/^\d+$/.test(text)) {
+        number = parseInt(text, 10);
+      } else {
+        const match = text.match(/^\[(\d+)\]$/);
+        if (match) number = parseInt(match[1], 10);
+      }
+      if (number && usedNumbers.has(number)) {
+        link.textContent = '[' + number + ']';
+        link.classList.add('reference-link');
+      }
+    });
+  }
+
   function insertMarkdownBlock(block) {
     const value = markdownEditor.value;
     const start = markdownEditor.selectionStart;
@@ -1981,12 +2002,8 @@ This is a fully client-side application. Your content never leaves your browser 
     }
 
     function insertFromFile(file) {
-      const reader = new FileReader();
-      reader.onload = function() {
-        if (typeof reader.result !== 'string') return;
-        insertImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      const objectUrl = URL.createObjectURL(file);
+      insertImage(objectUrl);
     }
 
     function updateMode(shouldFocus) {
@@ -2103,10 +2120,8 @@ This is a fully client-side application. Your content never leaves your browser 
       const inlineReference = selected + '[' + finalNumber + ']';
       const baseValue = latestValue.slice(0, start) + inlineReference + latestValue.slice(end);
       let separator = '';
-      if (baseValue.length) {
-        if (baseValue.endsWith('\n\n')) separator = '';
-        else if (baseValue.endsWith('\n')) separator = '\n';
-        else separator = '\n\n';
+      if (baseValue.length && !baseValue.endsWith('\n')) {
+        separator = '\n';
       }
       const updatedValue = baseValue + separator + definition;
       markdownEditor.value = updatedValue;

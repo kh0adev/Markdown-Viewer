@@ -146,6 +146,11 @@ body {
   color: var(--preview-text-color); /* Using specific text color for preview content */
 }
 
+.markdown-body a.reference-link {
+  font-size: 0.9em;
+  letter-spacing: -0.02em;
+}
+
 /* Style tables in light mode */
 .markdown-body table {
   background-color: var(--table-bg);
@@ -1769,6 +1774,11 @@ a:focus {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.reset-modal-box--wide {
+  width: min(92vw, 560px);
+  max-width: 560px;
 }
 
 .reset-modal-message {
