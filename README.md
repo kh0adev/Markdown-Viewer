@@ -7,10 +7,10 @@
   <p>Live preview, diagrams, math, export tools, and multi-document workflows — all in your browser.</p>
 
   <p>
-    <a href="https://markdownviewer.pages.dev/">Live Demo</a> ·
-    <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki">Documentation</a> ·
-    <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/issues">Issues</a> ·
-    <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/releases">Releases</a>
+    <a href="https://markdownviewer.pages.dev/" target="_blank" rel="noopener noreferrer">Live Demo</a> ·
+    <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki" target="_blank" rel="noopener noreferrer">Documentation</a> ·
+    <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/issues" target="_blank" rel="noopener noreferrer">Issues</a> ·
+    <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/releases" target="_blank" rel="noopener noreferrer">Releases</a>
   </p>
 
   <p>
@@ -21,10 +21,10 @@
   </p>
 
   <p>
-  <a href="https://deepwiki.com/ThisIs-Developer/Markdown-Viewer">
+  <a href="https://deepwiki.com/ThisIs-Developer/Markdown-Viewer" target="_blank" rel="noopener noreferrer">
     <img src="https://deepwiki.com/badge.svg" />
   </a>
-  <a href="https://oosmetrics.com/repo/ThisIs-Developer/Markdown-Viewer">
+  <a href="https://oosmetrics.com/repo/ThisIs-Developer/Markdown-Viewer" target="_blank" rel="noopener noreferrer">
     <img src="https://api.oosmetrics.com/api/v1/badge/achievement/b13c27be-447e-489d-a04d-55f7ccaf9175.svg" />
   </a>
 </p>
@@ -141,7 +141,7 @@ python3 -m http.server 8080
 ```
 
 ### Option 4 — Desktop App
-Download pre-built binaries from the [Releases](https://github.com/ThisIs-Developer/Markdown-Viewer/releases) page or build from source (see the [Desktop App](https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Desktop-App) guide).
+Download pre-built binaries from the <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/releases" target="_blank" rel="noopener noreferrer">Releases</a> page or build from source (see the <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Desktop-App" target="_blank" rel="noopener noreferrer">Desktop App</a> guide).
 
 ---
 
@@ -166,27 +166,27 @@ Download pre-built binaries from the [Releases](https://github.com/ThisIs-Develo
 
 Explore the full documentation on the wiki:
 
-- [Features](https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Features)
-- [Usage Guide](https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Usage-Guide)
-- [Installation](https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Installation)
-- [Markdown Reference](https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Markdown-Reference)
-- [FAQ](https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/FAQ)
-- [Configuration](https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Configuration)
+- <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Features" target="_blank" rel="noopener noreferrer">Features</a>
+- <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Usage-Guide" target="_blank" rel="noopener noreferrer">Usage Guide</a>
+- <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Installation" target="_blank" rel="noopener noreferrer">Installation</a>
+- <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Markdown-Reference" target="_blank" rel="noopener noreferrer">Markdown Reference</a>
+- <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/FAQ" target="_blank" rel="noopener noreferrer">FAQ</a>
+- <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Configuration" target="_blank" rel="noopener noreferrer">Configuration</a>
 
 ---
 
 ## Built With
 
 - HTML5, CSS3, JavaScript
-- [Bootstrap](https://getbootstrap.com/)
-- [Marked.js](https://marked.js.org/)
-- [highlight.js](https://highlightjs.org/)
-- [MathJax](https://www.mathjax.org/)
-- [Mermaid](https://mermaid.js.org/)
-- [DOMPurify](https://github.com/cure53/DOMPurify)
-- [FileSaver.js](https://github.com/eligrey/FileSaver.js)
-- [html2canvas](https://github.com/niklasvh/html2canvas) + [jsPDF](https://www.npmjs.com/package/jspdf)
-- [JoyPixels](https://www.joypixels.com/)
+- <a href="https://getbootstrap.com/" target="_blank" rel="noopener noreferrer">Bootstrap</a>
+- <a href="https://marked.js.org/" target="_blank" rel="noopener noreferrer">Marked.js</a>
+- <a href="https://highlightjs.org/" target="_blank" rel="noopener noreferrer">highlight.js</a>
+- <a href="https://www.mathjax.org/" target="_blank" rel="noopener noreferrer">MathJax</a>
+- <a href="https://mermaid.js.org/" target="_blank" rel="noopener noreferrer">Mermaid</a>
+- <a href="https://github.com/cure53/DOMPurify" target="_blank" rel="noopener noreferrer">DOMPurify</a>
+- <a href="https://github.com/eligrey/FileSaver.js" target="_blank" rel="noopener noreferrer">FileSaver.js</a>
+- <a href="https://github.com/niklasvh/html2canvas" target="_blank" rel="noopener noreferrer">html2canvas</a> + <a href="https://www.npmjs.com/package/jspdf" target="_blank" rel="noopener noreferrer">jsPDF</a>
+- <a href="https://www.joypixels.com/" target="_blank" rel="noopener noreferrer">JoyPixels</a>
 
 ---
 
@@ -196,13 +196,13 @@ Explore the full documentation on the wiki:
 
 | Project | Description |
 |---------|-------------|
-| [Markdown Desk](https://github.com/jhrepo/markdown-desk) | Native macOS wrapper built with [Tauri](https://tauri.app/), adding live reload and native file open/save. |
+| <a href="https://github.com/jhrepo/markdown-desk" target="_blank" rel="noopener noreferrer">Markdown Desk</a> | Native macOS wrapper built with <a href="https://tauri.app/" target="_blank" rel="noopener noreferrer">Tauri</a>, adding live reload and native file open/save. |
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please review the [Contributing Guide](https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Contributing) and open a pull request.
+Contributions are welcome! Please review the <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Contributing" target="_blank" rel="noopener noreferrer">Contributing Guide</a> and open a pull request.
 
 ---
 
@@ -210,22 +210,24 @@ Contributions are welcome! Please review the [Contributing Guide](https://github
 
 Thanks to everyone who has contributed to Markdown Viewer.
 
-[![Contributors](https://contrib.rocks/image?repo=ThisIs-Developer/Markdown-Viewer)](https://github.com/ThisIs-Developer/Markdown-Viewer/graphs/contributors)
+<a href="https://github.com/ThisIs-Developer/Markdown-Viewer/graphs/contributors" target="_blank" rel="noopener noreferrer">
+  <img src="https://contrib.rocks/image?repo=ThisIs-Developer/Markdown-Viewer" alt="Contributors" />
+</a>
 
 ---
 
 ## 📈 Development Journey
 
-Markdown Viewer has grown from a lightweight Markdown parser into a full-featured, professional application with advanced rendering, workflow, and export capabilities. Compare the [current version](https://markdownviewer.pages.dev/) with the [original version](https://a1b91221.markdownviewer.pages.dev/) to see the progress in UI design, performance optimization, and feature depth.
+Markdown Viewer has grown from a lightweight Markdown parser into a full-featured, professional application with advanced rendering, workflow, and export capabilities. Compare the <a href="https://markdownviewer.pages.dev/" target="_blank" rel="noopener noreferrer">current version</a> with the <a href="https://a1b91221.markdownviewer.pages.dev/" target="_blank" rel="noopener noreferrer">original version</a> to see the progress in UI design, performance optimization, and feature depth.
 
 ---
 
 ## License
 
-This project is licensed under the Apache License. See [LICENSE](LICENSE) for details.
+This project is licensed under the Apache License. See <a href="LICENSE" target="_blank" rel="noopener noreferrer">LICENSE</a> for details.
 
 ---
 
 ## Contact
 
-Developed and maintained by [ThisIs-Developer](https://github.com/ThisIs-Developer).
+Developed and maintained by <a href="https://github.com/ThisIs-Developer" target="_blank" rel="noopener noreferrer">ThisIs-Developer</a>.
