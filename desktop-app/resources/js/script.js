@@ -1869,6 +1869,16 @@ This is a fully client-side application. Your content never leaves your browser 
     return next;
   }
 
+  function sanitizeMarkdownTitle(title) {
+    return title
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/'/g, '&#39;')
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"');
+  }
+
   function insertMarkdownBlock(block) {
     const value = markdownEditor.value;
     const start = markdownEditor.selectionStart;
@@ -1961,7 +1971,7 @@ This is a fully client-side application. Your content never leaves your browser 
     function buildImageMarkdown(url) {
       const altText = altInput.value.trim() || 'alt text';
       const titleText = altInput.value.trim();
-      const safeTitle = titleText.replace(/"/g, '\\"');
+      const safeTitle = sanitizeMarkdownTitle(titleText);
       const titlePart = safeTitle ? ' "' + safeTitle + '"' : '';
       return '![' + altText + '](' + url + titlePart + ')';
     }
@@ -2091,7 +2101,7 @@ This is a fully client-side application. Your content never leaves your browser 
       const finalNumber = getNextAvailableReferenceNumber(usedNumbers, baseNumber);
       const url = urlInput.value.trim() || 'https://';
       const title = titleInput.value.trim();
-      const safeTitle = title.replace(/"/g, '\\"');
+      const safeTitle = sanitizeMarkdownTitle(title);
       const definition = '[' + finalNumber + ']: ' + url + (safeTitle ? ' "' + safeTitle + '"' : '');
       const selected = latestValue.slice(start, end);
       const inlineReference = selected + '[' + finalNumber + ']';
