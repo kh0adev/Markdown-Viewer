@@ -354,28 +354,7 @@ body {
   color: var(--text-color);
 }
 
-/* Responsive design for mobile */
-@media (max-width: 1080px) {
-  .content-container {
-      flex-direction: column;
-  }
-  
-  .editor-pane, .preview-pane {
-      flex: none;
-      height: 50%;
-      border-right: none;
-  }
-  
-  .editor-pane {
-      border-bottom: 1px solid var(--border-color);
-  }
-  
-  .toolbar {
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-  }
-}
+
 
 /* Loading indicators */
 .loading {
@@ -678,11 +657,7 @@ a:focus {
   z-index: 1001;
 }
 
-@media (max-width: 1080px) {
-  .mobile-menu {
-    display: block;
-  }
-}
+
 
 /* slide‑in panel */
 .mobile-menu-panel {
@@ -899,11 +874,55 @@ a:focus {
   font-size: 0.9rem;
 }
 
-/* hide desktop-only stats and toolbar on mobile */
-@media (max-width: 767px) {
-  .stats-container.d-none.d-md-flex,
-  .toolbar.d-none.d-md-flex {
+/* ==========================================
+   NAVBAR RESPONSIVE BREAKPOINTS
+   >= 1080px : full desktop navbar
+   <  1080px : mobile hamburger + stacked panes
+   ========================================== */
+
+/* Mobile / tablet (< 1080px): switch to hamburger, stack panes */
+@media (max-width: 1079px) {
+  /* Override Bootstrap d-md-flex / d-md-none so the breakpoint is 1080px */
+  .stats-container,
+  .view-mode-group,
+  .toolbar {
     display: none !important;
+  }
+
+  .mobile-menu {
+    display: block !important;
+  }
+
+  /* Stack editor and preview vertically */
+  .content-container {
+    flex-direction: column;
+  }
+
+  .editor-pane,
+  .preview-pane {
+    flex: none;
+    height: 50%;
+    border-right: none;
+  }
+
+  .editor-pane {
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  /* Hide drag-resize divider (touch devices don't use it) */
+  .resize-divider {
+    display: none;
+  }
+
+  /* Single-pane view modes: occupy full height */
+  .content-container.view-editor-only .editor-pane,
+  .content-container.view-preview-only .preview-pane {
+    height: 100%;
+  }
+
+  .content-container.view-split .editor-pane,
+  .content-container.view-split .preview-pane {
+    height: 50%;
   }
 }
 
@@ -1023,7 +1042,7 @@ a:focus {
   flex: 1;
 }
 
-/* Responsive adjustments for view mode buttons and toolbar */
+/* Compact desktop (< 1280px): icon-only view mode buttons, compact toolbar */
 @media (max-width: 1280px) {
   /* Icon-only view mode buttons at medium widths */
   .view-mode-btn span {
@@ -1044,11 +1063,7 @@ a:focus {
   }
 }
 
-@media (max-width: 767px) {
-  .view-mode-group {
-    display: none;
-  }
-}
+
 
 /* ========================================
    RESIZE DIVIDER - Story 1.3
@@ -1095,12 +1110,7 @@ a:focus {
   display: none;
 }
 
-/* Hide divider on tablet and mobile (no drag resize) */
-@media (max-width: 1079px) {
-  .resize-divider {
-    display: none;
-  }
-}
+
 
 /* Prevent text selection during drag */
 .resizing {
@@ -1180,18 +1190,7 @@ a:focus {
    RESPONSIVE VIEW MODE FIXES - Story 1.5
    ======================================== */
 
-/* On tablet/mobile, ensure single-pane modes take full height */
-@media (max-width: 1079px) {
-  .content-container.view-editor-only .editor-pane,
-  .content-container.view-preview-only .preview-pane {
-    height: 100%;
-  }
 
-  .content-container.view-split .editor-pane,
-  .content-container.view-split .preview-pane {
-    height: 50%;
-  }
-}
 
 /* ========================================
    PDF EXPORT TABLE FIX - Rowspan/Colspan
