@@ -287,7 +287,7 @@
           </div>
           <div class="markdown-toolbar-group">
             <button type="button" class="markdown-tool-btn" data-md-action="link" title="Link" aria-label="Link"><i class="bi bi-link-45deg"></i></button>
-            <button type="button" class="markdown-tool-btn" data-md-action="anchor" title="Anchor" aria-label="Anchor"><i class="bi bi-anchor"></i></button>
+            <button type="button" class="markdown-tool-btn text-tool" data-md-action="reference" title="Reference" aria-label="Reference"><i></i></button>
             <button type="button" class="markdown-tool-btn" data-md-action="image" title="Image" aria-label="Image"><i class="bi bi-card-image"></i></button>
             <button type="button" class="markdown-tool-btn" data-md-action="inline-code" title="Inline code" aria-label="Inline code"><i class="bi bi-code-slash"></i></button>
             <button type="button" class="markdown-tool-btn" data-md-action="code-block" title="Code block" aria-label="Code block"><i class="bi bi-file-code"></i></button>
@@ -311,7 +311,7 @@
 
         <!-- Reset Confirmation Modal -->
         <div id="reset-confirm-modal" class="reset-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="reset-modal-title" style="display:none;">
-          <div class="reset-modal-box">
+          <div class="reset-modal-box reset-modal-box--wide">
             <p id="reset-modal-title" class="reset-modal-message">Are you sure you want to delete all files?</p>
             <div class="reset-modal-actions">
               <button class="reset-modal-btn reset-modal-cancel" id="reset-modal-cancel">Cancel</button>
@@ -322,12 +322,88 @@
 
         <!-- Rename Modal -->
         <div id="rename-modal" class="reset-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="rename-modal-title" style="display:none;">
-          <div class="reset-modal-box">
+          <div class="reset-modal-box reset-modal-box--wide">
             <p id="rename-modal-title" class="reset-modal-message">Rename file</p>
             <input type="text" id="rename-modal-input" class="rename-modal-input" placeholder="File name" />
             <div class="reset-modal-actions">
               <button class="reset-modal-btn reset-modal-cancel" id="rename-modal-cancel">Cancel</button>
               <button class="reset-modal-btn reset-modal-confirm" id="rename-modal-confirm">Rename</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Link Modal -->
+        <div id="link-modal" class="reset-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="link-modal-title" style="display:none;">
+          <div class="reset-modal-box reset-modal-box--wide">
+            <p id="link-modal-title" class="reset-modal-message">Insert link</p>
+            <div class="reset-modal-field">
+              <label class="reset-modal-label" for="link-modal-url">Address / URL</label>
+              <input type="url" id="link-modal-url" class="rename-modal-input" value="https://" />
+            </div>
+            <div class="reset-modal-field">
+              <label class="reset-modal-label" for="link-modal-text">Link Text</label>
+              <input type="text" id="link-modal-text" class="rename-modal-input" placeholder="Link title" />
+            </div>
+            <div class="reset-modal-actions">
+              <button class="reset-modal-btn reset-modal-cancel" id="link-modal-cancel">Cancel</button>
+              <button class="reset-modal-btn" id="link-modal-apply">Apply</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reference Modal -->
+        <div id="reference-modal" class="reset-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="reference-modal-title" style="display:none;">
+          <div class="reset-modal-box">
+            <p id="reference-modal-title" class="reset-modal-message">Insert reference</p>
+            <div class="reset-modal-field">
+              <label class="reset-modal-label" for="reference-modal-number">Reference Number</label>
+              <input type="text" id="reference-modal-number" class="rename-modal-input" value="[1]" />
+            </div>
+            <div class="reset-modal-field">
+              <label class="reset-modal-label" for="reference-modal-url">Address / Link</label>
+              <input type="url" id="reference-modal-url" class="rename-modal-input" value="https://" />
+            </div>
+            <div class="reset-modal-field">
+              <label class="reset-modal-label" for="reference-modal-title-input">Title</label>
+              <input type="text" id="reference-modal-title-input" class="rename-modal-input" placeholder="Reference title" />
+            </div>
+            <div class="reset-modal-actions">
+              <button class="reset-modal-btn reset-modal-cancel" id="reference-modal-cancel">Cancel</button>
+              <button class="reset-modal-btn" id="reference-modal-apply">Insert</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image Modal -->
+        <div id="image-modal" class="reset-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="image-modal-title" style="display:none;">
+          <div class="reset-modal-box">
+            <p id="image-modal-title" class="reset-modal-message">Insert image</p>
+            <div class="reset-modal-toggle-group">
+              <label class="reset-modal-option">
+                <input type="radio" name="image-source" id="image-source-upload" value="upload">
+                Upload from Device
+              </label>
+              <label class="reset-modal-option">
+                <input type="radio" name="image-source" id="image-source-url" value="url" checked>
+                External Image (URL)
+              </label>
+            </div>
+            <div id="image-upload-fields" class="reset-modal-field-group" style="display:none;">
+              <input type="file" id="image-modal-file" class="rename-modal-input" accept="image/*" />
+            </div>
+            <div id="image-url-fields" class="reset-modal-field-group">
+              <div class="reset-modal-field">
+                <label class="reset-modal-label" for="image-modal-url">Image URL</label>
+                <input type="url" id="image-modal-url" class="rename-modal-input" value="https://" />
+              </div>
+            </div>
+            <div class="reset-modal-field">
+              <label class="reset-modal-label" for="image-modal-alt">Alt Text (used for title)</label>
+              <input type="text" id="image-modal-alt" class="rename-modal-input" placeholder="Image description" />
+            </div>
+            <div class="reset-modal-actions">
+              <button class="reset-modal-btn reset-modal-cancel" id="image-modal-cancel">Cancel</button>
+              <button class="reset-modal-btn" id="image-modal-insert">Insert</button>
             </div>
           </div>
         </div>

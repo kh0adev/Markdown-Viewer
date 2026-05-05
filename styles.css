@@ -146,6 +146,11 @@ body {
   color: var(--preview-text-color); /* Using specific text color for preview content */
 }
 
+.markdown-body a.reference-link {
+  font-size: 0.9em;
+  letter-spacing: -0.02em;
+}
+
 /* Style tables in light mode */
 .markdown-body table {
   background-color: var(--table-bg);
@@ -465,6 +470,13 @@ body {
 
 .markdown-tool-btn i {
   font-size: 15px;
+}
+
+.markdown-tool-btn[data-md-action="reference"] i::before {
+  content: "[ ]";
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: -0.12em;
 }
 
 .markdown-tool-btn.text-tool {
@@ -1771,6 +1783,11 @@ a:focus {
   gap: 16px;
 }
 
+.reset-modal-box--wide {
+  width: min(92vw, 560px);
+  max-width: 560px;
+}
+
 .reset-modal-message {
   margin: 0;
   font-size: 14px;
@@ -1809,6 +1826,47 @@ a:focus {
 .reset-modal-confirm:hover {
   background-color: #b02a37;
   border-color: #b02a37;
+}
+
+/* ========================================
+   RESET MODAL FORM FIELDS
+   ======================================== */
+
+.reset-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.reset-modal-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reset-modal-label {
+  font-size: 12px;
+  color: var(--text-secondary, #57606a);
+  font-weight: 600;
+}
+
+.reset-modal-toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reset-modal-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-color);
+}
+
+.reset-modal-option input {
+  margin: 0;
 }
 
 /* ========================================

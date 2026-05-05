@@ -77,6 +77,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // GLOBAL STATE (persisted across reloads)
   // ========================================
   const GLOBAL_STATE_KEY = 'markdownViewerGlobalState';
+  let referenceCounter = 1;
+  const imageObjectUrls = new Set();
 
   function loadGlobalState() {
     try { return JSON.parse(localStorage.getItem(GLOBAL_STATE_KEY)) || {}; }
@@ -958,12 +960,14 @@ This is a fully client-side application. Your content never leaves your browser 
     try {
       const { frontmatter, body } = parseFrontmatter(markdownEditor.value);
       const tableHtml = frontmatter ? renderFrontmatterTable(frontmatter) : '';
+      const usedReferenceNumbers = getUsedReferenceNumbers(body);
       const html = tableHtml + marked.parse(body);
       const sanitizedHtml = DOMPurify.sanitize(html, {
         ADD_TAGS: ['mjx-container'],
         ADD_ATTR: ['id', 'class', 'style']
       });
       markdownPreview.innerHTML = sanitizedHtml;
+      applyReferencePreviewLinks(markdownPreview, usedReferenceNumbers);
       enhanceGitHubAlerts(markdownPreview);
 
       processEmojis(markdownPreview);
@@ -996,6 +1000,7 @@ This is a fully client-side application. Your content never leaves your browser 
       }
 
       updateDocumentStats();
+      cleanupImageObjectUrls();
     } catch (e) {
       console.error("Markdown rendering failed:", e);
       markdownPreview.innerHTML = `<div class="alert alert-danger">
@@ -1850,6 +1855,68 @@ This is a fully client-side application. Your content never leaves your browser 
     return slug || 'section';
   }
 
+  function getUsedReferenceNumbers(text) {
+    const used = new Set();
+    const regex = /^\[(\d+)\]:/gm;
+    let match = regex.exec(text);
+    while (match) {
+      const num = parseInt(match[1], 10);
+      if (!Number.isNaN(num)) used.add(num);
+      match = regex.exec(text);
+    }
+    return used;
+  }
+
+  function getNextAvailableReferenceNumber(used, startNumber) {
+    let next = Math.max(1, startNumber || 1);
+    while (used.has(next)) next += 1;
+    return next;
+  }
+
+  function sanitizeMarkdownTitle(title) {
+    return title
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"');
+  }
+
+  function applyReferencePreviewLinks(container, usedNumbers) {
+    if (!container || !usedNumbers || usedNumbers.size === 0) return;
+    const links = container.querySelectorAll('a');
+    links.forEach(function(link) {
+      const text = link.textContent.trim();
+      let number = null;
+      if (/^\d+$/.test(text)) {
+        number = parseInt(text, 10);
+      } else {
+        const match = text.match(/^\[(\d+)\]$/);
+        if (match) number = parseInt(match[1], 10);
+      }
+      if (number && usedNumbers.has(number)) {
+        link.textContent = '[' + number + ']';
+        link.classList.add('reference-link');
+      }
+    });
+  }
+
+  function cleanupImageObjectUrls() {
+    if (imageObjectUrls.size === 0) return;
+    const contents = [markdownEditor.value];
+    if (Array.isArray(tabs)) {
+      tabs.forEach(function(tab) {
+        if (tab && typeof tab.content === 'string' && tab.content) {
+          contents.push(tab.content);
+        }
+      });
+    }
+    const snapshot = contents.join('\n');
+    Array.from(imageObjectUrls).forEach(function(url) {
+      if (!snapshot.includes(url)) {
+        URL.revokeObjectURL(url);
+        imageObjectUrls.delete(url);
+      }
+    });
+  }
+
   function insertMarkdownBlock(block) {
     const value = markdownEditor.value;
     const start = markdownEditor.selectionStart;
@@ -1862,33 +1929,266 @@ This is a fully client-side application. Your content never leaves your browser 
   }
 
   function insertMarkdownLink() {
-    const start = markdownEditor.selectionStart;
-    const end = markdownEditor.selectionEnd;
-    const selected = markdownEditor.value.slice(start, end) || 'link text';
-    const url = prompt('Link URL', 'https://');
-    if (url === null) return;
-    const replacement = '[' + selected + '](' + (url.trim() || 'https://') + ')';
-    replaceEditorRange(start, end, replacement, start + 1, start + 1 + selected.length);
-  }
-
-  function insertMarkdownImage() {
-    const start = markdownEditor.selectionStart;
-    const end = markdownEditor.selectionEnd;
-    const selected = markdownEditor.value.slice(start, end) || 'alt text';
-    const url = prompt('Image URL', 'https://');
-    if (url === null) return;
-    const replacement = '![' + selected + '](' + (url.trim() || 'https://') + ')';
-    replaceEditorRange(start, end, replacement, start + 2, start + 2 + selected.length);
-  }
-
-  function insertMarkdownAnchor() {
+    const modal = document.getElementById('link-modal');
+    const urlInput = document.getElementById('link-modal-url');
+    const textInput = document.getElementById('link-modal-text');
+    const confirmBtn = document.getElementById('link-modal-apply');
+    const cancelBtn = document.getElementById('link-modal-cancel');
+    if (!modal || !urlInput || !textInput || !confirmBtn || !cancelBtn) return;
     const start = markdownEditor.selectionStart;
     const end = markdownEditor.selectionEnd;
     const selected = markdownEditor.value.slice(start, end);
-    const id = prompt('Anchor ID', toSlug(selected));
-    if (id === null) return;
-    const replacement = '<a id="' + toSlug(id) + '"></a>';
-    replaceEditorRange(start, end, replacement, start + replacement.length, start + replacement.length);
+    urlInput.value = 'https://';
+    textInput.value = selected || '';
+    modal.style.display = 'flex';
+
+    function applyLink() {
+      const url = urlInput.value.trim() || 'https://';
+      const linkText = textInput.value.trim() || selected || 'link text';
+      const replacement = '[' + linkText + '](' + url + ')';
+      modal.style.display = 'none';
+      cleanup();
+      replaceEditorRange(start, end, replacement, start + replacement.length, start + replacement.length);
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+      cleanup();
+    }
+
+    function onKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        applyLink();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeModal();
+      }
+    }
+
+    function cleanup() {
+      confirmBtn.removeEventListener('click', applyLink);
+      cancelBtn.removeEventListener('click', closeModal);
+      urlInput.removeEventListener('keydown', onKey);
+      textInput.removeEventListener('keydown', onKey);
+    }
+
+    confirmBtn.addEventListener('click', applyLink);
+    cancelBtn.addEventListener('click', closeModal);
+    urlInput.addEventListener('keydown', onKey);
+    textInput.addEventListener('keydown', onKey);
+
+    requestAnimationFrame(function() {
+      urlInput.focus();
+      urlInput.select();
+    });
+  }
+
+  function insertMarkdownImage() {
+    const modal = document.getElementById('image-modal');
+    const uploadOption = document.getElementById('image-source-upload');
+    const urlOption = document.getElementById('image-source-url');
+    const uploadFields = document.getElementById('image-upload-fields');
+    const urlFields = document.getElementById('image-url-fields');
+    const fileInput = document.getElementById('image-modal-file');
+    const urlInput = document.getElementById('image-modal-url');
+    const altInput = document.getElementById('image-modal-alt');
+    const confirmBtn = document.getElementById('image-modal-insert');
+    const cancelBtn = document.getElementById('image-modal-cancel');
+    if (!modal || !uploadOption || !urlOption || !uploadFields || !urlFields || !fileInput || !urlInput || !altInput || !confirmBtn || !cancelBtn) return;
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    const selected = markdownEditor.value.slice(start, end);
+    urlInput.value = 'https://';
+    altInput.value = selected || '';
+    fileInput.value = '';
+    urlOption.checked = true;
+    uploadOption.checked = false;
+    modal.style.display = 'flex';
+
+    function buildImageMarkdown(url) {
+      const titleText = altInput.value.trim();
+      const altText = titleText || 'alt text';
+      const safeTitle = sanitizeMarkdownTitle(titleText);
+      const titlePart = safeTitle ? ' "' + safeTitle + '"' : '';
+      return '![' + altText + '](' + url + titlePart + ')';
+    }
+
+    function insertImage(url) {
+      const safeUrl = url.trim() || 'https://';
+      const replacement = buildImageMarkdown(safeUrl);
+      modal.style.display = 'none';
+      cleanup();
+      replaceEditorRange(start, end, replacement, start + replacement.length, start + replacement.length);
+    }
+
+    function insertFromFile(file) {
+      const objectUrl = URL.createObjectURL(file);
+      imageObjectUrls.add(objectUrl);
+      insertImage(objectUrl);
+    }
+
+    function updateMode(shouldFocus) {
+      const isUpload = uploadOption.checked;
+      uploadFields.style.display = isUpload ? 'flex' : 'none';
+      urlFields.style.display = isUpload ? 'none' : 'flex';
+      if (shouldFocus) {
+        requestAnimationFrame(function() {
+          if (isUpload) {
+            fileInput.focus();
+          } else {
+            urlInput.focus();
+            urlInput.select();
+          }
+        });
+      }
+    }
+
+    function onModeChange() {
+      updateMode(true);
+    }
+
+    function onFileChange() {
+      const file = fileInput.files && fileInput.files[0];
+      if (file) {
+        insertFromFile(file);
+      }
+    }
+
+    function onKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (uploadOption.checked) {
+          const file = fileInput.files && fileInput.files[0];
+          if (file) insertFromFile(file);
+          else fileInput.click();
+        } else {
+          insertImage(urlInput.value);
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeModal();
+      }
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+      cleanup();
+    }
+
+    function cleanup() {
+      confirmBtn.removeEventListener('click', onConfirm);
+      cancelBtn.removeEventListener('click', closeModal);
+      uploadOption.removeEventListener('change', onModeChange);
+      urlOption.removeEventListener('change', onModeChange);
+      fileInput.removeEventListener('change', onFileChange);
+      fileInput.removeEventListener('keydown', onKey);
+      urlInput.removeEventListener('keydown', onKey);
+      altInput.removeEventListener('keydown', onKey);
+    }
+
+    function onConfirm() {
+      if (uploadOption.checked) {
+        const file = fileInput.files && fileInput.files[0];
+        if (file) insertFromFile(file);
+        else fileInput.click();
+      } else {
+        insertImage(urlInput.value);
+      }
+    }
+
+    confirmBtn.addEventListener('click', onConfirm);
+    cancelBtn.addEventListener('click', closeModal);
+    uploadOption.addEventListener('change', onModeChange);
+    urlOption.addEventListener('change', onModeChange);
+    fileInput.addEventListener('change', onFileChange);
+    fileInput.addEventListener('keydown', onKey);
+    urlInput.addEventListener('keydown', onKey);
+    altInput.addEventListener('keydown', onKey);
+    updateMode(true);
+  }
+
+  function insertMarkdownReference() {
+    const modal = document.getElementById('reference-modal');
+    const numberInput = document.getElementById('reference-modal-number');
+    const urlInput = document.getElementById('reference-modal-url');
+    const titleInput = document.getElementById('reference-modal-title-input');
+    const confirmBtn = document.getElementById('reference-modal-apply');
+    const cancelBtn = document.getElementById('reference-modal-cancel');
+    if (!modal || !numberInput || !urlInput || !titleInput || !confirmBtn || !cancelBtn) return;
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    const currentValue = markdownEditor.value;
+    const used = getUsedReferenceNumbers(currentValue);
+    const maxUsed = used.size ? Math.max(...used) : 0;
+    referenceCounter = Math.max(1, maxUsed + 1);
+    const suggestedNumber = getNextAvailableReferenceNumber(used, referenceCounter);
+    numberInput.value = '[' + suggestedNumber + ']';
+    urlInput.value = 'https://';
+    titleInput.value = '';
+    modal.style.display = 'flex';
+
+    function insertReference() {
+      const latestValue = markdownEditor.value;
+      const usedNumbers = getUsedReferenceNumbers(latestValue);
+      const parsed = parseInt(numberInput.value.replace(/[^\d]/g, ''), 10);
+      const baseNumber = Number.isNaN(parsed) ? suggestedNumber : parsed;
+      const finalNumber = getNextAvailableReferenceNumber(usedNumbers, baseNumber);
+      const url = urlInput.value.trim() || 'https://';
+      const title = titleInput.value.trim();
+      const safeTitle = sanitizeMarkdownTitle(title);
+      const definition = '[' + finalNumber + ']: ' + url + (safeTitle ? ' "' + safeTitle + '"' : '');
+      const selected = latestValue.slice(start, end);
+      const inlineReference = selected + '[' + finalNumber + ']';
+      const baseValue = latestValue.slice(0, start) + inlineReference + latestValue.slice(end);
+      let separator = '';
+      if (baseValue.length && !baseValue.endsWith('\n')) {
+        separator = '\n';
+      }
+      const updatedValue = baseValue + separator + definition;
+      markdownEditor.value = updatedValue;
+      markdownEditor.focus();
+      const caret = start + inlineReference.length;
+      markdownEditor.setSelectionRange(caret, caret);
+      markdownEditor.dispatchEvent(new Event('input', { bubbles: true }));
+      referenceCounter = Math.max(referenceCounter, finalNumber + 1);
+      modal.style.display = 'none';
+      cleanup();
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+      cleanup();
+    }
+
+    function onKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        insertReference();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeModal();
+      }
+    }
+
+    function cleanup() {
+      confirmBtn.removeEventListener('click', insertReference);
+      cancelBtn.removeEventListener('click', closeModal);
+      numberInput.removeEventListener('keydown', onKey);
+      urlInput.removeEventListener('keydown', onKey);
+      titleInput.removeEventListener('keydown', onKey);
+    }
+
+    confirmBtn.addEventListener('click', insertReference);
+    cancelBtn.addEventListener('click', closeModal);
+    numberInput.addEventListener('keydown', onKey);
+    urlInput.addEventListener('keydown', onKey);
+    titleInput.addEventListener('keydown', onKey);
+
+    requestAnimationFrame(function() {
+      numberInput.focus();
+      numberInput.select();
+    });
   }
 
   function findInMarkdownEditor() {
@@ -1942,7 +2242,7 @@ This is a fully client-side application. Your content never leaves your browser 
       applyMarkdownList('ordered');
     } else if (action === 'horizontal-rule') insertMarkdownBlock('---\n');
     else if (action === 'link') insertMarkdownLink();
-    else if (action === 'anchor') insertMarkdownAnchor();
+    else if (action === 'reference') insertMarkdownReference();
     else if (action === 'image') insertMarkdownImage();
     else if (action === 'inline-code') wrapEditorSelection('`', '`', 'code');
     else if (action === 'code-block') insertMarkdownBlock('```js\n' + (markdownEditor.value.slice(markdownEditor.selectionStart, markdownEditor.selectionEnd) || 'console.log("Hello, Markdown!");') + '\n```\n');
