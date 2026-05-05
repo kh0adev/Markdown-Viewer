@@ -1853,7 +1853,7 @@ This is a fully client-side application. Your content never leaves your browser 
 
   function getUsedReferenceNumbers(text) {
     const used = new Set();
-    const regex = /\[(\d+)\]/g;
+    const regex = /^\[(\d+)\]:/gm;
     let match = regex.exec(text);
     while (match) {
       const num = parseInt(match[1], 10);
@@ -1871,10 +1871,6 @@ This is a fully client-side application. Your content never leaves your browser 
 
   function sanitizeMarkdownTitle(title) {
     return title
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/'/g, '&#39;')
       .replace(/\\/g, '\\\\')
       .replace(/"/g, '\\"');
   }
@@ -1969,8 +1965,8 @@ This is a fully client-side application. Your content never leaves your browser 
     modal.style.display = 'flex';
 
     function buildImageMarkdown(url) {
-      const altText = altInput.value.trim() || 'alt text';
       const titleText = altInput.value.trim();
+      const altText = titleText || 'alt text';
       const safeTitle = sanitizeMarkdownTitle(titleText);
       const titlePart = safeTitle ? ' "' + safeTitle + '"' : '';
       return '![' + altText + '](' + url + titlePart + ')';
