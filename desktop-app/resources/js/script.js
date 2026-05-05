@@ -1670,6 +1670,147 @@ This is a fully client-side application. Your content never leaves your browser 
     replaceEditorRange(range.start, range.end, replacement, range.start, range.start + replacement.length);
   }
 
+  function getListLineRange() {
+    const value = markdownEditor.value;
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    const effectiveEnd = end > start && value[end - 1] === '\n' ? end - 1 : end;
+    const lineStart = value.lastIndexOf('\n', Math.max(0, start - 1)) + 1;
+    let lineEnd = value.indexOf('\n', effectiveEnd);
+    if (lineEnd === -1) lineEnd = value.length;
+    return { start: lineStart, end: lineEnd, text: value.slice(lineStart, lineEnd) };
+  }
+
+  function parseMarkdownListItem(line) {
+    const match = line.match(/^(\s*)((\d+)\.|[-*+])(?:\s+|$)(.*)$/);
+    if (!match) return null;
+    const isOrdered = typeof match[3] !== 'undefined';
+    return {
+      type: isOrdered ? 'ordered' : 'unordered',
+      indent: match[1],
+      marker: match[2],
+      number: isOrdered ? parseInt(match[3], 10) : null,
+      bullet: isOrdered ? null : match[2],
+      body: match[4] || '',
+      prefix: match[1] + match[2] + ' '
+    };
+  }
+
+  function stripListMarkerForApply(line) {
+    const parsed = parseMarkdownListItem(line);
+    if (parsed) {
+      return { indent: parsed.indent, body: parsed.body };
+    }
+    const match = line.match(/^(\s*)(.*)$/);
+    return { indent: match ? match[1] : '', body: match ? match[2] : line };
+  }
+
+  function getPreviousLineInfo(lineStart) {
+    if (lineStart <= 0) return null;
+    const value = markdownEditor.value;
+    const previousEnd = lineStart - 1;
+    const previousStart = previousEnd > 0 ? value.lastIndexOf('\n', previousEnd - 1) + 1 : 0;
+    return { start: previousStart, text: value.slice(previousStart, previousEnd) };
+  }
+
+  function getOrderedListStartNumber(lineStart) {
+    const previousLine = getPreviousLineInfo(lineStart);
+    if (!previousLine || !previousLine.text.trim()) return 1;
+    const parsed = parseMarkdownListItem(previousLine.text);
+    return parsed && parsed.type === 'ordered' ? parsed.number + 1 : 1;
+  }
+
+  function applyMarkdownList(type) {
+    const range = getListLineRange();
+    const hadSelection = markdownEditor.selectionStart !== markdownEditor.selectionEnd;
+    const lines = range.text.split('\n');
+    let nextNumber = type === 'ordered' ? getOrderedListStartNumber(range.start) : 1;
+    let firstPrefixLength = null;
+
+    const replacement = lines.map(function(line) {
+      const stripped = stripListMarkerForApply(line);
+      const prefix = type === 'ordered'
+        ? stripped.indent + (nextNumber++) + '. '
+        : stripped.indent + '- ';
+      if (firstPrefixLength === null) firstPrefixLength = prefix.length;
+      return prefix + stripped.body;
+    }).join('\n');
+
+    const isSingleLine = lines.length === 1;
+    const caret = (!hadSelection || isSingleLine)
+      ? range.start + (firstPrefixLength || 0)
+      : range.start + replacement.length;
+
+    replaceEditorRange(range.start, range.end, replacement, caret, caret);
+  }
+
+  function renumberOrderedListAfterPosition(position, nextNumber) {
+    let value = markdownEditor.value;
+    let lineStart = value.indexOf('\n', position);
+    if (lineStart === -1) return;
+    lineStart += 1;
+
+    let changed = false;
+    while (lineStart < value.length) {
+      let lineEnd = value.indexOf('\n', lineStart);
+      const hasNewline = lineEnd !== -1;
+      if (!hasNewline) lineEnd = value.length;
+
+      const line = value.slice(lineStart, lineEnd);
+      if (!line.trim()) break;
+
+      const parsed = parseMarkdownListItem(line);
+      if (!parsed || parsed.type !== 'ordered') break;
+
+      const replacement = parsed.indent + nextNumber + '. ' + parsed.body;
+      if (replacement !== line) {
+        value = value.slice(0, lineStart) + replacement + value.slice(lineEnd);
+        changed = true;
+      }
+
+      lineStart += replacement.length + (hasNewline ? 1 : 0);
+      nextNumber += 1;
+    }
+
+    if (changed) {
+      const selectionStart = markdownEditor.selectionStart;
+      const selectionEnd = markdownEditor.selectionEnd;
+      markdownEditor.value = value;
+      markdownEditor.setSelectionRange(selectionStart, selectionEnd);
+      markdownEditor.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  function handleListEnter(e) {
+    if (e.key !== 'Enter' || e.shiftKey || markdownEditor.selectionStart !== markdownEditor.selectionEnd) {
+      return false;
+    }
+
+    const range = getCurrentLineRange();
+    const parsed = parseMarkdownListItem(range.text);
+    if (!parsed) return false;
+
+    e.preventDefault();
+    if (!parsed.body.trim()) {
+      const caret = range.start + parsed.indent.length;
+      replaceEditorRange(range.start, range.end, parsed.indent, caret, caret);
+      return true;
+    }
+
+    const nextPrefix = parsed.type === 'ordered'
+      ? parsed.indent + (parsed.number + 1) + '. '
+      : parsed.indent + parsed.bullet + ' ';
+    const insertAt = markdownEditor.selectionStart;
+    const caret = insertAt + 1 + nextPrefix.length;
+    replaceEditorRange(insertAt, insertAt, '\n' + nextPrefix, caret, caret);
+
+    if (parsed.type === 'ordered') {
+      renumberOrderedListAfterPosition(caret, parsed.number + 2);
+    }
+
+    return true;
+  }
+
   function transformSelectionOrCurrentLine(transformer) {
     let start = markdownEditor.selectionStart;
     let end = markdownEditor.selectionEnd;
@@ -1796,9 +1937,9 @@ This is a fully client-side application. Your content never leaves your browser 
       const marker = '#'.repeat(Math.max(1, Math.min(6, level))) + ' ';
       transformEditorLines(function(line) { return marker + line.replace(/^#{1,6}\s+/, ''); });
     } else if (action === 'unordered-list') {
-      transformEditorLines(function(line) { return '- ' + line.replace(/^\s*([-*+]|\d+\.)\s+/, ''); });
+      applyMarkdownList('unordered');
     } else if (action === 'ordered-list') {
-      transformEditorLines(function(line, index) { return (index + 1) + '. ' + line.replace(/^\s*([-*+]|\d+\.)\s+/, ''); });
+      applyMarkdownList('ordered');
     } else if (action === 'horizontal-rule') insertMarkdownBlock('---\n');
     else if (action === 'link') insertMarkdownLink();
     else if (action === 'anchor') insertMarkdownAnchor();
@@ -2023,8 +2164,12 @@ This is a fully client-side application. Your content never leaves your browser 
 
   initMarkdownFormatToolbar();
   
-  // Tab key handler to insert indentation instead of moving focus
+  // Editor key handlers for list continuation and indentation
   markdownEditor.addEventListener("keydown", function(e) {
+    if (handleListEnter(e)) {
+      return;
+    }
+
     if (e.key === 'Tab') {
       e.preventDefault();
       
