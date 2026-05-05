@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const markdownEditor = document.getElementById("markdown-editor");
   const markdownPreview = document.getElementById("markdown-preview");
+  const markdownFormatToolbar = document.getElementById("markdown-format-toolbar");
   const themeToggle = document.getElementById("theme-toggle");
   const importFromFileButton = document.getElementById("import-from-file");
   const importFromGithubButton = document.getElementById("import-from-github");
@@ -1625,6 +1626,220 @@ This is a fully client-side application. Your content never leaves your browser 
     }
   }
 
+  function replaceEditorRange(start, end, replacement, selectStart, selectEnd) {
+    markdownEditor.focus();
+    markdownEditor.setRangeText(replacement, start, end, 'end');
+    const nextStart = typeof selectStart === 'number' ? selectStart : start + replacement.length;
+    const nextEnd = typeof selectEnd === 'number' ? selectEnd : nextStart;
+    markdownEditor.setSelectionRange(nextStart, nextEnd);
+    markdownEditor.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  function wrapEditorSelection(prefix, suffix, placeholder) {
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    const selected = markdownEditor.value.slice(start, end) || placeholder;
+    const replacement = prefix + selected + suffix;
+    const selectionStart = start + prefix.length;
+    const selectionEnd = selectionStart + selected.length;
+    replaceEditorRange(start, end, replacement, selectionStart, selectionEnd);
+  }
+
+  function getCurrentLineRange() {
+    const value = markdownEditor.value;
+    const start = markdownEditor.selectionStart;
+    const lineStart = value.lastIndexOf('\n', Math.max(0, start - 1)) + 1;
+    let lineEnd = value.indexOf('\n', start);
+    if (lineEnd === -1) lineEnd = value.length;
+    return { start: lineStart, end: lineEnd, text: value.slice(lineStart, lineEnd) };
+  }
+
+  function getSelectedLineRange() {
+    const value = markdownEditor.value;
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    const lineStart = value.lastIndexOf('\n', Math.max(0, start - 1)) + 1;
+    let lineEnd = value.indexOf('\n', end);
+    if (lineEnd === -1) lineEnd = value.length;
+    return { start: lineStart, end: lineEnd, text: value.slice(lineStart, lineEnd) };
+  }
+
+  function transformEditorLines(transformer) {
+    const range = getSelectedLineRange();
+    const replacement = range.text.split('\n').map(transformer).join('\n');
+    replaceEditorRange(range.start, range.end, replacement, range.start, range.start + replacement.length);
+  }
+
+  function transformSelectionOrCurrentLine(transformer) {
+    let start = markdownEditor.selectionStart;
+    let end = markdownEditor.selectionEnd;
+    if (start === end) {
+      const range = getCurrentLineRange();
+      start = range.start;
+      end = range.end;
+    }
+    const replacement = transformer(markdownEditor.value.slice(start, end));
+    replaceEditorRange(start, end, replacement, start, start + replacement.length);
+  }
+
+  function stripBasicMarkdown(text) {
+    return text
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/^>\s?/gm, '')
+      .replace(/^(\s*)([-*+]|\d+\.)\s+/gm, '$1')
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/(\*\*|__)(.*?)\1/g, '$2')
+      .replace(/(\*|_)(.*?)\1/g, '$2')
+      .replace(/~~(.*?)~~/g, '$1')
+      .replace(/`([^`]+)`/g, '$1');
+  }
+
+  function toTitleCase(text) {
+    return text.toLowerCase().replace(/\b\w/g, function(letter) {
+      return letter.toUpperCase();
+    });
+  }
+
+  function toSlug(text) {
+    const slug = text.toLowerCase().trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+    return slug || 'section';
+  }
+
+  function insertMarkdownBlock(block) {
+    const value = markdownEditor.value;
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    const needsLeadingBreak = start > 0 && value[start - 1] !== '\n';
+    const needsTrailingBreak = end < value.length && value[end] !== '\n';
+    const replacement = (needsLeadingBreak ? '\n' : '') + block + (needsTrailingBreak ? '\n' : '');
+    const caret = start + replacement.length;
+    replaceEditorRange(start, end, replacement, caret, caret);
+  }
+
+  function insertMarkdownLink() {
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    const selected = markdownEditor.value.slice(start, end) || 'link text';
+    const url = prompt('Link URL', 'https://');
+    if (url === null) return;
+    const replacement = '[' + selected + '](' + (url.trim() || 'https://') + ')';
+    replaceEditorRange(start, end, replacement, start + 1, start + 1 + selected.length);
+  }
+
+  function insertMarkdownImage() {
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    const selected = markdownEditor.value.slice(start, end) || 'alt text';
+    const url = prompt('Image URL', 'https://');
+    if (url === null) return;
+    const replacement = '![' + selected + '](' + (url.trim() || 'https://') + ')';
+    replaceEditorRange(start, end, replacement, start + 2, start + 2 + selected.length);
+  }
+
+  function insertMarkdownAnchor() {
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    const selected = markdownEditor.value.slice(start, end);
+    const id = prompt('Anchor ID', toSlug(selected));
+    if (id === null) return;
+    const replacement = '<a id="' + toSlug(id) + '"></a>';
+    replaceEditorRange(start, end, replacement, start + replacement.length, start + replacement.length);
+  }
+
+  function findInMarkdownEditor() {
+    const selected = markdownEditor.value.slice(markdownEditor.selectionStart, markdownEditor.selectionEnd);
+    const query = prompt('Find in document', selected);
+    if (!query) return;
+    const value = markdownEditor.value;
+    const fromIndex = markdownEditor.selectionEnd < value.length ? markdownEditor.selectionEnd : 0;
+    let foundAt = value.toLowerCase().indexOf(query.toLowerCase(), fromIndex);
+    if (foundAt === -1 && fromIndex > 0) {
+      foundAt = value.toLowerCase().indexOf(query.toLowerCase(), 0);
+    }
+    if (foundAt === -1) {
+      alert('No matches found.');
+      return;
+    }
+    markdownEditor.focus();
+    markdownEditor.setSelectionRange(foundAt, foundAt + query.length);
+  }
+
+  function showMarkdownToolbarHelp() {
+    alert('Use the toolbar to format selected text, add headings and lists, insert links/images/code/tables, switch views, search, or clear simple Markdown syntax.');
+  }
+
+  function showMarkdownDocumentInfo() {
+    alert('Words: ' + wordCountElement.textContent + '\nCharacters: ' + charCountElement.textContent + '\nReading time: ' + readingTimeElement.textContent + ' min');
+  }
+
+  function runMarkdownTool(action, button) {
+    if (action === 'undo' || action === 'redo') {
+      markdownEditor.focus();
+      document.execCommand(action);
+      markdownEditor.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    }
+
+    if (action === 'bold') wrapEditorSelection('**', '**', 'bold text');
+    else if (action === 'strike') wrapEditorSelection('~~', '~~', 'struck text');
+    else if (action === 'italic') wrapEditorSelection('*', '*', 'italic text');
+    else if (action === 'quote') transformEditorLines(function(line) { return line ? '> ' + line.replace(/^>\s?/, '') : '>'; });
+    else if (action === 'title-case') transformSelectionOrCurrentLine(toTitleCase);
+    else if (action === 'uppercase') transformSelectionOrCurrentLine(function(text) { return text.toUpperCase(); });
+    else if (action === 'lowercase') transformSelectionOrCurrentLine(function(text) { return text.toLowerCase(); });
+    else if (action === 'heading') {
+      const level = parseInt(button.getAttribute('data-md-level') || '1', 10);
+      const marker = '#'.repeat(Math.max(1, Math.min(6, level))) + ' ';
+      transformEditorLines(function(line) { return marker + line.replace(/^#{1,6}\s+/, ''); });
+    } else if (action === 'unordered-list') {
+      transformEditorLines(function(line) { return '- ' + line.replace(/^\s*([-*+]|\d+\.)\s+/, ''); });
+    } else if (action === 'ordered-list') {
+      transformEditorLines(function(line, index) { return (index + 1) + '. ' + line.replace(/^\s*([-*+]|\d+\.)\s+/, ''); });
+    } else if (action === 'horizontal-rule') insertMarkdownBlock('---\n');
+    else if (action === 'link') insertMarkdownLink();
+    else if (action === 'anchor') insertMarkdownAnchor();
+    else if (action === 'image') insertMarkdownImage();
+    else if (action === 'inline-code') wrapEditorSelection('`', '`', 'code');
+    else if (action === 'code-block') insertMarkdownBlock('```js\n' + (markdownEditor.value.slice(markdownEditor.selectionStart, markdownEditor.selectionEnd) || 'console.log("Hello, Markdown!");') + '\n```\n');
+    else if (action === 'table') insertMarkdownBlock('| Column 1 | Column 2 | Column 3 |\n| --- | --- | --- |\n| Value | Value | Value |\n');
+    else if (action === 'date-time') {
+      const timestamp = new Date().toLocaleString();
+      replaceEditorRange(markdownEditor.selectionStart, markdownEditor.selectionEnd, timestamp, markdownEditor.selectionStart + timestamp.length, markdownEditor.selectionStart + timestamp.length);
+    } else if (action === 'emoji') {
+      const shortcode = prompt('Emoji shortcode', ':smile:');
+      if (shortcode !== null) replaceEditorRange(markdownEditor.selectionStart, markdownEditor.selectionEnd, shortcode || ':smile:');
+    }
+    else if (action === 'copyright') replaceEditorRange(markdownEditor.selectionStart, markdownEditor.selectionEnd, '&copy;');
+    else if (action === 'alert-note') insertMarkdownBlock('> [!NOTE]\n> Important note goes here.\n');
+    else if (action === 'terminal-block') insertMarkdownBlock('```bash\nnpm run dev\n```\n');
+    else if (action === 'editor-only') { setViewMode('editor'); saveCurrentTabState(); }
+    else if (action === 'split-view') { setViewMode('split'); saveCurrentTabState(); }
+    else if (action === 'fullscreen') {
+      if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+      else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+    } else if (action === 'clear-formatting') transformSelectionOrCurrentLine(stripBasicMarkdown);
+    else if (action === 'find') findInMarkdownEditor();
+    else if (action === 'help') showMarkdownToolbarHelp();
+    else if (action === 'info') showMarkdownDocumentInfo();
+  }
+
+  function initMarkdownFormatToolbar() {
+    if (!markdownFormatToolbar) return;
+    markdownFormatToolbar.addEventListener('mousedown', function(e) {
+      if (e.target.closest('[data-md-action]')) e.preventDefault();
+    });
+    markdownFormatToolbar.addEventListener('click', function(e) {
+      const button = e.target.closest('[data-md-action]');
+      if (!button) return;
+      e.preventDefault();
+      runMarkdownTool(button.getAttribute('data-md-action'), button);
+    });
+  }
+
   // Story 1.3: Resize Divider Functions
   function initResizer() {
     if (!resizeDivider) return;
@@ -1805,6 +2020,8 @@ This is a fully client-side application. Your content never leaves your browser 
     clearTimeout(saveTabStateTimeout);
     saveTabStateTimeout = setTimeout(saveCurrentTabState, 500);
   });
+
+  initMarkdownFormatToolbar();
   
   // Tab key handler to insert indentation instead of moving focus
   markdownEditor.addEventListener("keydown", function(e) {
