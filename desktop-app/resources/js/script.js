@@ -1870,17 +1870,16 @@ This is a fully client-side application. Your content never leaves your browser 
 
   function extractReferenceDefinitions(markdown) {
     const definitions = new Map();
-    const definitionRegex = /^\[(\d+)\]:\s*(\S+)(?:\s+(?:"([^"]*)"|'([^']*)'|\(([^)]+)\)))?\s*$/gm;
+    const definitionRegex = /^\[(\d+)\]:\s*(?:<([^>\s]+)>|(\S+))(?:\s+(?:"([^"]*)"|'([^']*)'|\(([^)]+)\)))?\s*$/gm;
     const cleanedMarkdown = markdown.replace(
       definitionRegex,
-      function(match, numberText, rawUrl, titleDouble, titleSingle, titleParen) {
+      function(match, numberText, angleUrl, plainUrl, titleDouble, titleSingle, titleParen) {
         const number = parseInt(numberText, 10);
-        if (Number.isNaN(number)) return '';
-        const url = rawUrl ? rawUrl.replace(/^<|>$/g, '') : '';
+        if (Number.isNaN(number)) return match;
+        const url = (angleUrl || plainUrl || '').trim();
+        if (!url) return match;
         const title = titleDouble || titleSingle || titleParen || '';
-        if (url) {
-          definitions.set(number, { url: url, title: title });
-        }
+        definitions.set(number, { url: url, title: title });
         return '';
       }
     );
