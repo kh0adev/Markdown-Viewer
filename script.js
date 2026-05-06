@@ -79,6 +79,77 @@ document.addEventListener("DOMContentLoaded", function () {
   const GLOBAL_STATE_KEY = 'markdownViewerGlobalState';
   let referenceCounter = 1;
   const imageObjectUrls = new Set();
+  const EMOJI_API_URL = 'https://api.github.com/emojis';
+  let emojiLoadPromise = null;
+  let emojiEntries = [];
+  let emojiItems = [];
+  const emojiSelection = new Set();
+  let symbolItems = [];
+  const symbolSelection = new Set();
+  const SYMBOL_SECTIONS = [
+    {
+      title: 'Common symbols',
+      items: [
+        { symbol: '©', entity: '&copy;', name: 'copyright' },
+        { symbol: '®', entity: '&reg;', name: 'registered' },
+        { symbol: '™', entity: '&trade;', name: 'trademark' },
+        { symbol: '✓', entity: '&check;', name: 'check' },
+        { symbol: '★', entity: '&star;', name: 'star' },
+        { symbol: '•', entity: '&bull;', name: 'bullet' },
+        { symbol: '…', entity: '&hellip;', name: 'ellipsis' },
+        { symbol: '—', entity: '&mdash;', name: 'em dash' },
+        { symbol: '–', entity: '&ndash;', name: 'en dash' },
+        { symbol: '→', entity: '&rarr;', name: 'right arrow' },
+        { symbol: '←', entity: '&larr;', name: 'left arrow' },
+        { symbol: '↑', entity: '&uarr;', name: 'up arrow' },
+        { symbol: '↓', entity: '&darr;', name: 'down arrow' },
+      ],
+    },
+    {
+      title: 'HTML entities',
+      items: [
+        { symbol: '€', entity: '&euro;', name: 'euro' },
+        { symbol: '£', entity: '&pound;', name: 'pound' },
+        { symbol: '¥', entity: '&yen;', name: 'yen' },
+        { symbol: '§', entity: '&sect;', name: 'section' },
+        { symbol: '°', entity: '&deg;', name: 'degree' },
+        { symbol: '±', entity: '&plusmn;', name: 'plus minus' },
+        { symbol: '×', entity: '&times;', name: 'times' },
+        { symbol: '÷', entity: '&divide;', name: 'divide' },
+        { symbol: '≠', entity: '&ne;', name: 'not equal' },
+        { symbol: '≤', entity: '&le;', name: 'less equal' },
+        { symbol: '≥', entity: '&ge;', name: 'greater equal' },
+        { symbol: '∞', entity: '&infin;', name: 'infinity' },
+        { symbol: 'µ', entity: '&micro;', name: 'micro' },
+        { symbol: '¼', entity: '&frac14;', name: 'quarter' },
+        { symbol: '½', entity: '&frac12;', name: 'half' },
+        { symbol: '¾', entity: '&frac34;', name: 'three quarters' },
+        { symbol: '«', entity: '&laquo;', name: 'left quote' },
+        { symbol: '»', entity: '&raquo;', name: 'right quote' },
+      ],
+    },
+    {
+      title: 'Markdown-safe characters',
+      items: [
+        { symbol: '&', entity: '&amp;', name: 'ampersand' },
+        { symbol: '<', entity: '&lt;', name: 'less than' },
+        { symbol: '>', entity: '&gt;', name: 'greater than' },
+        { symbol: '"', entity: '&quot;', name: 'double quote' },
+        { symbol: "'", entity: '&#39;', name: 'apostrophe' },
+        { symbol: '|', entity: '&#124;', name: 'pipe' },
+        { symbol: '\\', entity: '&#92;', name: 'backslash' },
+        { symbol: '`', entity: '&#96;', name: 'backtick' },
+        { symbol: '*', entity: '&#42;', name: 'asterisk' },
+        { symbol: '_', entity: '&#95;', name: 'underscore' },
+        { symbol: '{', entity: '&#123;', name: 'left brace' },
+        { symbol: '}', entity: '&#125;', name: 'right brace' },
+        { symbol: '[', entity: '&#91;', name: 'left bracket' },
+        { symbol: ']', entity: '&#93;', name: 'right bracket' },
+        { symbol: '(', entity: '&#40;', name: 'left parenthesis' },
+        { symbol: ')', entity: '&#41;', name: 'right parenthesis' },
+      ],
+    },
+  ];
 
   function loadGlobalState() {
     try { return JSON.parse(localStorage.getItem(GLOBAL_STATE_KEY)) || {}; }
@@ -2004,15 +2075,498 @@ This is a fully client-side application. Your content never leaves your browser 
     });
   }
 
-  function insertMarkdownBlock(block) {
+  function insertMarkdownBlock(block, startOverride, endOverride) {
     const value = markdownEditor.value;
-    const start = markdownEditor.selectionStart;
-    const end = markdownEditor.selectionEnd;
+    const start = typeof startOverride === 'number' ? startOverride : markdownEditor.selectionStart;
+    const end = typeof endOverride === 'number' ? endOverride : markdownEditor.selectionEnd;
     const needsLeadingBreak = start > 0 && value[start - 1] !== '\n';
     const needsTrailingBreak = end < value.length && value[end] !== '\n';
     const replacement = (needsLeadingBreak ? '\n' : '') + block + (needsTrailingBreak ? '\n' : '');
     const caret = start + replacement.length;
     replaceEditorRange(start, end, replacement, caret, caret);
+  }
+
+  function clampNumber(value, min, max, fallback) {
+    const parsed = parseInt(value, 10);
+    if (Number.isNaN(parsed)) return fallback;
+    return Math.max(min, Math.min(max, parsed));
+  }
+
+  function buildMarkdownTable(columns, rows) {
+    const header = Array.from({ length: columns }, (_, index) => `Column ${index + 1}`).join(' | ');
+    const divider = Array.from({ length: columns }, () => '---').join(' | ');
+    const bodyRows = Array.from({ length: rows }, () => `| ${Array.from({ length: columns }, () => 'Value').join(' | ')} |`);
+    return `| ${header} |\n| ${divider} |\n${bodyRows.join('\n')}\n`;
+  }
+
+  function loadEmojiEntries() {
+    if (emojiLoadPromise) return emojiLoadPromise;
+    emojiLoadPromise = fetch(EMOJI_API_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Emoji request failed (${response.status})`);
+        return response.json();
+      })
+      .then((data) => {
+        emojiEntries = Object.keys(data)
+          .sort((a, b) => a.localeCompare(b))
+          .map((name) => ({
+            name,
+            url: data[name],
+            shortcode: `:${name}:`,
+            search: `${name} :${name}:`.toLowerCase(),
+          }));
+        return emojiEntries;
+      })
+      .catch((error) => {
+        console.error('Failed to load GitHub emojis:', error);
+        emojiEntries = [];
+        return emojiEntries;
+      });
+    return emojiLoadPromise;
+  }
+
+  function createAlertPreview(type, meta) {
+    const wrapper = document.createElement('div');
+    wrapper.className = `markdown-alert markdown-alert-${type}`;
+    const title = document.createElement('p');
+    title.className = 'markdown-alert-title';
+    const icon = document.createElement('span');
+    icon.className = 'markdown-alert-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    if (meta.path) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', meta.viewBox || '0 0 512 512');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', meta.path);
+      svg.appendChild(path);
+      icon.appendChild(svg);
+    }
+    const label = document.createElement('span');
+    label.textContent = meta.label;
+    title.appendChild(icon);
+    title.appendChild(label);
+    const body = document.createElement('p');
+    body.textContent = `${meta.label} details go here.`;
+    wrapper.appendChild(title);
+    wrapper.appendChild(body);
+    return wrapper;
+  }
+
+  function flashCopyButton(button) {
+    const icon = button.querySelector('i');
+    if (!icon) return;
+    icon.className = 'bi bi-check-lg';
+    button.classList.add('is-copied');
+    clearTimeout(button.copyTimeout);
+    button.copyTimeout = setTimeout(() => {
+      icon.className = 'bi bi-clipboard';
+      button.classList.remove('is-copied');
+    }, 1200);
+  }
+
+  function openTableModal() {
+    const modal = document.getElementById('table-modal');
+    const columnInput = document.getElementById('table-modal-columns');
+    const rowInput = document.getElementById('table-modal-rows');
+    const confirmBtn = document.getElementById('table-modal-insert');
+    const cancelBtn = document.getElementById('table-modal-cancel');
+    if (!modal || !columnInput || !rowInput || !confirmBtn || !cancelBtn) return;
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    columnInput.value = '3';
+    rowInput.value = '1';
+    modal.style.display = 'flex';
+
+    function insertTable() {
+      const columns = clampNumber(columnInput.value, 1, 20, 3);
+      const rows = clampNumber(rowInput.value, 1, 20, 1);
+      const table = buildMarkdownTable(columns, rows);
+      modal.style.display = 'none';
+      cleanup();
+      insertMarkdownBlock(table, start, end);
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+      cleanup();
+    }
+
+    function onKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        insertTable();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeModal();
+      }
+    }
+
+    function cleanup() {
+      confirmBtn.removeEventListener('click', insertTable);
+      cancelBtn.removeEventListener('click', closeModal);
+      columnInput.removeEventListener('keydown', onKey);
+      rowInput.removeEventListener('keydown', onKey);
+    }
+
+    confirmBtn.addEventListener('click', insertTable);
+    cancelBtn.addEventListener('click', closeModal);
+    columnInput.addEventListener('keydown', onKey);
+    rowInput.addEventListener('keydown', onKey);
+
+    requestAnimationFrame(() => {
+      columnInput.focus();
+      columnInput.select();
+    });
+  }
+
+  function openEmojiModal() {
+    const modal = document.getElementById('emoji-modal');
+    const grid = document.getElementById('emoji-modal-grid');
+    const emptyMessage = document.getElementById('emoji-modal-empty');
+    const searchInput = document.getElementById('emoji-modal-search');
+    const confirmBtn = document.getElementById('emoji-modal-insert');
+    const cancelBtn = document.getElementById('emoji-modal-cancel');
+    if (!modal || !grid || !emptyMessage || !searchInput || !confirmBtn || !cancelBtn) return;
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    modal.style.display = 'flex';
+    confirmBtn.disabled = true;
+    emptyMessage.textContent = 'Loading emojis...';
+    emptyMessage.style.display = 'block';
+    searchInput.value = '';
+    emojiSelection.clear();
+    grid.innerHTML = '';
+    emojiItems = [];
+
+    function updateInsertState() {
+      confirmBtn.disabled = emojiSelection.size === 0;
+    }
+
+    function toggleSelection(shortcode, element) {
+      if (emojiSelection.has(shortcode)) {
+        emojiSelection.delete(shortcode);
+        element.classList.remove('is-selected');
+      } else {
+        emojiSelection.add(shortcode);
+        element.classList.add('is-selected');
+      }
+      element.setAttribute('aria-pressed', emojiSelection.has(shortcode).toString());
+      updateInsertState();
+    }
+
+    function renderEmojiGrid() {
+      grid.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+      emojiItems = emojiEntries.map((entry) => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'emoji-item';
+        item.setAttribute('aria-pressed', 'false');
+        item.dataset.search = entry.search;
+        item.dataset.shortcode = entry.shortcode;
+
+        const preview = document.createElement('span');
+        preview.className = 'emoji-preview';
+        const image = document.createElement('img');
+        image.src = entry.url;
+        image.alt = entry.shortcode;
+        image.loading = 'lazy';
+        preview.appendChild(image);
+
+        const shortcodeRow = document.createElement('div');
+        shortcodeRow.className = 'emoji-shortcode';
+        const code = document.createElement('span');
+        code.textContent = entry.shortcode;
+        const copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.className = 'emoji-copy-btn';
+        copyBtn.setAttribute('aria-label', `Copy ${entry.shortcode}`);
+        copyBtn.innerHTML = '<i class="bi bi-clipboard"></i>';
+        copyBtn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          copyTextToClipboard(entry.shortcode)
+            .then(() => flashCopyButton(copyBtn))
+            .catch((error) => console.error('Copy failed:', error));
+        });
+        shortcodeRow.appendChild(code);
+        shortcodeRow.appendChild(copyBtn);
+
+        item.appendChild(preview);
+        item.appendChild(shortcodeRow);
+        item.addEventListener('click', () => toggleSelection(entry.shortcode, item));
+        fragment.appendChild(item);
+        return { element: item, search: entry.search, shortcode: entry.shortcode };
+      });
+      grid.appendChild(fragment);
+    }
+
+    function applyFilter() {
+      const query = searchInput.value.trim().toLowerCase();
+      let visibleCount = 0;
+      emojiItems.forEach((item) => {
+        const match = !query || item.search.includes(query);
+        item.element.style.display = match ? '' : 'none';
+        if (match) visibleCount += 1;
+      });
+      emptyMessage.style.display = visibleCount ? 'none' : 'block';
+    }
+
+    function insertEmojis() {
+      if (!emojiSelection.size) return;
+      const ordered = emojiItems
+        .filter((item) => emojiSelection.has(item.shortcode))
+        .map((item) => item.shortcode);
+      const insertion = ordered.join(' ');
+      modal.style.display = 'none';
+      cleanup();
+      replaceEditorRange(start, end, insertion, start + insertion.length, start + insertion.length);
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+      cleanup();
+    }
+
+    function onKey(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeModal();
+      }
+    }
+
+    function cleanup() {
+      confirmBtn.removeEventListener('click', insertEmojis);
+      cancelBtn.removeEventListener('click', closeModal);
+      searchInput.removeEventListener('input', applyFilter);
+      searchInput.removeEventListener('keydown', onKey);
+    }
+
+    loadEmojiEntries().then((entries) => {
+      if (!entries.length) {
+        emptyMessage.textContent = 'Unable to load emojis.';
+        emptyMessage.style.display = 'block';
+        grid.innerHTML = '';
+        emojiItems = [];
+        return;
+      }
+      renderEmojiGrid();
+      emptyMessage.textContent = 'No emojis found.';
+      applyFilter();
+      updateInsertState();
+    });
+
+    confirmBtn.addEventListener('click', insertEmojis);
+    cancelBtn.addEventListener('click', closeModal);
+    searchInput.addEventListener('input', applyFilter);
+    searchInput.addEventListener('keydown', onKey);
+
+    requestAnimationFrame(() => searchInput.focus());
+  }
+
+  function openSymbolsModal() {
+    const modal = document.getElementById('symbols-modal');
+    const grid = document.getElementById('symbols-modal-grid');
+    const emptyMessage = document.getElementById('symbols-modal-empty');
+    const searchInput = document.getElementById('symbols-modal-search');
+    const confirmBtn = document.getElementById('symbols-modal-insert');
+    const cancelBtn = document.getElementById('symbols-modal-cancel');
+    if (!modal || !grid || !emptyMessage || !searchInput || !confirmBtn || !cancelBtn) return;
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    modal.style.display = 'flex';
+    confirmBtn.disabled = true;
+    searchInput.value = '';
+    symbolSelection.clear();
+    grid.innerHTML = '';
+
+    const sectionEntries = [];
+    SYMBOL_SECTIONS.forEach((section) => {
+      const sectionWrapper = document.createElement('div');
+      sectionWrapper.className = 'symbol-section';
+      const title = document.createElement('p');
+      title.className = 'symbol-section-title';
+      title.textContent = section.title;
+      const sectionGrid = document.createElement('div');
+      sectionGrid.className = 'symbol-section-grid';
+      const sectionItems = section.items.map((entry) => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'symbol-item';
+        item.setAttribute('aria-pressed', 'false');
+        const preview = document.createElement('span');
+        preview.className = 'symbol-preview';
+        preview.textContent = entry.symbol;
+        const codeRow = document.createElement('div');
+        codeRow.className = 'symbol-code';
+        const code = document.createElement('span');
+        code.textContent = entry.entity;
+        const copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.className = 'symbol-copy-btn';
+        copyBtn.setAttribute('aria-label', `Copy ${entry.entity}`);
+        copyBtn.innerHTML = '<i class="bi bi-clipboard"></i>';
+        copyBtn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          copyTextToClipboard(entry.entity)
+            .then(() => flashCopyButton(copyBtn))
+            .catch((error) => console.error('Copy failed:', error));
+        });
+        codeRow.appendChild(code);
+        codeRow.appendChild(copyBtn);
+        item.appendChild(preview);
+        item.appendChild(codeRow);
+
+        item.dataset.search = `${entry.symbol} ${entry.entity} ${entry.name}`.toLowerCase();
+        item.dataset.entity = entry.entity;
+        item.addEventListener('click', () => {
+          if (symbolSelection.has(entry.entity)) {
+            symbolSelection.delete(entry.entity);
+            item.classList.remove('is-selected');
+          } else {
+            symbolSelection.add(entry.entity);
+            item.classList.add('is-selected');
+          }
+          item.setAttribute('aria-pressed', symbolSelection.has(entry.entity).toString());
+          confirmBtn.disabled = symbolSelection.size === 0;
+        });
+
+        sectionGrid.appendChild(item);
+        return { element: item, search: item.dataset.search, entity: entry.entity };
+      });
+      sectionWrapper.appendChild(title);
+      sectionWrapper.appendChild(sectionGrid);
+      grid.appendChild(sectionWrapper);
+      sectionEntries.push({ wrapper: sectionWrapper, items: sectionItems });
+    });
+
+    symbolItems = sectionEntries.flatMap((section) => section.items);
+
+    function applyFilter() {
+      const query = searchInput.value.trim().toLowerCase();
+      let visibleCount = 0;
+      sectionEntries.forEach((section) => {
+        let sectionVisible = 0;
+        section.items.forEach((item) => {
+          const match = !query || item.search.includes(query);
+          item.element.style.display = match ? '' : 'none';
+          if (match) {
+            visibleCount += 1;
+            sectionVisible += 1;
+          }
+        });
+        section.wrapper.style.display = sectionVisible ? '' : 'none';
+      });
+      emptyMessage.style.display = visibleCount ? 'none' : 'block';
+    }
+
+    function insertSymbols() {
+      if (!symbolSelection.size) return;
+      const ordered = symbolItems
+        .filter((item) => symbolSelection.has(item.entity))
+        .map((item) => item.entity);
+      const insertion = ordered.join(' ');
+      modal.style.display = 'none';
+      cleanup();
+      replaceEditorRange(start, end, insertion, start + insertion.length, start + insertion.length);
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+      cleanup();
+    }
+
+    function onKey(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeModal();
+      }
+    }
+
+    function cleanup() {
+      confirmBtn.removeEventListener('click', insertSymbols);
+      cancelBtn.removeEventListener('click', closeModal);
+      searchInput.removeEventListener('input', applyFilter);
+      searchInput.removeEventListener('keydown', onKey);
+    }
+
+    emptyMessage.textContent = 'No symbols found.';
+    applyFilter();
+    confirmBtn.addEventListener('click', insertSymbols);
+    cancelBtn.addEventListener('click', closeModal);
+    searchInput.addEventListener('input', applyFilter);
+    searchInput.addEventListener('keydown', onKey);
+    requestAnimationFrame(() => searchInput.focus());
+  }
+
+  function openAlertModal() {
+    const modal = document.getElementById('alert-modal');
+    const grid = document.getElementById('alert-modal-grid');
+    const confirmBtn = document.getElementById('alert-modal-insert');
+    const cancelBtn = document.getElementById('alert-modal-cancel');
+    if (!modal || !grid || !confirmBtn || !cancelBtn) return;
+    const start = markdownEditor.selectionStart;
+    const end = markdownEditor.selectionEnd;
+    modal.style.display = 'flex';
+    grid.innerHTML = '';
+
+    const alertTypes = ['note', 'tip', 'important', 'warning', 'caution'];
+    let selectedType = alertTypes[0];
+    const options = [];
+    alertTypes.forEach((type) => {
+      const meta = GITHUB_ALERT_META[type] || { label: type };
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'alert-option';
+      option.dataset.alertType = type;
+      option.setAttribute('aria-pressed', (type === selectedType).toString());
+      const preview = document.createElement('div');
+      preview.className = 'alert-preview';
+      preview.appendChild(createAlertPreview(type, meta));
+      option.appendChild(preview);
+      if (type === selectedType) option.classList.add('is-selected');
+      option.addEventListener('click', () => {
+        selectedType = type;
+        options.forEach((item) => {
+          const isSelected = item === option;
+          item.classList.toggle('is-selected', isSelected);
+          item.setAttribute('aria-pressed', isSelected.toString());
+        });
+      });
+      options.push(option);
+      grid.appendChild(option);
+    });
+
+    function insertAlert() {
+      const type = selectedType.toUpperCase();
+      const meta = GITHUB_ALERT_META[selectedType] || { label: selectedType };
+      const body = `${meta.label} details go here.`;
+      const block = `> [!${type}]\n> ${body}\n`;
+      modal.style.display = 'none';
+      cleanup();
+      insertMarkdownBlock(block, start, end);
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+      cleanup();
+    }
+
+    function onKey(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeModal();
+      }
+    }
+
+    function cleanup() {
+      confirmBtn.removeEventListener('click', insertAlert);
+      cancelBtn.removeEventListener('click', closeModal);
+      modal.removeEventListener('keydown', onKey);
+    }
+
+    confirmBtn.addEventListener('click', insertAlert);
+    cancelBtn.addEventListener('click', closeModal);
+    modal.addEventListener('keydown', onKey);
   }
 
   function insertMarkdownLink() {
@@ -2333,16 +2887,19 @@ This is a fully client-side application. Your content never leaves your browser 
     else if (action === 'image') insertMarkdownImage();
     else if (action === 'inline-code') wrapEditorSelection('`', '`', 'code');
     else if (action === 'code-block') insertMarkdownBlock('```js\n' + (markdownEditor.value.slice(markdownEditor.selectionStart, markdownEditor.selectionEnd) || 'console.log("Hello, Markdown!");') + '\n```\n');
-    else if (action === 'table') insertMarkdownBlock('| Column 1 | Column 2 | Column 3 |\n| --- | --- | --- |\n| Value | Value | Value |\n');
+    else if (action === 'table') openTableModal();
     else if (action === 'date-time') {
-      const timestamp = new Date().toLocaleString();
+      const now = new Date();
+      const datePart = now.toLocaleDateString('en-CA');
+      const timePart = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+      const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+      const timestamp = `${datePart} ${timePart} ${dayName}`;
       replaceEditorRange(markdownEditor.selectionStart, markdownEditor.selectionEnd, timestamp, markdownEditor.selectionStart + timestamp.length, markdownEditor.selectionStart + timestamp.length);
     } else if (action === 'emoji') {
-      const shortcode = prompt('Emoji shortcode', ':smile:');
-      if (shortcode !== null) replaceEditorRange(markdownEditor.selectionStart, markdownEditor.selectionEnd, shortcode || ':smile:');
+      openEmojiModal();
     }
-    else if (action === 'copyright') replaceEditorRange(markdownEditor.selectionStart, markdownEditor.selectionEnd, '&copy;');
-    else if (action === 'alert-note') insertMarkdownBlock('> [!NOTE]\n> Important note goes here.\n');
+    else if (action === 'symbols') openSymbolsModal();
+    else if (action === 'alert') openAlertModal();
     else if (action === 'terminal-block') insertMarkdownBlock('```bash\nnpm run dev\n```\n');
     else if (action === 'editor-only') { setViewMode('editor'); saveCurrentTabState(); }
     else if (action === 'split-view') { setViewMode('split'); saveCurrentTabState(); }
@@ -3431,27 +3988,29 @@ This is a fully client-side application. Your content never leaves your browser 
     }
   });
 
+  async function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    const successful = document.execCommand("copy");
+    document.body.removeChild(textArea);
+    if (!successful) {
+      throw new Error("Copy command was unsuccessful");
+    }
+  }
+
   async function copyToClipboard(text) {
     try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-        showCopiedMessage();
-      } else {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        const successful = document.execCommand("copy");
-        document.body.removeChild(textArea);
-        if (successful) {
-          showCopiedMessage();
-        } else {
-          throw new Error("Copy command was unsuccessful");
-        }
-      }
+      await copyTextToClipboard(text);
+      showCopiedMessage();
     } catch (err) {
       console.error("Copy failed:", err);
       alert("Failed to copy HTML: " + err.message);

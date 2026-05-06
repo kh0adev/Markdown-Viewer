@@ -291,12 +291,12 @@
             <button type="button" class="markdown-tool-btn" data-md-action="image" title="Image" aria-label="Image"><i class="bi bi-card-image"></i></button>
             <button type="button" class="markdown-tool-btn" data-md-action="inline-code" title="Inline code" aria-label="Inline code"><i class="bi bi-code-slash"></i></button>
             <button type="button" class="markdown-tool-btn" data-md-action="code-block" title="Code block" aria-label="Code block"><i class="bi bi-file-code"></i></button>
+            <button type="button" class="markdown-tool-btn" data-md-action="terminal-block" title="Terminal block" aria-label="Terminal block"><i class="bi bi-terminal"></i></button>
             <button type="button" class="markdown-tool-btn" data-md-action="table" title="Table" aria-label="Table"><i class="bi bi-table"></i></button>
             <button type="button" class="markdown-tool-btn" data-md-action="date-time" title="Date and time" aria-label="Date and time"><i class="bi bi-clock"></i></button>
             <button type="button" class="markdown-tool-btn" data-md-action="emoji" title="Emoji shortcode" aria-label="Emoji shortcode"><i class="bi bi-emoji-smile"></i></button>
-            <button type="button" class="markdown-tool-btn" data-md-action="copyright" title="Copyright" aria-label="Copyright"><i class="bi bi-c-circle"></i></button>
-            <button type="button" class="markdown-tool-btn" data-md-action="alert-note" title="Markdown alert" aria-label="Markdown alert"><i class="bi bi-newspaper"></i></button>
-            <button type="button" class="markdown-tool-btn" data-md-action="terminal-block" title="Terminal block" aria-label="Terminal block"><i class="bi bi-terminal"></i></button>
+            <button type="button" class="markdown-tool-btn" data-md-action="symbols" title="Symbols &amp; HTML entities" aria-label="Symbols &amp; HTML entities"><i class="bi bi-c-circle"></i></button>
+            <button type="button" class="markdown-tool-btn" data-md-action="alert" title="Markdown alert" aria-label="Markdown alert"><i class="bi bi-newspaper"></i></button>
           </div>
           <div class="markdown-toolbar-group">
             <button type="button" class="markdown-tool-btn" data-md-action="editor-only" title="Editor only" aria-label="Editor only"><i class="bi bi-eye-slash"></i></button>
@@ -404,6 +404,71 @@
             <div class="reset-modal-actions">
               <button class="reset-modal-btn reset-modal-cancel" id="image-modal-cancel">Cancel</button>
               <button class="reset-modal-btn" id="image-modal-insert">Insert</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Modal -->
+        <div id="table-modal" class="reset-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="table-modal-title" style="display:none;">
+          <div class="reset-modal-box reset-modal-box--wide">
+            <p id="table-modal-title" class="reset-modal-message">Insert table</p>
+            <div class="reset-modal-field">
+              <label class="reset-modal-label" for="table-modal-columns">Column count</label>
+              <input type="number" id="table-modal-columns" class="rename-modal-input" min="1" max="20" value="3" />
+            </div>
+            <div class="reset-modal-field">
+              <label class="reset-modal-label" for="table-modal-rows">Row count</label>
+              <input type="number" id="table-modal-rows" class="rename-modal-input" min="1" max="20" value="1" />
+            </div>
+            <div class="reset-modal-actions">
+              <button class="reset-modal-btn reset-modal-cancel" id="table-modal-cancel">Cancel</button>
+              <button class="reset-modal-btn" id="table-modal-insert">Insert</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emoji Modal -->
+        <div id="emoji-modal" class="reset-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="emoji-modal-title" style="display:none;">
+          <div class="reset-modal-box reset-modal-box--wide reset-modal-box--xl">
+            <p id="emoji-modal-title" class="reset-modal-message">GitHub Emojis</p>
+            <div class="reset-modal-field">
+              <label class="reset-modal-label" for="emoji-modal-search">Search</label>
+              <input type="text" id="emoji-modal-search" class="rename-modal-input" placeholder="Search emojis" />
+            </div>
+            <div id="emoji-modal-grid" class="emoji-grid" role="listbox" aria-label="Emoji list"></div>
+            <p id="emoji-modal-empty" class="modal-empty" style="display:none;">No emojis found.</p>
+            <div class="reset-modal-actions">
+              <button class="reset-modal-btn reset-modal-cancel" id="emoji-modal-cancel">Cancel</button>
+              <button class="reset-modal-btn" id="emoji-modal-insert">Insert</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Symbols Modal -->
+        <div id="symbols-modal" class="reset-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="symbols-modal-title" style="display:none;">
+          <div class="reset-modal-box reset-modal-box--wide reset-modal-box--xl">
+            <p id="symbols-modal-title" class="reset-modal-message">Symbols &amp; HTML Entities</p>
+            <div class="reset-modal-field">
+              <label class="reset-modal-label" for="symbols-modal-search">Search</label>
+              <input type="text" id="symbols-modal-search" class="rename-modal-input" placeholder="Search symbols" />
+            </div>
+            <div id="symbols-modal-grid" class="symbol-grid" role="listbox" aria-label="Symbol list"></div>
+            <p id="symbols-modal-empty" class="modal-empty" style="display:none;">No symbols found.</p>
+            <div class="reset-modal-actions">
+              <button class="reset-modal-btn reset-modal-cancel" id="symbols-modal-cancel">Cancel</button>
+              <button class="reset-modal-btn" id="symbols-modal-insert">Insert</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Markdown Alert Modal -->
+        <div id="alert-modal" class="reset-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="alert-modal-title" style="display:none;">
+          <div class="reset-modal-box reset-modal-box--wide">
+            <p id="alert-modal-title" class="reset-modal-message">Markdown alerts</p>
+            <div id="alert-modal-grid" class="alert-grid" role="listbox" aria-label="Markdown alert types"></div>
+            <div class="reset-modal-actions">
+              <button class="reset-modal-btn reset-modal-cancel" id="alert-modal-cancel">Cancel</button>
+              <button class="reset-modal-btn" id="alert-modal-insert">Insert</button>
             </div>
           </div>
         </div>
