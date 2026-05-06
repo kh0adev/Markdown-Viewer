@@ -3043,7 +3043,7 @@ This is a fully client-side application. Your content never leaves your browser 
     let index = 0;
     while (needle && (index = haystack.indexOf(needle, index)) !== -1) {
       matches.push({ start: index, end: index + needle.length });
-      index += needle.length || 1;
+      index += needle.length;
     }
     return matches;
   }
