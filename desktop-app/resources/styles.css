@@ -328,6 +328,12 @@ body {
   background-color: var(--button-active);
 }
 
+.tool-button:disabled,
+.tool-button[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .tool-button i {
   font-size: 15px;
 }

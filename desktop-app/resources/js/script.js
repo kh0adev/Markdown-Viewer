@@ -1774,14 +1774,18 @@ This is a fully client-side application. Your content never leaves your browser 
 
     // Desktop sync toggle
     if (toggleSyncButton) {
-      toggleSyncButton.style.display = isSplitView ? '' : 'none';
-      toggleSyncButton.setAttribute('aria-hidden', !isSplitView);
+      toggleSyncButton.style.display = '';
+      toggleSyncButton.disabled = !isSplitView;
+      toggleSyncButton.setAttribute('aria-disabled', String(!isSplitView));
+      toggleSyncButton.removeAttribute('aria-hidden');
     }
 
     // Mobile sync toggle
     if (mobileToggleSync) {
-      mobileToggleSync.style.display = isSplitView ? '' : 'none';
-      mobileToggleSync.setAttribute('aria-hidden', !isSplitView);
+      mobileToggleSync.style.display = '';
+      mobileToggleSync.disabled = !isSplitView;
+      mobileToggleSync.setAttribute('aria-disabled', String(!isSplitView));
+      mobileToggleSync.removeAttribute('aria-hidden');
     }
   }
 
