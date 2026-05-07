@@ -3086,11 +3086,11 @@ This is a fully client-side application. Your content never leaves your browser 
     return fontSize * 1.5;
   }
 
-  function getWrappedLineCount(line, metrics) {
+  function getWrappedLineCount(line, lineHeight, paddingSum) {
     if (!lineNumberMeasure) return 1;
     lineNumberMeasure.textContent = line.length ? line : LINE_NUMBER_EMPTY_PLACEHOLDER;
-    const contentHeight = lineNumberMeasure.scrollHeight - metrics.paddingTop - metrics.paddingBottom;
-    return Math.max(1, Math.round(contentHeight / metrics.lineHeight));
+    const contentHeight = lineNumberMeasure.scrollHeight - paddingSum;
+    return Math.max(1, Math.round(contentHeight / lineHeight));
   }
 
   function updateLineNumbers() {
@@ -3101,22 +3101,28 @@ This is a fully client-side application. Your content never leaves your browser 
     ensureLineNumberMeasure();
     const styles = window.getComputedStyle(markdownEditor);
     const lineHeight = getLineHeight(styles);
-    const metrics = {
-      lineHeight,
-      paddingTop: parseFloat(styles.paddingTop) || 0,
-      paddingBottom: parseFloat(styles.paddingBottom) || 0,
-    };
-    const fragment = document.createDocumentFragment();
-    lines.forEach(function(line, index) {
-      const lineNumber = document.createElement('div');
-      lineNumber.className = 'line-number';
-      lineNumber.textContent = index + 1;
-      const wrapCount = getWrappedLineCount(line, metrics);
-      lineNumber.style.height = `${wrapCount * lineHeight}px`;
-      fragment.appendChild(lineNumber);
-    });
-    lineNumbers.textContent = '';
-    lineNumbers.appendChild(fragment);
+    const paddingSum =
+      (parseFloat(styles.paddingTop) || 0) +
+      (parseFloat(styles.paddingBottom) || 0);
+    const existingItems = lineNumbers.children;
+    if (existingItems.length !== lineCount) {
+      const fragment = document.createDocumentFragment();
+      lines.forEach(function(line, index) {
+        const lineNumber = document.createElement('div');
+        lineNumber.className = 'line-number';
+        lineNumber.textContent = index + 1;
+        const wrapCount = getWrappedLineCount(line, lineHeight, paddingSum);
+        lineNumber.style.height = `${wrapCount * lineHeight}px`;
+        fragment.appendChild(lineNumber);
+      });
+      lineNumbers.textContent = '';
+      lineNumbers.appendChild(fragment);
+    } else {
+      for (let i = 0; i < lineCount; i += 1) {
+        const wrapCount = getWrappedLineCount(lines[i], lineHeight, paddingSum);
+        existingItems[i].style.height = `${wrapCount * lineHeight}px`;
+      }
+    }
     syncLineNumberScroll();
   }
 
