@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const markdownPreview = document.getElementById("markdown-preview");
   const markdownFormatToolbar = document.getElementById("markdown-format-toolbar");
   const themeToggle = document.getElementById("theme-toggle");
+  const directionToggle = document.getElementById("direction-toggle");
   const importFromFileButton = document.getElementById("import-from-file");
   const importFromGithubButton = document.getElementById("import-from-github");
   const fileInput = document.getElementById("file-input");
@@ -66,6 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const mobileExportPdf     = document.getElementById("mobile-export-pdf");
   const mobileCopyMarkdown  = document.getElementById("mobile-copy-markdown");
   const mobileThemeToggle   = document.getElementById("mobile-theme-toggle");
+  const mobileDirectionToggle = document.getElementById("mobile-direction-toggle");
   const shareButton         = document.getElementById("share-button");
   const mobileShareButton   = document.getElementById("mobile-share-button");
   const githubImportModal = document.getElementById("github-import-modal");
@@ -208,6 +210,30 @@ document.addEventListener("DOMContentLoaded", function () {
   themeToggle.innerHTML = initialTheme === "dark"
     ? '<i class="bi bi-sun"></i>'
     : '<i class="bi bi-moon"></i>';
+
+  function updateDirectionToggleUI(direction) {
+    const isRtl = direction === "rtl";
+    const toggleLabel = isRtl ? "Switch to LTR" : "Switch to RTL";
+    if (directionToggle) {
+      directionToggle.innerHTML = isRtl
+        ? '<i class="bi bi-text-left"></i>'
+        : '<i class="bi bi-text-right"></i>';
+      directionToggle.setAttribute("title", toggleLabel);
+      directionToggle.setAttribute("aria-label", toggleLabel);
+      directionToggle.setAttribute("aria-pressed", isRtl.toString());
+    }
+    if (mobileDirectionToggle) {
+      const icon = isRtl
+        ? '<i class="bi bi-text-left me-2"></i>'
+        : '<i class="bi bi-text-right me-2"></i>';
+      mobileDirectionToggle.innerHTML = `${icon} ${toggleLabel}`;
+    }
+  }
+
+  const savedDirection = loadGlobalState().direction;
+  const initialDirection = savedDirection === "rtl" ? "rtl" : "ltr";
+  document.documentElement.setAttribute("dir", initialDirection);
+  updateDirectionToggleUI(initialDirection);
 
   const initMermaid = () => {
     const currentTheme = document.documentElement.getAttribute("data-theme");
@@ -3557,6 +3583,19 @@ This is a fully client-side application. Your content never leaves your browser 
   mobileExportHtml.addEventListener("click", () => exportHtml.click());
   mobileExportPdf.addEventListener("click", () => exportPdf.click());
   mobileCopyMarkdown.addEventListener("click", () => copyMarkdownButton.click());
+  if (mobileDirectionToggle) {
+    mobileDirectionToggle.addEventListener("click", () => {
+      if (directionToggle) {
+        directionToggle.click();
+      } else {
+        const direction =
+          document.documentElement.getAttribute("dir") === "rtl" ? "ltr" : "rtl";
+        document.documentElement.setAttribute("dir", direction);
+        saveGlobalState({ direction });
+        updateDirectionToggleUI(direction);
+      }
+    });
+  }
   mobileThemeToggle.addEventListener("click", () => {
     themeToggle.click();
     mobileThemeToggle.innerHTML = themeToggle.innerHTML + " Toggle Dark Mode";
@@ -3662,6 +3701,15 @@ This is a fully client-side application. Your content never leaves your browser 
   });
   previewPane.addEventListener("scroll", syncPreviewToEditor);
   toggleSyncButton.addEventListener("click", toggleSyncScrolling);
+  if (directionToggle) {
+    directionToggle.addEventListener("click", function () {
+      const direction =
+        document.documentElement.getAttribute("dir") === "rtl" ? "ltr" : "rtl";
+      document.documentElement.setAttribute("dir", direction);
+      saveGlobalState({ direction });
+      updateDirectionToggleUI(direction);
+    });
+  }
   themeToggle.addEventListener("click", function () {
     const theme =
       document.documentElement.getAttribute("data-theme") === "dark"
