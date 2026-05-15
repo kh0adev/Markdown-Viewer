@@ -273,8 +273,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let lineNumberUpdateFrame = null;
 
   const renderer = new marked.Renderer();
-  const BLOCK_MATH_MARKER_PATTERN = /\$\$/;
-  const BLOCK_MATH_PATTERN = /^\$\$[ \t]*\n?([\s\S]+?)\n?\$\$[ \t]*(?:\n|$)/;
+  const BLOCK_MATH_MARKER_PATTERN = /^\$\$/m;
+  const BLOCK_MATH_PATTERN = /^\$\$[ \t]*\n?([\s\S]*?)\n?\$\$[ \t]*(?:\n|$)/;
   const blockMathExtension = {
     name: 'blockMath',
     level: 'block',
