@@ -320,16 +320,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function renderDefinitionContent(content, options = {}) {
     const { appendHtml = "" } = options;
-    const paragraphs = content
+    const appendMarkup = appendHtml ? ` ${appendHtml}` : "";
+    const paragraphs = String(content || "")
       .split(/\n\s*\n/)
       .map((paragraph) => paragraph.trim())
       .filter(Boolean);
 
-    if (appendHtml) {
+    if (appendMarkup) {
       if (paragraphs.length === 0) {
         paragraphs.push(appendHtml);
       } else {
-        paragraphs[paragraphs.length - 1] = `${paragraphs[paragraphs.length - 1]}${appendHtml}`;
+        paragraphs[paragraphs.length - 1] = `${paragraphs[paragraphs.length - 1]}${appendMarkup}`;
       }
     }
 
@@ -391,7 +392,7 @@ document.addEventListener("DOMContentLoaded", function () {
         break;
       }
 
-      footnoteDefinitions.set(id, definitionLines.join("\n").trim());
+      footnoteDefinitions.set(id, definitionLines.join("\n").trimEnd());
     }
 
     return preservedLines.join("\n");
@@ -430,7 +431,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const backRefId = footnoteFirstRefId.get(id) || `fnref-${normalizedId}`;
         const safeNormalizedId = escapeHtmlAttribute(normalizedId);
         const safeBackRefId = escapeHtmlAttribute(backRefId);
-        const backRefHtml = `<a href="#${safeBackRefId}" class="footnote-backref" aria-label="Back to content">↩</a>`;
+        const backRefHtml = `<a href="#${safeBackRefId}" class="footnote-backref" aria-label="Back to content">←</a>`;
         const noteHtml = renderDefinitionContent(
           footnoteDefinitions.get(id) || "",
           { appendHtml: backRefHtml }
