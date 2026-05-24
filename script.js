@@ -3769,7 +3769,7 @@ This is a fully client-side application. Your content never leaves your browser 
     if (!query) return;
     const replacement = findReplaceWith ? findReplaceWith.value : '';
     const regex = new RegExp(escapeRegExp(query), 'gi');
-    markdownEditor.value = markdownEditor.value.replace(regex, replacement);
+    markdownEditor.value = markdownEditor.value.replace(regex, () => replacement);
     markdownEditor.dispatchEvent(new Event('input', { bubbles: true }));
     refreshFindMatches({ resetIndex: true });
     if (findMatches.length) {
@@ -4330,7 +4330,7 @@ This is a fully client-side application. Your content never leaves your browser 
       };
   </script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"></script>
   <style>
       body {
           background-color: ${isDarkTheme ? "#0d1117" : "#ffffff"};

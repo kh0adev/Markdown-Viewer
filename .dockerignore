@@ -39,3 +39,6 @@ logs/
 tmp/
 temp/
 
+# Desktop app (NeutralinoJS) - not needed in web container
+desktop-app/
+
