@@ -665,7 +665,10 @@ document.addEventListener("DOMContentLoaded", function () {
           return markdown;
         }
         resetExtendedMarkdownState();
-        return applyFootnotes(extractFootnoteDefinitions(markdown));
+        // ✅ Replace escaped dollar signs before marked.js strips the backslash.
+        // This prevents MathJax from treating lone $ as a math delimiter.
+        const protectedMarkdown = markdown.replace(/\\\$/g, '&#36;');
+        return applyFootnotes(extractFootnoteDefinitions(protectedMarkdown));
       },
     },
   });
@@ -5009,64 +5012,151 @@ This is a fully client-side application. Your content never leaves your browser 
     return new TextDecoder().decode(pako.inflate(bytes));
   }
 
-  function copyShareUrl(btn) {
+  // ============================================
+  // Share Modal
+  // ============================================
+
+  const shareModal        = document.getElementById('share-modal');
+  const shareModalCloseX  = document.getElementById('share-modal-close-icon');
+  const shareModalClose   = document.getElementById('share-modal-close');
+  const shareUrlInput     = document.getElementById('share-url-input');
+  const shareCopyBtn      = document.getElementById('share-copy-btn');
+  const shareModeView     = document.getElementById('share-mode-view');
+  const shareModeEdit     = document.getElementById('share-mode-edit');
+  const shareCardView     = document.getElementById('share-card-view');
+  const shareCardEdit     = document.getElementById('share-card-edit');
+
+  function buildShareUrl(mode) {
     const markdownText = markdownEditor.value;
     let encoded;
     try {
       encoded = encodeMarkdownForShare(markdownText);
     } catch (e) {
-      console.error("Share encoding failed:", e);
-      alert("Failed to encode content for sharing: " + e.message);
+      console.error('Share encoding failed:', e);
+      return null;
+    }
+    // mode=view  →  #share=<encoded>   (opens preview-only)
+    // mode=edit  →  #share=<encoded>&edit=1
+    const base = window.location.origin + window.location.pathname + '#share=' + encoded;
+    return mode === 'edit' ? base + '&edit=1' : base;
+  }
+
+  function updateShareUrlField() {
+    const mode = shareModeView.checked ? 'view' : 'edit';
+    const url = buildShareUrl(mode);
+    if (!url) {
+      shareUrlInput.value = 'Error generating link.';
+      shareCopyBtn.disabled = true;
       return;
     }
-
-    const shareUrl = window.location.origin + window.location.pathname + '#share=' + encoded;
-    const tooLarge = shareUrl.length > MAX_SHARE_URL_LENGTH;
-
-    const originalHTML = btn.innerHTML;
-    const copiedHTML = '<i class="bi bi-check-lg"></i> Copied!';
-
-    function onCopied() {
-      if (!tooLarge) {
-        window.location.hash = 'share=' + encoded;
-      }
-      btn.innerHTML = copiedHTML;
-      setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
-    }
-
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(shareUrl).then(onCopied).catch(() => {
-        // clipboard.writeText failed; nothing further to do in secure context
-      });
+    const tooLarge = url.length > MAX_SHARE_URL_LENGTH;
+    if (tooLarge) {
+      shareUrlInput.value = 'Document too large to share via URL.';
+      shareCopyBtn.disabled = true;
     } else {
-      try {
-        const tempInput = document.createElement("textarea");
-        tempInput.value = shareUrl;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
-        onCopied();
-      } catch (_) {
-        // copy failed silently
-      }
+      shareUrlInput.value = url;
+      shareCopyBtn.disabled = false;
     }
   }
 
-  shareButton.addEventListener("click", function () { copyShareUrl(shareButton); });
-  mobileShareButton.addEventListener("click", function () { copyShareUrl(mobileShareButton); });
+  function openShareModal() {
+    // Reset to view-only by default each time
+    shareModeView.checked = true;
+    syncShareCardStyles();
+    updateShareUrlField();
+    shareModal.style.display = '';
+    requestAnimationFrame(() => {
+      shareModal.classList.add('is-visible');
+      shareModal.setAttribute('aria-hidden', 'false');
+    });
+  }
+
+  function closeShareModal() {
+    shareModal.classList.remove('is-visible');
+    shareModal.setAttribute('aria-hidden', 'true');
+    shareModal.addEventListener('transitionend', function handler() {
+      shareModal.style.display = 'none';
+      shareModal.removeEventListener('transitionend', handler);
+    });
+  }
+
+  function syncShareCardStyles() {
+    if (shareModeView.checked) {
+      shareCardView.classList.add('is-selected');
+      shareCardEdit.classList.remove('is-selected');
+    } else {
+      shareCardEdit.classList.add('is-selected');
+      shareCardView.classList.remove('is-selected');
+    }
+  }
+
+  shareModeView.addEventListener('change', function () {
+    syncShareCardStyles();
+    updateShareUrlField();
+  });
+  shareModeEdit.addEventListener('change', function () {
+    syncShareCardStyles();
+    updateShareUrlField();
+  });
+
+  shareCopyBtn.addEventListener('click', function () {
+    const url = shareUrlInput.value;
+    if (!url || shareCopyBtn.disabled) return;
+
+    function onCopied() {
+      const orig = shareCopyBtn.innerHTML;
+      shareCopyBtn.innerHTML = '<i class="bi bi-check-lg"></i>';
+      setTimeout(() => { shareCopyBtn.innerHTML = orig; }, 2000);
+    }
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(url).then(onCopied).catch(() => {});
+    } else {
+      try {
+        const tmp = document.createElement('textarea');
+        tmp.value = url;
+        document.body.appendChild(tmp);
+        tmp.select();
+        document.execCommand('copy');
+        document.body.removeChild(tmp);
+        onCopied();
+      } catch (_) {}
+    }
+  });
+
+  shareModalCloseX.addEventListener('click', closeShareModal);
+  shareModalClose.addEventListener('click', closeShareModal);
+  shareModal.addEventListener('click', function (e) {
+    if (e.target === shareModal) closeShareModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && shareModal.classList.contains('is-visible')) closeShareModal();
+  });
+
+  shareButton.addEventListener('click', openShareModal);
+  mobileShareButton.addEventListener('click', openShareModal);
 
   function loadFromShareHash() {
     if (typeof pako === 'undefined') return;
     const hash = window.location.hash;
     if (!hash.startsWith('#share=')) return;
-    const encoded = hash.slice('#share='.length);
+
+    // Parse encoded content and optional &edit=1 flag.
+    // Hash format: #share=<encoded>  or  #share=<encoded>&edit=1
+    const rest = hash.slice('#share='.length);
+    const ampIdx = rest.indexOf('&');
+    const encoded = ampIdx === -1 ? rest : rest.slice(0, ampIdx);
+    const params = ampIdx === -1 ? '' : rest.slice(ampIdx + 1);
+    const isEdit = params.split('&').includes('edit=1');
+
     if (!encoded) return;
     try {
       const decoded = decodeMarkdownFromShare(encoded);
       markdownEditor.value = decoded;
       renderMarkdown();
       saveCurrentTabState();
+      // Apply the correct view mode: edit=1 → split, default → preview only
+      setViewMode(isEdit ? 'split' : 'preview');
     } catch (e) {
       console.error("Failed to load shared content:", e);
       alert("The shared URL could not be decoded. It may be corrupted or incomplete.");

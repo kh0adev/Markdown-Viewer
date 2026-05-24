@@ -2686,3 +2686,125 @@ a:focus {
   border-left: 0;
   border-right: 0.25em solid currentColor;
 }
+
+/* ============================================
+   SHARE MODAL
+   ============================================ */
+
+.share-modal-description {
+  font-size: 13px;
+  color: var(--text-secondary, #57606a);
+  margin: 0;
+}
+
+.share-mode-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.share-mode-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  user-select: none;
+}
+
+.share-mode-card:hover {
+  border-color: var(--accent-color);
+  background: var(--button-hover);
+}
+
+.share-mode-card.is-selected {
+  border-color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 8%, transparent);
+}
+
+.share-mode-card input[type="radio"] {
+  display: none;
+}
+
+.share-card-icon {
+  font-size: 18px;
+  width: 28px;
+  text-align: center;
+  color: var(--text-secondary, #57606a);
+  flex-shrink: 0;
+}
+
+.share-mode-card.is-selected .share-card-icon {
+  color: var(--accent-color);
+}
+
+.share-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.share-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.share-card-desc {
+  font-size: 12px;
+  color: var(--text-secondary, #57606a);
+}
+
+.share-card-check {
+  width: 18px;
+  text-align: center;
+  color: var(--accent-color);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+}
+
+.share-mode-card.is-selected .share-card-check {
+  opacity: 1;
+}
+
+.share-url-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.share-url-input {
+  flex: 1;
+  font-size: 12px;
+  font-family: var(--font-mono, monospace);
+  color: var(--text-secondary, #57606a);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-copy-btn {
+  flex-shrink: 0;
+  padding: 6px 10px;
+}
+
+.share-copy-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.share-modal-notice {
+  font-size: 11px;
+  color: var(--text-secondary, #57606a);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
