@@ -6070,7 +6070,7 @@ This is a fully client-side application. Your content never leaves your browser 
     }
     const mobileLabelEl = document.getElementById('mobile-current-lang-label');
     if (mobileLabelEl) {
-      const flags = { en: "English", zh: "简体中文", ja: "日本語", ko: "한국어" };
+      const flags = { en: "🇺🇸 English", zh: "🇨🇳 简体中文", ja: "🇯🇵 日本語", ko: "🇰🇷 한국어" };
       mobileLabelEl.textContent = flags[lang];
     }
 

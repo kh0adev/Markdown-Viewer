@@ -933,6 +933,27 @@ a:focus {
   font-size: 0.9rem;
 }
 
+/* Ensure desktop dropdown menu options match the stats-container font size */
+[aria-labelledby="importDropdown"] .dropdown-item,
+[aria-labelledby="exportDropdown"] .dropdown-item,
+[aria-labelledby="languageDropdown"] .dropdown-item {
+  font-size: 0.8rem;
+}
+
+/* Ensure mobile menu import, export, and language dropdown triggers/options match the mobile stats-container font size */
+#mobile-import-button,
+#mobile-import-github-button,
+#mobile-export-md,
+#mobile-export-html,
+#mobile-export-pdf,
+#mobileLanguageDropdown {
+  font-size: 0.9rem !important;
+}
+
+[aria-labelledby="mobileLanguageDropdown"] .dropdown-item {
+  font-size: 0.9rem;
+}
+
 .editor-pane {
   overflow: hidden;
 }
