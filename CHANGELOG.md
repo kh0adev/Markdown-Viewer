@@ -3,6 +3,14 @@
 All notable code changes to **Markdown Viewer** are documented here.
 Non-code commits (documentation, planning, README-only updates) are excluded.
 
+## v3.6.5
+
+- **Description:** Resolved the Find & Replace panel docking position reset bug, preserving custom panel drag-and-drop coordinates when toggling between floating and docked modes, and keeping coordinates in sync with viewport boundaries on window resize. Added a dedicated "Reset Position" button using the `bi-arrow-counterclockwise` icon in both the panel's header actions and the actions footer (improving accessibility and convenience for tablet and touch/keyboard-tab users), hiding both reset options automatically when docked. Synchronized assets with the desktop application wrapper by running the `prepare.js` compiler.
+- **Date:** 2026-05-27
+- **URL:** https://github.com/ThisIs-Developer/Markdown-Viewer/commit/5c6e113
+
+---
+
 ## v3.6.4
 
 - **Description:** Redesigned the Find & Replace panel with AST scoping, regular expression support, and diff preview, allowing structured text replacement with context-sensitive analysis. Remediated multiple editor regressions including global shortcut interception, scroll view centering, floating position resets, and split-pane docking reflow. Optimized the mobile layout by hiding the split-pane dock toggle, removing language selector flags, prepending language text prefixes for improved usability, and fixing help/about modal triggers. Implemented a complete Brazilian Portuguese (pt-BR) translation module localizing all main editor labels, stats, tooltips, dialogs, placeholders, and search/replace options, registered a `hreflang` alternate link for Portuguese search indexation, and enabled automatic browser language detection fallback for Portuguese language preferences. Rotated the Service Worker cache namespace to `markdown-viewer-cache-v3.6.4` to trigger background cache updates.
