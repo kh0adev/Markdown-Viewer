@@ -3953,11 +3953,32 @@ This is a fully client-side application. Your content never leaves your browser 
 
   let frPreferredDocked = false;
 
-  function toggleFrDockMode() {
+  function toggleFrDockMode(forceFloat = false) {
     const panel = document.getElementById('find-replace-modal');
     const dockBtn = document.getElementById('find-replace-dock');
     const contentCont = document.querySelector('.content-container');
     if (!panel || !dockBtn || !contentCont) return;
+
+    if (window.innerWidth <= 768 || forceFloat) {
+      isFrDocked = false;
+      panel.classList.remove('docked');
+      if (panel.parentElement !== document.body) {
+        document.body.appendChild(panel);
+      }
+      contentCont.classList.remove('fr-docked');
+      contentCont.style.setProperty('--dock-width', '0px');
+
+      panel.style.top = '';
+      panel.style.left = '';
+      panel.style.right = '';
+      
+      dockBtn.innerHTML = '<i class="bi bi-layout-sidebar-reverse"></i>';
+      dockBtn.title = "Toggle Dock Mode";
+      
+      panel.style.display = 'flex';
+      applyPaneWidths();
+      return;
+    }
 
     isFrDocked = !isFrDocked;
     
@@ -4119,7 +4140,12 @@ This is a fully client-side application. Your content never leaves your browser 
     }
 
     // Restore docked/floating mode preference
-    const wasDockedPref = localStorage.getItem('find-replace-docked') === 'true';
+    let wasDockedPref = localStorage.getItem('find-replace-docked') === 'true';
+    
+    // Force floating-only mode on mobile/tablet viewports
+    if (window.innerWidth <= 768) {
+      wasDockedPref = false;
+    }
     
     if (wasDockedPref) {
       isFrDocked = false; // Set false so toggleFrDockMode() turns it to true
@@ -4571,6 +4597,7 @@ This is a fully client-side application. Your content never leaves your browser 
   }
 
   function startResize(e) {
+    if (window.innerWidth <= 768) return;
     if (currentViewMode !== 'split') return;
     e.preventDefault();
     isResizing = true;
@@ -4579,6 +4606,7 @@ This is a fully client-side application. Your content never leaves your browser 
   }
 
   function startResizeTouch(e) {
+    if (window.innerWidth <= 768) return;
     if (currentViewMode !== 'split') return;
     e.preventDefault();
     isResizing = true;
@@ -4625,6 +4653,10 @@ This is a fully client-side application. Your content never leaves your browser 
   }
 
   function applyPaneWidths() {
+    if (window.innerWidth <= 768) {
+      resetPaneWidths();
+      return;
+    }
     if (currentViewMode !== 'split') return;
 
     const previewPercent = 100 - editorWidthPercent;
@@ -4733,7 +4765,12 @@ This is a fully client-side application. Your content never leaves your browser 
 
   // Initialize resizer - Story 1.3
   initResizer();
-  window.addEventListener('resize', scheduleLineNumberUpdate);
+  window.addEventListener('resize', () => {
+    scheduleLineNumberUpdate();
+    if (window.innerWidth <= 768 && isFrDocked && isFindModalOpen) {
+      toggleFrDockMode(true);
+    }
+  });
 
   // View Mode Button Event Listeners - Story 1.1
   viewModeButtons.forEach(btn => {
@@ -6648,7 +6685,7 @@ This is a fully client-side application. Your content never leaves your browser 
     }
     const mobileLabelEl = document.getElementById('mobile-current-lang-label');
     if (mobileLabelEl) {
-      const flags = { en: "🇺🇸 English", zh: "🇨🇳 简体中文", ja: "🇯🇵 日本語", ko: "🇰🇷 한국어" };
+      const flags = { en: "English", zh: "简体中文", ja: "日本語", ko: "한국어" };
       mobileLabelEl.textContent = flags[lang];
     }
 

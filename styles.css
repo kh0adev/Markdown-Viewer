@@ -3376,4 +3376,21 @@ html[lang="ko"] .markdown-body h1, html[lang="ko"] .markdown-body h2, html[lang=
   flex: 1;
   position: relative;
   overflow: hidden;
+}
+
+/* ========================================
+   MOBILE FIND PANEL RESPONSIVE FIXES
+   ======================================== */
+@media (max-width: 768px) {
+  #find-replace-dock {
+    display: none !important;
+  }
+  
+  /* Prevent full screen expansion of floating panel on small mobile viewports */
+  .find-replace-panel {
+    width: calc(100% - 24px) !important;
+    right: 12px !important;
+    left: 12px !important;
+    top: 80px !important;
+  }
 }
