@@ -6626,6 +6626,42 @@ This is a fully client-side application. Your content never leaves your browser 
       insertTable: "표 삽입",
       findReplace: "찾기 및 바꾸기",
       placeholder: "여기에 마크다운 내용을 입력하세요..."
+    },
+    pt: {
+      title: "Visualizador de Markdown",
+      syncOff: "Desativar Sincronia",
+      syncOn: "Ativar Sincronia",
+      import: "Importar",
+      importFile: "De arquivos",
+      importGithub: "Do GitHub",
+      export: "Exportar",
+      exportMd: "Markdown (.md)",
+      exportHtml: "HTML",
+      exportPdf: "PDF",
+      copy: "Copiar",
+      copied: "Copiado!",
+      share: "Compartilhar",
+      reset: "Redefinir",
+      editor: "Editor",
+      split: "Dividido",
+      preview: "Visualizar",
+      minRead: "Min de leitura",
+      words: "Palavras",
+      chars: "Caracteres",
+      switchRtl: "Mudar para RTL",
+      switchLtr: "Mudar para LTR",
+      darkMode: "Modo Escuro",
+      lightMode: "Modo Claro",
+      helpTitle: "Ajuda do Visualizador de Markdown",
+      aboutTitle: "Sobre o Markdown",
+      shareTitle: "Compartilhar Documento",
+      renameTitle: "Renomear arquivo",
+      insertLink: "Inserir link",
+      insertRef: "Inserir referência",
+      insertImg: "Inserir imagem",
+      insertTable: "Inserir tabela",
+      findReplace: "Localizar & Substituir",
+      placeholder: "Digite seu markdown aqui..."
     }
   };
 
@@ -6643,12 +6679,12 @@ This is a fully client-side application. Your content never leaves your browser 
     // Update dynamic current language labels in drop menus
     const labelEl = document.getElementById('current-lang-label');
     if (labelEl) {
-      const flags = { en: "🇺🇸 English", zh: "🇨🇳 简体中文", ja: "🇯🇵 日本語", ko: "🇰🇷 한국어" };
+      const flags = { en: "🇺🇸 English", zh: "🇨🇳 简体中文", ja: "🇯🇵 日本語", ko: "🇰🇷 한국어", pt: "🇧🇷 Português (Brasil)" };
       labelEl.textContent = flags[lang];
     }
     const mobileLabelEl = document.getElementById('mobile-current-lang-label');
     if (mobileLabelEl) {
-      const flags = { en: "🇺🇸 English", zh: "🇨🇳 简体中文", ja: "🇯🇵 日本語", ko: "🇰🇷 한국어" };
+      const flags = { en: "🇺🇸 English", zh: "🇨🇳 简体中文", ja: "🇯🇵 日本語", ko: "🇰🇷 한국어", pt: "🇧🇷 Português (Brasil)" };
       mobileLabelEl.textContent = flags[lang];
     }
 
@@ -6821,6 +6857,7 @@ This is a fully client-side application. Your content never leaves your browser 
       if (navLang.startsWith('zh')) lang = 'zh';
       else if (navLang.startsWith('ja')) lang = 'ja';
       else if (navLang.startsWith('ko')) lang = 'ko';
+      else if (navLang.startsWith('pt')) lang = 'pt';
     }
 
     if (!lang || !I18N_DICTS[lang]) {
