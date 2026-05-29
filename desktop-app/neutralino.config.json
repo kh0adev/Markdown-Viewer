@@ -3,7 +3,7 @@
   "applicationId": "com.markdownviewer.desktop",
   "version": "1.0.0",
   "defaultMode": "window",
-  "port": 28915,
+  "port": 0,
   "documentRoot": "/resources/",
   "url": "/",
   "enableServer": true,

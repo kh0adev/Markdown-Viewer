@@ -93,12 +93,18 @@ function downloadFile(url, destPath, expectedSha384) {
 
     function downloadAndVerify() {
       console.log(`Downloading offline dependency: ${path.basename(destPath)}...`);
-      https.get(url, (res) => {
+      const req = https.get(url, (res) => {
         if (res.statusCode !== 200) {
+          res.resume(); // Drain response to free up the socket
           reject(new Error(`Failed to load ${url} (${res.statusCode})`));
           return;
         }
         const stream = fs.createWriteStream(destPath);
+        
+        // Handle stream and response errors
+        stream.on("error", reject);
+        res.on("error", reject);
+
         res.pipe(stream);
         stream.on("finish", () => {
           stream.close();
@@ -114,7 +120,8 @@ function downloadFile(url, destPath, expectedSha384) {
               reject(err);
             });
         });
-      }).on("error", reject);
+      });
+      req.on("error", reject);
     }
   });
 }
@@ -143,6 +150,7 @@ async function prepareOfflineDependencies() {
 
     if (!expectedSha384) {
       console.warn(`⚠ Warning: CDN dependency is missing an integrity hash: ${url}`);
+      throw new Error(`CDN dependency is missing an integrity hash: ${url}`);
     }
 
     // Determine local filename - sanitize package version tags or query strings
