@@ -3,6 +3,16 @@
 All notable code changes to **Markdown Viewer** are documented here.
 Non-code commits (documentation, planning, README-only updates) are excluded.
 
+## v3.7.0
+
+- **Description:** Implemented extensive security hardening, accessibility remediation, and high-performance user experience upgrades. 
+  - **Security (PR 130):** Hardened offline desktop-app configuration by restricting the WebSocket communication server, enabling system process automatic cleanup on window close, and implementing secure build-time cryptographic dependency checks verifying SHA-384 integrity parameters of external assets.
+  - **UX & Performance (PR 131):** Overhauled workspace loading layouts with theme-aware dual-motion skeleton loaders (combining opacity pulses and horizontal shimmers), establishing visual alignment symmetry between the Editor and Preview panes. Introduced an asynchronous task scheduler for processing large markdown files (>15KB) that yields the call stack to the browser to paint preview skeletons immediately on pasting, avoiding interface freezes and ensuring completely responsive input. Added clearTimeout debouncers to dynamic live-region screen reader announcers and expanded accessible visually-hidden CSS clipping boundaries.
+- **Date:** 2026-05-31
+- **URL:** https://github.com/ThisIs-Developer/Markdown-Viewer/pull/131
+
+---
+
 ## v3.6.5
 
 - **Description:** Resolved the Find & Replace panel docking position reset bug, preserving custom panel drag-and-drop coordinates when toggling between floating and docked modes, and keeping coordinates in sync with viewport boundaries on window resize. Added a dedicated "Reset Position" button using the `bi-arrow-counterclockwise` icon in both the panel's header actions and the actions footer (improving accessibility and convenience for tablet and touch/keyboard-tab users), hiding both reset options automatically when docked. Synchronized assets with the desktop application wrapper by running the `prepare.js` compiler.
