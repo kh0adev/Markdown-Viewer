@@ -645,7 +645,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
-      return `<div class="mermaid-container"><div class="mermaid" id="${uniqueId}">${escapedCode}</div></div>`;
+      return `<div class="mermaid-container is-loading"><div class="mermaid" id="${uniqueId}">${escapedCode}</div></div>`;
     }
     
     const validLanguage = hljs.getLanguage(language) ? language : "plaintext";
@@ -1544,6 +1544,10 @@ This is a fully client-side application. Your content never leaves your browser 
     markdownEditor.value = activeTab.content;
     restoreViewMode(activeTab.viewMode);
     renderMarkdown();
+    const editorPane = document.querySelector('.editor-pane');
+    if (editorPane) {
+      editorPane.classList.remove('is-loading');
+    }
     requestAnimationFrame(function() {
       markdownEditor.scrollTop = activeTab.scrollPos || 0;
     });
@@ -1561,9 +1565,40 @@ This is a fully client-side application. Your content never leaves your browser 
     newTab(content, name);
   };
 
+  function showPreviewSkeleton() {
+    if (markdownPreview && !markdownPreview.querySelector('#markdown-preview-skeleton')) {
+      markdownPreview.innerHTML = `
+        <div class="skeleton-preview-container" id="markdown-preview-skeleton" aria-hidden="true">
+            <div class="skeleton-placeholder skeleton-title"></div>
+            <div class="skeleton-placeholder skeleton-line skeleton-w90"></div>
+            <div class="skeleton-placeholder skeleton-line skeleton-w85"></div>
+            <div class="skeleton-placeholder skeleton-line skeleton-w60"></div>
+            
+            <div class="skeleton-placeholder skeleton-subtitle"></div>
+            <div class="skeleton-placeholder skeleton-line skeleton-w88"></div>
+            <div class="skeleton-placeholder skeleton-line skeleton-w92"></div>
+            <div class="skeleton-placeholder skeleton-line skeleton-w45"></div>
+        </div>
+      `;
+    }
+  }
+
   function renderMarkdown() {
+    const rawVal = markdownEditor.value;
+    if (rawVal.length > 15000) {
+      showPreviewSkeleton();
+      setTimeout(function() {
+        if (markdownEditor.value !== rawVal) return;
+        executeRender(rawVal);
+      }, 30);
+    } else {
+      executeRender(rawVal);
+    }
+  }
+
+  function executeRender(rawVal) {
     try {
-      const { frontmatter, body } = parseFrontmatter(markdownEditor.value);
+      const { frontmatter, body } = parseFrontmatter(rawVal);
       const tableHtml = frontmatter ? renderFrontmatterTable(frontmatter) : '';
       const referenceData = extractReferenceDefinitions(body);
       const html = tableHtml + marked.parse(referenceData.cleanedMarkdown);
@@ -1585,9 +1620,17 @@ This is a fully client-side application. Your content never leaves your browser 
         const mermaidNodes = markdownPreview.querySelectorAll('.mermaid');
         if (mermaidNodes.length > 0) {
           Promise.resolve(mermaid.init(undefined, mermaidNodes))
-            .then(() => addMermaidToolbars())
+            .then(() => {
+              markdownPreview.querySelectorAll('.mermaid-container.is-loading').forEach((container) => {
+                container.classList.remove('is-loading');
+              });
+              addMermaidToolbars();
+            })
             .catch((e) => {
               console.warn("Mermaid rendering failed:", e);
+              markdownPreview.querySelectorAll('.mermaid-container.is-loading').forEach((container) => {
+                container.classList.remove('is-loading');
+              });
               addMermaidToolbars();
             });
         }
@@ -1612,7 +1655,7 @@ This is a fully client-side application. Your content never leaves your browser 
     } catch (e) {
       console.error("Markdown rendering failed:", e);
       const safeMessage = escapeHtml(e && e.message ? e.message : 'Unknown error');
-      const safeMarkdown = escapeHtml(markdownEditor.value);
+      const safeMarkdown = escapeHtml(rawVal);
       markdownPreview.innerHTML = `<div class="alert alert-danger">
               <strong>Error rendering markdown:</strong> ${safeMessage}
           </div>
@@ -1953,15 +1996,18 @@ This is a fully client-side application. Your content never leaves your browser 
       }
       setGitHubImportLoading(true);
       setGitHubImportDialogDisabled(true);
+      announceToScreenReader("Importing selected files from GitHub...");
       try {
         for (const selectedPath of selectedPaths) {
           const markdown = await fetchTextContent(buildRawGitHubUrl(owner, repo, ref, selectedPath));
           newTab(markdown, getFileName(selectedPath).replace(/\.(md|markdown)$/i, ""));
         }
         closeGitHubImportModal();
+        announceToScreenReader("Files imported successfully.");
       } catch (error) {
         console.error("GitHub import failed:", error);
         setGitHubImportMessage("GitHub import failed: " + error.message);
+        announceToScreenReader("GitHub import failed.");
       } finally {
         setGitHubImportDialogDisabled(false);
         setGitHubImportLoading(false);
@@ -1989,26 +2035,45 @@ This is a fully client-side application. Your content never leaves your browser 
         if (!isMarkdownPath(parsed.filePath)) {
           throw new Error("The provided URL does not point to a Markdown file.");
         }
+        announceToScreenReader("Fetching file from GitHub...");
         const markdown = await fetchTextContent(buildRawGitHubUrl(parsed.owner, parsed.repo, parsed.ref, parsed.filePath));
         newTab(markdown, getFileName(parsed.filePath).replace(/\.(md|markdown)$/i, ""));
         closeGitHubImportModal();
+        announceToScreenReader("File imported successfully.");
         return;
+      }
+
+      // Accessibility dynamic live announcer
+      const fetchingText = I18N_DICTS[activeLang].loadingFiles || "Fetching file tree...";
+      announceToScreenReader(fetchingText);
+
+      // Render hierarchical visual skeleton tree while the list is loading
+      if (githubImportTree) {
+        renderGitHubImportTreeSkeleton();
+        githubImportTree.style.display = "block";
       }
 
       const ref = parsed.ref || await getDefaultBranch(parsed.owner, parsed.repo);
       const files = await listMarkdownFiles(parsed.owner, parsed.repo, ref, parsed.basePath || "");
 
       if (!files.length) {
+        if (githubImportTree) {
+          githubImportTree.innerHTML = "";
+          githubImportTree.style.display = "none";
+        }
         setGitHubImportMessage("No Markdown files were found at that GitHub location.");
+        announceToScreenReader("Failed to locate Markdown files.");
         return;
       }
 
       const shownFiles = files.slice(0, MAX_GITHUB_FILES_SHOWN);
       if (files.length === 1) {
         const targetPath = files[0];
+        announceToScreenReader("Fetching file content...");
         const markdown = await fetchTextContent(buildRawGitHubUrl(parsed.owner, parsed.repo, ref, targetPath));
         newTab(markdown, getFileName(targetPath).replace(/\.(md|markdown)$/i, ""));
         closeGitHubImportModal();
+        announceToScreenReader("File imported successfully.");
         return;
       }
 
@@ -2030,6 +2095,10 @@ This is a fully client-side application. Your content never leaves your browser 
       availableGitHubImportPaths = shownFiles.slice();
       setGitHubSelectedPaths(shownFiles[0] ? [shownFiles[0]] : []);
       renderGitHubImportTree(shownFiles);
+
+      // Announce load complete
+      announceToScreenReader("GitHub files loaded. " + files.length + " files available in the tree.");
+
       if (files.length > MAX_GITHUB_FILES_SHOWN) {
         setGitHubImportMessage(`Showing first ${MAX_GITHUB_FILES_SHOWN} of ${files.length} Markdown files.`, { isError: false });
       } else {
@@ -2046,6 +2115,11 @@ This is a fully client-side application. Your content never leaves your browser 
     } catch (error) {
       console.error("GitHub import failed:", error);
       setGitHubImportMessage("GitHub import failed: " + error.message);
+      announceToScreenReader("GitHub import failed.");
+      if (githubImportTree) {
+        githubImportTree.innerHTML = "";
+        githubImportTree.style.display = "none";
+      }
     } finally {
       setGitHubImportDialogDisabled(false);
       setGitHubImportLoading(false);
@@ -2149,6 +2223,12 @@ This is a fully client-side application. Your content never leaves your browser 
 
   function debouncedRender() {
     clearTimeout(markdownRenderTimeout);
+    
+    // For large documents, show the skeleton in the preview pane immediately to provide instant visual feedback
+    if (markdownEditor.value.length > 15000) {
+      showPreviewSkeleton();
+    }
+    
     markdownRenderTimeout = setTimeout(renderMarkdown, RENDER_DELAY);
   }
 
@@ -2866,12 +2946,27 @@ This is a fully client-side application. Your content never leaves your browser 
     const end = markdownEditor.selectionEnd;
     modal.style.display = 'flex';
     confirmBtn.disabled = true;
-    emptyMessage.textContent = 'Loading emojis...';
+
+    // Localized and accessible announcements for loading
+    const loadingText = I18N_DICTS[activeLang].loadingEmojis || "Loading emojis...";
+    emptyMessage.textContent = loadingText;
     emptyMessage.style.display = 'block';
+    announceToScreenReader(loadingText);
+
     searchInput.value = '';
     emojiSelection.clear();
     grid.innerHTML = '';
+    grid.scrollTop = 0;
     emojiItems = [];
+
+    // Render visual placeholders during active requests
+    if (!emojiLookupLoaded) {
+      renderEmojiSkeletons();
+    }
+
+    let currentFilteredEntries = [];
+    let renderedCount = 0;
+    const CHUNK_SIZE = 120;
 
     function updateInsertState() {
       confirmBtn.disabled = emojiSelection.size === 0;
@@ -2889,14 +2984,30 @@ This is a fully client-side application. Your content never leaves your browser 
       updateInsertState();
     }
 
-    function renderEmojiGrid() {
-      grid.innerHTML = '';
+    function renderEmojiChunk(clear = false) {
+      if (clear) {
+        grid.innerHTML = '';
+        emojiItems = [];
+        renderedCount = 0;
+      }
+
+      const nextBatch = currentFilteredEntries.slice(renderedCount, renderedCount + CHUNK_SIZE);
+      if (nextBatch.length === 0) {
+        emptyMessage.style.display = emojiItems.length ? 'none' : 'block';
+        return;
+      }
+
       const fragment = document.createDocumentFragment();
-      emojiItems = emojiEntries.map((entry) => {
+      const newItems = nextBatch.map((entry) => {
         const item = document.createElement('button');
         item.type = 'button';
         item.className = 'emoji-item';
-        item.setAttribute('aria-pressed', 'false');
+
+        const isSelected = emojiSelection.has(entry.shortcode);
+        if (isSelected) {
+          item.classList.add('is-selected');
+        }
+        item.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
         item.dataset.search = entry.search;
         item.dataset.shortcode = entry.shortcode;
 
@@ -2932,25 +3043,28 @@ This is a fully client-side application. Your content never leaves your browser 
         fragment.appendChild(item);
         return { element: item, search: entry.search, shortcode: entry.shortcode };
       });
+
+      emojiItems = emojiItems.concat(newItems);
       grid.appendChild(fragment);
+      renderedCount += nextBatch.length;
+      emptyMessage.style.display = emojiItems.length ? 'none' : 'block';
     }
 
     function applyFilter() {
       const query = searchInput.value.trim().toLowerCase();
-      let visibleCount = 0;
-      emojiItems.forEach((item) => {
-        const match = !query || item.search.includes(query);
-        item.element.style.display = match ? '' : 'none';
-        if (match) visibleCount += 1;
-      });
-      emptyMessage.style.display = visibleCount ? 'none' : 'block';
+      currentFilteredEntries = emojiEntries.filter(entry => !query || entry.search.includes(query));
+      renderEmojiChunk(true);
+    }
+
+    function handleScroll() {
+      if (grid.scrollTop + grid.clientHeight >= grid.scrollHeight - 60) {
+        renderEmojiChunk(false);
+      }
     }
 
     function insertEmojis() {
       if (!emojiSelection.size) return;
-      const ordered = emojiItems
-        .filter((item) => emojiSelection.has(item.shortcode))
-        .map((item) => item.shortcode);
+      const ordered = Array.from(emojiSelection);
       const insertion = ordered.join(' ');
       modal.style.display = 'none';
       cleanup();
@@ -2974,6 +3088,7 @@ This is a fully client-side application. Your content never leaves your browser 
       cancelBtn.removeEventListener('click', closeModal);
       searchInput.removeEventListener('input', applyFilter);
       searchInput.removeEventListener('keydown', onKey);
+      grid.removeEventListener('scroll', handleScroll);
     }
 
     loadEmojiEntries().then((entries) => {
@@ -2982,11 +3097,13 @@ This is a fully client-side application. Your content never leaves your browser 
         emptyMessage.style.display = 'block';
         grid.innerHTML = '';
         emojiItems = [];
+        announceToScreenReader("Failed to load emojis.");
         return;
       }
-      renderEmojiGrid();
+      currentFilteredEntries = entries;
+      renderEmojiChunk(true);
       emptyMessage.textContent = 'No emojis found.';
-      applyFilter();
+      announceToScreenReader("Emojis loaded. " + entries.length + " items available.");
       updateInsertState();
     });
 
@@ -2994,6 +3111,7 @@ This is a fully client-side application. Your content never leaves your browser 
     cancelBtn.addEventListener('click', closeModal);
     searchInput.addEventListener('input', applyFilter);
     searchInput.addEventListener('keydown', onKey);
+    grid.addEventListener('scroll', handleScroll);
 
     requestAnimationFrame(() => searchInput.focus());
   }
@@ -6698,7 +6816,9 @@ This is a fully client-side application. Your content never leaves your browser 
       insertImg: "Insert image",
       insertTable: "Insert table",
       findReplace: "Find & Replace",
-      placeholder: "Type your markdown here..."
+      placeholder: "Type your markdown here...",
+      loadingEmojis: "Loading emojis...",
+      loadingFiles: "Fetching file tree..."
     },
     zh: {
       title: "Markdown 阅读器",
@@ -6734,7 +6854,9 @@ This is a fully client-side application. Your content never leaves your browser 
       insertImg: "插入图片",
       insertTable: "插入表格",
       findReplace: "查找与替换",
-      placeholder: "在此输入您的 Markdown 文本..."
+      placeholder: "在此输入您的 Markdown 文本...",
+      loadingEmojis: "正在加载表情...",
+      loadingFiles: "正在获取文件树..."
     },
     ja: {
       title: "Markdown ビューア",
@@ -6770,7 +6892,9 @@ This is a fully client-side application. Your content never leaves your browser 
       insertImg: "画像の挿入",
       insertTable: "テーブルの挿入",
       findReplace: "検索と置換",
-      placeholder: "ここにMarkdownを入力してください..."
+      placeholder: "ここにMarkdownを入力してください...",
+      loadingEmojis: "絵文字を読み込んでいます...",
+      loadingFiles: "ファイルツリーを取得しています..."
     },
     ko: {
       title: "마크다운 뷰어",
@@ -6806,7 +6930,9 @@ This is a fully client-side application. Your content never leaves your browser 
       insertImg: "이미지 삽입",
       insertTable: "표 삽입",
       findReplace: "찾기 및 바꾸기",
-      placeholder: "여기에 마크다운 내용을 입력하세요..."
+      placeholder: "여기에 마크다운 내용을 입력하세요...",
+      loadingEmojis: "이모지 로딩 중...",
+      loadingFiles: "파일 트리 가져오는 중..."
     },
     pt: {
       title: "Visualizador de Markdown",
@@ -6842,7 +6968,9 @@ This is a fully client-side application. Your content never leaves your browser 
       insertImg: "Inserir imagem",
       insertTable: "Inserir tabela",
       findReplace: "Localizar & Substituir",
-      placeholder: "Digite seu markdown aqui..."
+      placeholder: "Digite seu markdown aqui...",
+      loadingEmojis: "Carregando emojis...",
+      loadingFiles: "Buscando árvore de arquivos..."
     }
   };
 
@@ -7063,6 +7191,96 @@ This is a fully client-side application. Your content never leaves your browser 
       window.history.replaceState({}, '', url.toString());
     }
   });
+
+  // Accessibility dynamic screen reader announcer helper
+  function announceToScreenReader(message) {
+    const announcer = document.getElementById('app-accessibility-announcer');
+    if (announcer) {
+      announcer.textContent = '';
+      setTimeout(() => {
+        announcer.textContent = message;
+      }, 50);
+    }
+  }
+
+  // Visual skeleton loader generator for emoji list
+  function renderEmojiSkeletons() {
+    const grid = document.getElementById('emoji-modal-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < 18; i++) {
+      const item = document.createElement('div');
+      item.className = 'emoji-item skeleton-placeholder';
+      item.setAttribute('aria-hidden', 'true');
+      item.style.border = '1px solid var(--border-color)';
+      item.style.borderRadius = '10px';
+      item.style.padding = '10px';
+      item.style.display = 'flex';
+      item.style.flexDirection = 'column';
+      item.style.alignItems = 'center';
+      item.style.gap = '8px';
+
+      const preview = document.createElement('span');
+      preview.className = 'emoji-preview skeleton-circle';
+      item.appendChild(preview);
+
+      const shortcodeRow = document.createElement('div');
+      shortcodeRow.className = 'emoji-shortcode';
+      const code = document.createElement('span');
+      code.className = 'skeleton-text';
+      code.style.width = '60px';
+      shortcodeRow.appendChild(code);
+      item.appendChild(shortcodeRow);
+
+      fragment.appendChild(item);
+    }
+    grid.appendChild(fragment);
+  }
+
+  // Visual skeleton loader generator for GitHub file list tree
+  function renderGitHubImportTreeSkeleton() {
+    if (!githubImportTree) return;
+    githubImportTree.innerHTML = '';
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = 'github-import-tree-skeleton';
+    
+    const list = document.createElement('ul');
+    list.style.listStyle = 'none';
+    list.style.paddingLeft = '4px';
+    list.style.margin = '0';
+    
+    for (let i = 0; i < 4; i++) {
+      const folderItem = document.createElement('li');
+      folderItem.style.margin = '6px 0';
+      
+      const folderSpan = document.createElement('span');
+      folderSpan.className = 'skeleton-placeholder skeleton-tree-folder';
+      folderItem.appendChild(folderSpan);
+      
+      const subList = document.createElement('ul');
+      subList.style.listStyle = 'none';
+      subList.style.paddingLeft = '18px';
+      subList.style.margin = '0';
+      
+      for (let j = 0; j < 2; j++) {
+        const fileItem = document.createElement('li');
+        fileItem.style.margin = '4px 0';
+        
+        const fileSpan = document.createElement('span');
+        fileSpan.className = 'skeleton-placeholder skeleton-tree-file';
+        fileItem.appendChild(fileSpan);
+        subList.appendChild(fileItem);
+      }
+      
+      folderItem.appendChild(subList);
+      list.appendChild(folderItem);
+    }
+    
+    wrapper.appendChild(list);
+    githubImportTree.appendChild(wrapper);
+  }
 
   // Run detection
   detectAndInitLanguage();

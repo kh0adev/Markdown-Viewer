@@ -17,6 +17,8 @@
   --accent-color: #0366d6;
   --table-bg: #ffffff; /* Table background for light mode */
   --code-bg: #f6f8fa; /* Code block background for light mode */
+  --skeleton-bg: #e2e8f0;
+  --skeleton-glow: rgba(255, 255, 255, 0.65);
 }
 
 [data-theme="dark"] {
@@ -38,6 +40,8 @@
   --accent-color: #58a6ff;
   --table-bg: #161b22; /* Table background for dark mode */
   --code-bg: #161b22; /* Code block background for dark mode */
+  --skeleton-bg: #2d3139;
+  --skeleton-glow: rgba(255, 255, 255, 0.08);
 }
 
 * {
@@ -3400,4 +3404,183 @@ html[lang="ko"] .markdown-body h1, html[lang="ko"] .markdown-body h2, html[lang=
     left: 12px !important;
     top: 80px !important;
   }
-}
+}
+
+/* ========================================
+   SKELETON LOADING SHIMMER SYSTEM
+   ======================================== */
+.skeleton-placeholder {
+  display: block;
+  background-color: var(--skeleton-bg);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  animation: skeleton-pulse 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+}
+
+.skeleton-placeholder::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    var(--skeleton-glow) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: skeleton-shimmer 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.82;
+  }
+}
+
+.skeleton-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.skeleton-text {
+  height: 12px;
+  width: 80%;
+  margin: 4px auto;
+  border-radius: 3px;
+}
+
+.skeleton-tree-folder {
+  height: 16px;
+  width: 140px;
+  margin: 6px 0;
+  display: inline-block;
+}
+
+.skeleton-tree-file {
+  height: 14px;
+  width: 180px;
+  margin: 4px 0 4px 12px;
+  display: inline-block;
+}
+
+/* Screen reader accessibility utility */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Article skeleton layout structures */
+.skeleton-title {
+  height: 28px;
+  width: 35%;
+  margin-bottom: 24px;
+  border-radius: 8px;
+}
+
+.skeleton-subtitle {
+  height: 20px;
+  width: 20%;
+  margin-bottom: 18px;
+  margin-top: 32px;
+  border-radius: 6px;
+}
+
+.skeleton-line {
+  height: 14px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+}
+
+/* Symmetrical dynamic widths */
+.skeleton-w90 { width: 90%; }
+.skeleton-w92 { width: 92%; }
+.skeleton-w88 { width: 88%; }
+.skeleton-w85 { width: 85%; }
+.skeleton-w60 { width: 60%; }
+.skeleton-w45 { width: 45%; }
+
+/* Editor pane skeleton overlay */
+.editor-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 30px 24px 24px calc(24px + var(--line-number-gutter));
+  z-index: 10;
+  pointer-events: none;
+  background: var(--editor-bg);
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.editor-pane:not(.is-loading) .editor-skeleton {
+  display: none;
+}
+
+.editor-pane.is-loading textarea {
+  opacity: 0; /* Completely hide editor content while initial bootstrap skeleton runs */
+}
+
+/* Preview pane skeleton container */
+.skeleton-preview-container {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 4px;
+  background: transparent;
+  transition: opacity 0.3s ease;
+}
+
+/* Mermaid compilation loading states */
+.mermaid-container.is-loading {
+  min-height: 180px;
+  background-color: var(--skeleton-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+  animation: skeleton-pulse 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+}
+
+.mermaid-container.is-loading .mermaid {
+  opacity: 0; /* Hide raw chart source code during compile */
+}
+
+.mermaid-container.is-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    var(--skeleton-glow) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: skeleton-shimmer 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
