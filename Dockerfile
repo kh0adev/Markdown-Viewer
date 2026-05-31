@@ -43,6 +43,8 @@ RUN echo 'server { \
     add_header X-Content-Type-Options "nosniff" always; \
     add_header X-XSS-Protection "1; mode=block" always; \
     add_header Referrer-Policy "strict-origin-when-cross-origin" always; \
+    # PERF-029: Content Security Policy for defense-in-depth \
+    add_header Content-Security-Policy "default-src '"'"'self'"'"'; script-src '"'"'self'"'"' cdnjs.cloudflare.com cdn.jsdelivr.net '"'"'unsafe-inline'"'"'; style-src '"'"'self'"'"' cdnjs.cloudflare.com cdn.jsdelivr.net '"'"'unsafe-inline'"'"'; img-src '"'"'self'"'"' https: data: blob:; font-src '"'"'self'"'"' cdn.jsdelivr.net; connect-src '"'"'self'"'"' api.github.com raw.githubusercontent.com;" always; \
     }' > /etc/nginx/conf.d/default.conf
 
 # Expose port 80

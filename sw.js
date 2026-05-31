@@ -7,6 +7,7 @@ const CRITICAL_ASSETS = [
   './index.html',
   './script.js',
   './styles.css',
+  './sample.md',
   './assets/icon.jpg',
   './manifest.json'
 ];
