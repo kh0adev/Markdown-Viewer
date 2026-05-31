@@ -3680,8 +3680,8 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     const text = markdownEditor.value || '';
-    const scrollTop = markdownEditor.scrollTop;
-    const scrollLeft = markdownEditor.scrollLeft;
+    const scrollTop = cachedScrollTop;
+    const scrollLeft = cachedScrollLeft;
     const fragment = document.createDocumentFragment();
     let lastIndex = 0;
     findMatches.forEach(function(match, index) {
@@ -3701,8 +3701,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function syncHighlightScroll() {
     if (!editorHighlightLayer) return;
-    editorHighlightLayer.scrollTop = markdownEditor.scrollTop;
-    editorHighlightLayer.scrollLeft = markdownEditor.scrollLeft;
+    editorHighlightLayer.scrollTop = cachedScrollTop;
+    editorHighlightLayer.scrollLeft = cachedScrollLeft;
   }
 
   function updateLineNumberGutter(lineCount) {
@@ -3765,42 +3765,71 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   const lineCache = new Map();
-  let lastEditorWidth = 0;
-  let charWidth = 0;
-  let maxCharsPerLine = 0;
+  let cachedPaddingLeft = 10;
+  let cachedPaddingRight = 10;
+  let cachedCharWidth = 0;
+  let cachedLineHeight = 21;
+  let cachedEditorWidth = 0;
+  let cachedMaxCharsPerLine = 80;
+  let cachedScrollTop = 0;
+  let cachedScrollLeft = 0;
+  let isGeometryInitialized = false;
+
+  function initEditorGeometry() {
+    if (!markdownEditor) return;
+    const styles = window.getComputedStyle(markdownEditor);
+    cachedPaddingLeft = parseFloat(styles.paddingLeft) || 10;
+    cachedPaddingRight = parseFloat(styles.paddingRight) || 10;
+    
+    // Measure character width
+    const testSpan = document.createElement('span');
+    testSpan.style.fontFamily = styles.fontFamily;
+    testSpan.style.fontSize = styles.fontSize;
+    testSpan.style.visibility = 'hidden';
+    testSpan.style.position = 'absolute';
+    testSpan.style.whiteSpace = 'pre';
+    testSpan.textContent = 'a'.repeat(100);
+    document.body.appendChild(testSpan);
+    cachedCharWidth = testSpan.getBoundingClientRect().width / 100;
+    document.body.removeChild(testSpan);
+    
+    // Calculate line height
+    const computed = parseFloat(styles.lineHeight);
+    if (!Number.isNaN(computed)) {
+      cachedLineHeight = computed;
+    } else {
+      const fontSize = parseFloat(styles.fontSize) || 14;
+      cachedLineHeight = fontSize * 1.5;
+    }
+    
+    isGeometryInitialized = true;
+    lineCache.clear();
+  }
+
+  function refreshEditorWidth() {
+    if (!markdownEditor) return;
+    if (!isGeometryInitialized) {
+      initEditorGeometry();
+    }
+    cachedEditorWidth = markdownEditor.clientWidth;
+    const availableWidth = cachedEditorWidth - cachedPaddingLeft - cachedPaddingRight;
+    cachedMaxCharsPerLine = Math.max(1, Math.floor(availableWidth / cachedCharWidth));
+    
+    cachedScrollTop = markdownEditor.scrollTop;
+    cachedScrollLeft = markdownEditor.scrollLeft;
+  }
 
   function updateLineNumbers() {
     if (!lineNumbers || !markdownEditor) return;
     const lines = (markdownEditor.value || '').split('\n');
     const lineCount = Math.max(1, lines.length);
 
-    const currentWidth = markdownEditor.clientWidth;
-    const styles = window.getComputedStyle(markdownEditor);
-    const paddingLeft = parseFloat(styles.paddingLeft) || 10;
-    const paddingRight = parseFloat(styles.paddingRight) || 10;
-    const availableWidth = currentWidth - paddingLeft - paddingRight;
-
-    // Measure character width exactly once per resize / layout width change
-    if (currentWidth !== lastEditorWidth || charWidth === 0) {
-      lineCache.clear();
-      lastEditorWidth = currentWidth;
-      
-      const testSpan = document.createElement('span');
-      testSpan.style.fontFamily = styles.fontFamily;
-      testSpan.style.fontSize = styles.fontSize;
-      testSpan.style.visibility = 'hidden';
-      testSpan.style.position = 'absolute';
-      testSpan.style.whiteSpace = 'pre';
-      testSpan.textContent = 'a'.repeat(100);
-      document.body.appendChild(testSpan);
-      charWidth = testSpan.getBoundingClientRect().width / 100;
-      document.body.removeChild(testSpan);
-      
-      maxCharsPerLine = Math.max(1, Math.floor(availableWidth / charWidth));
+    if (cachedEditorWidth === 0) {
+      refreshEditorWidth();
     }
 
     updateLineNumberGutter(lineCount);
-    const lineHeight = getLineHeight(styles);
+    const lineHeight = cachedLineHeight;
 
     const existingItems = lineNumbers.children;
     const existingCount = existingItems.length;
@@ -3825,7 +3854,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const lineText = lines[i];
       let wrapHeight = lineCache.get(lineText);
       if (wrapHeight === undefined) {
-        const wrapCount = getWrappedLineCountMonospace(lineText, maxCharsPerLine);
+        const wrapCount = getWrappedLineCountMonospace(lineText, cachedMaxCharsPerLine);
         wrapHeight = wrapCount * lineHeight;
         lineCache.set(lineText, wrapHeight);
       }
@@ -3855,7 +3884,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function syncLineNumberScroll() {
     if (!lineNumbers) return;
-    lineNumbers.scrollTop = markdownEditor.scrollTop;
+    lineNumbers.scrollTop = cachedScrollTop;
   }
 
   // Class encapsulating Search & Replace Engine
@@ -4344,6 +4373,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const targetScrollTop = Math.max(0, (lineIndex * lineHeight) - (editorHeight / 2) + (lineHeight / 2));
       
       markdownEditor.scrollTop = targetScrollTop;
+      cachedScrollTop = targetScrollTop;
       syncHighlightScroll();
       syncLineNumberScroll();
     } catch (e) {
@@ -4938,12 +4968,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const previewPercent = 100 - editorWidthPercent;
     editorPaneElement.style.flex = `0 0 calc((100% - var(--dock-width, 0px)) * ${editorWidthPercent / 100} - 4px)`;
     previewPaneElement.style.flex = `0 0 calc((100% - var(--dock-width, 0px)) * ${previewPercent / 100} - 4px)`;
+    refreshEditorWidth();
     scheduleLineNumberUpdate();
   }
 
   function resetPaneWidths() {
     editorPaneElement.style.flex = '';
     previewPaneElement.style.flex = '';
+    refreshEditorWidth();
   }
 
   function openMobileMenu() {
@@ -5035,6 +5067,8 @@ document.addEventListener("DOMContentLoaded", function () {
   
   initTabs();
   if (loadGlobalState().syncScrollingEnabled === false) toggleSyncScrolling();
+  initEditorGeometry();
+  refreshEditorWidth();
   updateMobileStats();
   updateFindHighlights();
   syncHighlightScroll();
@@ -5066,6 +5100,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   window.addEventListener('resize', () => {
+    initEditorGeometry();
+    refreshEditorWidth();
     scheduleLineNumberUpdate();
     if (window.innerWidth < 1080 && isFrDocked && isFindModalOpen) {
       toggleFrDockMode(true);
@@ -5136,6 +5172,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   
   editorPane.addEventListener("scroll", function() {
+    cachedScrollTop = this.scrollTop;
+    cachedScrollLeft = this.scrollLeft;
     syncEditorToPreview();
     syncHighlightScroll();
     syncLineNumberScroll();
