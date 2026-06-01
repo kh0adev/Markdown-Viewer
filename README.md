@@ -1,7 +1,7 @@
 # Markdown Viewer
 
 <div align="center">
-  <img src="assets/icon.jpg" alt="Markdown Viewer Logo" width="140" />
+  <img src="assets/icon.png" alt="Markdown Viewer Logo" width="140" />
 
   <p><strong>Professional GitHub-style Markdown editor and previewer</strong></p>
   <p>Live preview, diagrams, math, export tools, and multi-document workflows — all in your browser.</p>

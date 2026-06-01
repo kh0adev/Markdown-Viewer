@@ -9,7 +9,7 @@ COPY sw.js /usr/share/nginx/html/
 COPY manifest.json /usr/share/nginx/html/
 COPY robots.txt /usr/share/nginx/html/
 COPY sitemap.xml /usr/share/nginx/html/
-COPY assets/icon.jpg /usr/share/nginx/html/assets/
+COPY assets/icon.png /usr/share/nginx/html/assets/
 
 # Create a custom nginx configuration with compression and security
 # PERF-020: Added gzip compression for text-based assets
