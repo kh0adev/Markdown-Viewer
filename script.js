@@ -1,3 +1,58 @@
+(async function handlePureClientRedirect() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const docId = urlParams.get('sharedoc');
+  const isEditMode = urlParams.get('edit') === '1';
+
+  if (!docId) return;
+
+  // Tạo màn hình chờ đơn giản
+  const loadingOverlay = document.createElement('div');
+  loadingOverlay.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:#1e1e1e;color:#fff;display:flex;justify-content:center;align-items:center;z-index:99999;font-family:sans-serif;';
+  loadingOverlay.innerHTML = '<div>Đang tải tài liệu chia sẻ từ Cloud...</div>';
+  document.documentElement.appendChild(loadingOverlay);
+
+  try {
+    // Chờ tối đa 3 giây cho đến khi Firebase Loader sẵn sàng trên đối tượng window
+    const getLoader = () => typeof window.getFirebaseDocLoader === 'function' ? window.getFirebaseDocLoader() : null;
+    let loader = getLoader();
+    let attempts = 0;
+    
+    while (!loader && attempts < 30) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      loader = getLoader();
+      attempts++;
+    }
+
+    if (!loader) {
+      throw new Error("Không thể kết nối tới dịch vụ Cloud. Vui lòng F5 lại trang.");
+    }
+
+    // 1. Gọi Firebase lấy dữ liệu document
+    const docData = await loader(docId);
+    if (!docData || !docData.content) {
+      throw new Error("Tài liệu không tồn tại hoặc đã bị xóa.");
+    }
+
+    // 2. KHẮC PHỤC: Đẩy thẳng nội dung chữ thô và ID vào bộ nhớ tạm sessionStorage
+    sessionStorage.setItem('__cloud_shared_content', docData.content);
+    sessionStorage.setItem('__cloud_shared_title', docData.title || 'Untitled');
+    sessionStorage.setItem('__last_shared_doc_id', docId);
+    if (isEditMode) {
+      sessionStorage.setItem('__cloud_shared_edit_mode', '1');
+    }
+
+    // 3. REDIRECT CỨNG: Chuyển hướng về trang chủ sạch sẽ không chứa query/hash phức tạp để hệ thống tự load
+    window.location.replace(window.location.origin + window.location.pathname);
+
+  } catch (err) {
+    console.error("Redirect failed:", err);
+    loadingOverlay.innerHTML = `<div style="text-align:center;color:#ff6b6b;padding:20px;">
+      <h3>Lỗi tải tài liệu</h3>
+      <p>${err.message}</p>
+      <button onclick="window.location.href=window.location.origin" style="padding:8px 16px;background:#333;color:#fff;border:1px solid #555;border-radius:4px;cursor:pointer;margin-top:10px;">Quay lại trang chủ</button>
+    </div>`;
+  }
+})();
 document.addEventListener("DOMContentLoaded", function () {
   // PERF-002: Lazy script loader for optional heavy libraries
   const _loadedScripts = new Set();
@@ -109,6 +164,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const mobileDirectionToggle = document.getElementById("mobile-direction-toggle");
   const shareButton         = document.getElementById("share-button");
   const mobileShareButton   = document.getElementById("mobile-share-button");
+  // Expose for store.js to access
+  window.__shareButton = shareButton;
+  window.__mobileShareButton = mobileShareButton;
   const githubImportModal = document.getElementById("github-import-modal");
   const githubImportTitle = document.getElementById("github-import-title");
   const githubImportUrlInput = document.getElementById("github-import-url");
@@ -241,6 +299,10 @@ document.addEventListener("DOMContentLoaded", function () {
     _globalStateCache = { ...loadGlobalState(), ...patch };
     localStorage.setItem(GLOBAL_STATE_KEY, JSON.stringify(_globalStateCache));
   }
+
+  // Expose for store.js
+  window.__loadGlobalState = loadGlobalState;
+  window.__saveGlobalState = saveGlobalState;
 
   // Check dark mode preference first for proper initialization
   const prefersDarkMode =
@@ -889,6 +951,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const UNTITLED_COUNTER_KEY = 'markdownViewerUntitledCounter';
   let tabs = [];
   let activeTabId = null;
+  // Expose tabs and activeTabId reactively for store.js
+  Object.defineProperty(window, '__tabs', { get: function() { return tabs; } });
+  Object.defineProperty(window, '__activeTabId', { get: function() { return activeTabId; } });
   let draggedTabId = null;
   let saveTabStateTimeout = null;
   let untitledCounter = 0;
@@ -6310,66 +6375,116 @@ document.addEventListener("DOMContentLoaded", function () {
   const shareCardView     = document.getElementById('share-card-view');
   const shareCardEdit     = document.getElementById('share-card-edit');
 
-  function buildShareUrl(mode) {
-    const markdownText = markdownEditor.value;
-    let encoded;
-    try {
-      encoded = encodeMarkdownForShare(markdownText);
-    } catch (e) {
-      console.error('Share encoding failed:', e);
-      return null;
-    }
-    const isLocal = window.location.origin.includes('localhost') || 
-                    window.location.origin.startsWith('file://') || 
-                    typeof Neutralino !== 'undefined';
-                    
-    const baseUrl = isLocal 
-      ? 'https://markdownviewer.pages.dev/' 
-      : window.location.origin + window.location.pathname;
+function buildShareUrl(mode) {
+  const docId = window.__autoShareLastDocId;
+  
+  // Nếu vì lý do nào đó chưa có ID, trả về null
+  if (!docId) return null;
 
-    const base = baseUrl + '#share=' + encoded;
-    return mode === 'edit' ? base + '&edit=1' : base;
+  // Cố định tên miền chính thức theo yêu cầu của bạn
+  const PRODUCTION_URL = 'https://markdown.com.vn';
+  
+  let base = PRODUCTION_URL + '?sharedoc=' + encodeURIComponent(docId);
+  return mode === 'edit' ? base + '&edit=1' : base;
+}
+
+function updateShareUrlField() {
+  // SỬA TẠI ĐÂY: Thay đổi ID cho đúng với file HTML thực tế của bạn
+  const shareUrlInput = document.getElementById('share-url-input'); // Tên ô input bị trống của bạn
+  const shareCopyBtn = document.getElementById('share-copy-btn'); // Nút copy đi kèm (thay ID nếu cần)
+  const shareModeView = document.getElementById('share-mode-view');
+
+  const mode = (shareModeView && shareModeView.checked) ? 'view' : 'edit';
+  const url = buildShareUrl(mode);
+  
+  if (!url) {
+    if (shareUrlInput) shareUrlInput.value = 'Lỗi tạo liên kết chia sẻ.';
+    if (shareCopyBtn) shareCopyBtn.disabled = true;
+    return;
   }
 
-  function updateShareUrlField() {
-    const mode = shareModeView.checked ? 'view' : 'edit';
-    const url = buildShareUrl(mode);
-    if (!url) {
-      shareUrlInput.value = 'Error generating link.';
-      shareCopyBtn.disabled = true;
-      return;
-    }
-    const tooLarge = url.length > MAX_SHARE_URL_LENGTH;
-    if (tooLarge) {
-      shareUrlInput.value = 'Document too large to share via URL.';
-      shareCopyBtn.disabled = true;
-    } else {
-      shareUrlInput.value = url;
-      shareCopyBtn.disabled = false;
-    }
+  // Thực hiện gán giá trị URL vào ô input
+  if (shareUrlInput) {
+    shareUrlInput.value = url;
+    console.log("Đã gán thành công URL vào ô input:", url);
+  } else {
+    console.error("KHÔNG TÌM THẤY THẺ INPUT! Hãy kiểm tra lại ID trong file HTML.");
   }
 
-  function openShareModal() {
-    // PERF-002: Lazy-load pako on first share
-    if (typeof pako === 'undefined') {
-      loadScript(CDN.pako).then(function() {
-        openShareModal();
-      }).catch(function(e) {
-        console.error('Failed to load pako:', e);
-        alert('Failed to load sharing library. Please check your internet connection.');
-      });
-      return;
+  if (shareCopyBtn) shareCopyBtn.disabled = false;
+}
+
+
+  async function openShareModal() {
+  // 1. CHẶN LOGIN: Nếu chưa đăng nhập, hiển thị modal yêu cầu và dừng lại
+  if (!window.isUserLoggedIn()) {
+    window.showAuthRequiredModal();
+    return;
+  }
+
+  // Lấy hàm saver từ hệ thống Firebase
+  const saver = typeof window.getFirebaseDocSaver === 'function' ? window.getFirebaseDocSaver() : null;
+  if (!saver) {
+    alert('Dịch vụ Cloud chưa sẵn sàng. Vui lòng thử lại sau vài giây.');
+    return;
+  }
+
+  // Lấy các phần tử giao diện để hiển thị trạng thái chờ (Loading) nếu cần
+  const mainShareBtn = document.getElementById('main-share-btn'); // Thay bằng ID nút bấm kích hoạt của bạn nếu có
+  const originalHtml = mainShareBtn ? mainShareBtn.innerHTML : '';
+  
+  try {
+    // Thay đổi trạng thái nút bấm ngoài màn hình để người dùng biết hệ thống đang xử lý
+    if (mainShareBtn) {
+      mainShareBtn.disabled = true;
+      mainShareBtn.innerHTML = '<i class="bi bi-spinner spinning me-2"></i> Đang chuẩn bị link...';
     }
-    // Reset to view-only by default each time
+
+    // Lấy nội dung và tiêu đề hiện tại của editor
+    const markdownEditor = document.getElementById('markdown-editor');
+    let docTitle = 'Untitled';
+    if (window.__tabs && window.__activeTabId) {
+      const activeTab = window.__tabs.find(t => t.id === window.__activeTabId);
+      if (activeTab) docTitle = activeTab.title;
+    }
+
+    // 2. CHẠY LƯU NGẦM LÊN CLOUD: Truyền ID cũ để UPDATE hoặc null để CREATE mới
+    const docId = await saver(
+      markdownEditor ? markdownEditor.value : '',
+      docTitle,
+      window.__autoShareLastDocId || null
+    );
+
+    // Lưu lại ID tài liệu vào bộ nhớ toàn cục để đồng bộ
+    window.__autoShareLastDocId = docId;
+
+    // 3. THIẾT LẬP GIAO DIỆN MODAL VÀ HIỂN THỊ
+    // Reset về chế độ view-only mặc định như logic cũ của bạn
     shareModeView.checked = true;
-    syncShareCardStyles();
-    updateShareUrlField();
+    
+    if (typeof syncShareCardStyles === 'function') syncShareCardStyles();
+    
+    // Hàm này giờ đây sẽ tự đọc window.__autoShareLastDocId để map thành link rút gọn
+    updateShareUrlField(); 
+
+    // Hiển thị Modal Share lên màn hình mượt mà bằng RequestAnimationFrame
     shareModal.style.display = '';
     requestAnimationFrame(() => {
       shareModal.classList.add('is-visible');
       shareModal.setAttribute('aria-hidden', 'false');
     });
+
+  } catch (err) {
+    console.error('Khởi tạo liên kết share thất bại:', err);
+    alert('Không thể tạo liên kết chia sẻ: ' + err.message);
+  } finally {
+    // Khôi phục lại trạng thái ban đầu của nút bấm ngoài màn hình
+    if (mainShareBtn) {
+      mainShareBtn.disabled = false;
+      mainShareBtn.innerHTML = originalHtml;
+    }
   }
+}
 
   function closeShareModal() {
     shareModal.classList.remove('is-visible');
@@ -6971,7 +7086,8 @@ document.addEventListener("DOMContentLoaded", function () {
       findReplace: "Find & Replace",
       placeholder: "Type your markdown here...",
       loadingEmojis: "Loading emojis...",
-      loadingFiles: "Fetching file tree..."
+      loadingFiles: "Fetching file tree...",
+      autoShare: 'Auto Share'
     },
     zh: {
       title: "Markdown 阅读器",
@@ -7009,7 +7125,8 @@ document.addEventListener("DOMContentLoaded", function () {
       findReplace: "查找与替换",
       placeholder: "在此输入您的 Markdown 文本...",
       loadingEmojis: "正在加载表情...",
-      loadingFiles: "正在获取文件树..."
+      loadingFiles: "正在获取文件树...",
+      autoShare: '自动分享'
     },
     ja: {
       title: "Markdown ビューア",
@@ -7047,7 +7164,8 @@ document.addEventListener("DOMContentLoaded", function () {
       findReplace: "検索と置換",
       placeholder: "ここにMarkdownを入力してください...",
       loadingEmojis: "絵文字を読み込んでいます...",
-      loadingFiles: "ファイルツリーを取得しています..."
+      loadingFiles: "ファイルツリーを取得しています...",
+      autoShare: '自動共有'
     },
     ko: {
       title: "마크다운 뷰어",
@@ -7085,7 +7203,8 @@ document.addEventListener("DOMContentLoaded", function () {
       findReplace: "찾기 및 바꾸기",
       placeholder: "여기에 마크다운 내용을 입력하세요...",
       loadingEmojis: "이모지 로딩 중...",
-      loadingFiles: "파일 트리 가져오는 중..."
+      loadingFiles: "파일 트리 가져오는 중...",
+      autoShare: '자동 공유'
     },
     pt: {
       title: "Visualizador de Markdown",
@@ -7123,11 +7242,54 @@ document.addEventListener("DOMContentLoaded", function () {
       findReplace: "Localizar & Substituir",
       placeholder: "Digite seu markdown aqui...",
       loadingEmojis: "Carregando emojis...",
-      loadingFiles: "Buscando árvore de arquivos..."
+      loadingFiles: "Buscando árvore de arquivos...",
+      autoShare: 'Compartilhamento Automático'
+    },
+    vi: {
+      title: 'Trình xem Markdown',
+      syncOff: 'Tắt đồng bộ',
+      syncOn: 'Bật đồng bộ',
+      import: 'Nhập',
+      importFile: 'Từ tệp tin',
+      importGithub: 'Từ GitHub',
+      export: 'Xuất',
+      exportMd: 'Markdown (.md)',
+      exportHtml: 'HTML',
+      exportPdf: 'PDF',
+      copy: 'Sao chép',
+      copied: 'Đã sao chép!',
+      share: 'Chia sẻ',
+      reset: 'Đặt lại',
+      editor: 'Soạn thảo',
+      split: 'Chia đôi',
+      preview: 'Xem trước',
+      minRead: 'Phút đọc',
+      words: 'Từ',
+      chars: 'Ký tự',
+      switchRtl: 'Chuyển sang RTL',
+      switchLtr: 'Chuyển sang LTR',
+      darkMode: 'Chế độ tối',
+      lightMode: 'Chế độ sáng',
+      helpTitle: 'Trợ giúp Trình xem Markdown',
+      aboutTitle: 'Giới thiệu về Markdown',
+      shareTitle: 'Chia sẻ tài liệu',
+      renameTitle: 'Đổi tên tệp',
+      insertLink: 'Chèn liên kết',
+      insertRef: 'Chèn tham chiếu',
+      insertImg: 'Chèn hình ảnh',
+      insertTable: 'Chèn bảng',
+      findReplace: 'Tìm kiếm & Thay thế',
+      placeholder: 'Nhập nội dung Markdown tại đây...',
+      loadingEmojis: 'Đang tải biểu tượng cảm xúc...',
+      loadingFiles: 'Đang tải cây thư mục...',
+      autoShare: 'Tự động chia sẻ'
     }
   };
 
-  let activeLang = 'en';
+  // Expose for extensions.js
+  window.__I18N_DICTS = I18N_DICTS;
+
+  let activeLang = 'vi';
 
   function applyTranslations(lang) {
     activeLang = lang;
@@ -7141,12 +7303,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // Update dynamic current language labels in drop menus
     const labelEl = document.getElementById('current-lang-label');
     if (labelEl) {
-      const flags = { en: "🇺🇸 English", zh: "🇨🇳 简体中文", ja: "🇯🇵 日本語", ko: "🇰🇷 한국어", pt: "🇧🇷 Português (Brasil)" };
+      const flags = { en: "🇺🇸 English", zh: "🇨🇳 简体中文", ja: "🇯🇵 日本語", ko: "🇰🇷 한국어", pt: "🇧🇷 Português (Brasil)", vi: "🇻🇳 Tiếng Việt" };
       labelEl.textContent = flags[lang];
     }
     const mobileLabelEl = document.getElementById('mobile-current-lang-label');
     if (mobileLabelEl) {
-      const flags = { en: "us English", zh: "CN 简体中文", ja: "JP 日本語", ko: "KR 한국어", pt: "BR Português (Brasil)" };
+      const flags = { en: "us English", zh: "CN 简体中文", ja: "JP 日本語", ko: "KR 한국어", pt: "BR Português (Brasil)", vi: "VN Tiếng Việt" };
       mobileLabelEl.textContent = flags[lang];
     }
 
@@ -7300,6 +7462,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // Expose for extensions.js
+  window.__applyTranslations = applyTranslations;
+
   function detectAndInitLanguage() {
     const urlParams = new URLSearchParams(window.location.search);
     let lang = urlParams.get('lang');
@@ -7320,10 +7485,11 @@ document.addEventListener("DOMContentLoaded", function () {
       else if (navLang.startsWith('ja')) lang = 'ja';
       else if (navLang.startsWith('ko')) lang = 'ko';
       else if (navLang.startsWith('pt')) lang = 'pt';
+      else if (navLang.startsWith('vi')) lang = 'vi';
     }
 
     if (!lang || !I18N_DICTS[lang]) {
-      lang = 'en';
+      lang = 'vi';
     }
 
     applyTranslations(lang);
@@ -7439,6 +7605,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Run detection
   detectAndInitLanguage();
+
+  // Expose for extensions.js
+  window.__scriptAPI = {
+    newTab: newTab,
+    setViewMode: setViewMode,
+    openAppModal: openAppModal,
+    closeAppModal: closeAppModal
+  };
 
   // Register Service Worker for offline capabilities
   if ('serviceWorker' in navigator) {

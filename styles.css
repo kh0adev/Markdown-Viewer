@@ -15,6 +15,9 @@
   --scrollbar-thumb: #c1c1c1;
   --scrollbar-track: #f1f1f1;
   --accent-color: #0366d6;
+  --accent-hover: #0250b5;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
   --table-bg: #ffffff; /* Table background for light mode */
   --code-bg: #f6f8fa; /* Code block background for light mode */
   --skeleton-bg: #e2e8f0;
@@ -49,6 +52,9 @@
   --scrollbar-thumb: #484f58;
   --scrollbar-track: #21262d;
   --accent-color: #58a6ff;
+  --accent-hover: #79c0ff;
+  --success-color: #34d399;
+  --danger-color: #f87171;
   --table-bg: #161b22; /* Table background for dark mode */
   --code-bg: #161b22; /* Code block background for dark mode */
   --skeleton-bg: #2d3139;
@@ -2800,6 +2806,145 @@ a:focus {
 }
 
 /* ============================================
+   AUTH REQUIRED MODAL (Auto-Share Guest Prompt)
+   ============================================ */
+
+.auth-banner {
+  margin: -24px -28px 0 -28px;
+  border-radius: 10px 10px 0 0;
+  overflow: hidden;
+  position: relative;
+  max-height: 200px;
+}
+
+.auth-banner img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  max-height: 200px;
+}
+
+.auth-required-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+  text-align: center;
+}
+
+.auth-required-icon {
+  font-size: 2.5rem;
+  color: var(--accent-color);
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: color-mix(in srgb, var(--accent-color) 12%, transparent);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.auth-required-description {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 350px;
+}
+
+.auth-required-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  width: 100%;
+  max-width: 320px;
+}
+
+.auth-benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background-color: var(--button-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--text-color);
+  transition: border-color 0.15s ease;
+}
+
+.auth-benefit-item i {
+  color: var(--accent-color);
+  font-size: 15px;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+}
+
+.auth-benefit-item strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 1px;
+}
+
+.auth-benefit-item span {
+  display: block;
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.auth-required-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.auth-required-google-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #4285F4;
+  border-color: #4285F4;
+  color: #fff;
+  font-weight: 500;
+  padding: 8px 20px;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-required-google-btn:hover {
+  background-color: #357ae8;
+  border-color: #357ae8;
+  box-shadow: 0 1px 4px rgba(66, 133, 244, 0.3);
+}
+
+.auth-required-google-btn i {
+  font-size: 16px;
+}
+
+[data-theme="dark"] .auth-benefit-item {
+  background-color: var(--button-bg);
+}
+
+[data-theme="dark"] .auth-required-google-btn {
+  box-shadow: none;
+}
+
+[data-theme="dark"] .auth-required-google-btn:hover {
+  box-shadow: 0 1px 6px rgba(66, 133, 244, 0.4);
+}
+
+[data-theme="dark"] .auth-banner {
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* ============================================
    SHARE MODAL
    ============================================ */
 
@@ -3609,4 +3754,4 @@ html[lang="ko"] .markdown-body h1, html[lang="ko"] .markdown-body h2, html[lang=
     transition: none;
   }
 }
-
+

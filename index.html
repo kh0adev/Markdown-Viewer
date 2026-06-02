@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,6 +23,7 @@
     <link rel="alternate" hreflang="ja" href="https://markdown.com.vn/?lang=ja" />
     <link rel="alternate" hreflang="ko" href="https://markdown.com.vn/?lang=ko" />
     <link rel="alternate" hreflang="pt-BR" href="https://markdown.com.vn/?lang=pt" />
+    <link rel="alternate" hreflang="vi" href="https://markdown.com.vn/?lang=vi" />
     <!-- PWA Web Manifest -->
     <link rel="manifest" href="manifest.json">
 
@@ -32,7 +33,7 @@
     <meta name="keywords" content="Trình chỉnh sửa Markdown, GitHub-style markdown, live preview, markdown editor, LaTeX support, Mermaid diagrams, PDF export, syntax highlighting, markdown to HTML, secure markdown tool, client-side markdown viewer, ThisIs-Developer, advanced markdown parser, future markdown viewer, next-gen markdown tool">
     <meta name="author" content="ThisIs-Developer">
     <meta name="robots" content="index, follow">
-    <meta name="language" content="English">
+    <meta name="language" content="Vietnamese">
     <meta name="distribution" content="global">
     <meta name="rating" content="general">
 
@@ -50,13 +51,14 @@
     <meta property="twitter:description" content="Công cụ soạn thảo Markdown bảo mật, xem trước trực tiếp, hỗ trợ LaTeX, Mermaid, tô sáng cú pháp và xuất PDF/HTML/MD nhanh chóng trên trình duyệt.">
     <meta property="twitter:image" content="https://markdown.com.vn/assets/banner.png">
     <style>
-        /*body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f4f4f9; }*/
-        /*.container {  text-align: center; }*/
-        /*button { background-color: #4285F4; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }*/
-        /*button:hover { background-color: #357ae8; }*/
-        /*.hidden { display: none; }*/
-        /*.user-info { margin-top: 20px; }*/
-        /*.user-info img { border-radius: 50%; width: 80px; height: 80px; }*/
+      /*body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f4f4f9; }*/
+      /*.container {  text-align: center; }*/
+      /*button { background-color: #4285F4; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }*/
+      /*button:hover { background-color: #357ae8; }*/
+      /*.hidden { display: none; }*/
+      /*.user-info { margin-top: 20px; }*/
+      /*.user-info img { border-radius: 50%; width: 80px; height: 80px; }*/
+
     </style>
     <!-- JSON-LD Structured Data Schema for Search Rich Snippets -->
     <script type="application/ld+json">
@@ -189,9 +191,13 @@
                         <i class="bi bi-share"></i> <span class="btn-text">Share</span>
                     </button>
                     
+                    <button id="auto-share-btn" class="tool-button auto-share-off" title="Auto-share: Off — Save changes to cloud automatically">
+                        <i class="bi bi-cloud-arrow-up"></i> <span class="btn-text">Auto Share</span>
+                    </button>
+                    
                     <div class="dropdown me-1">
                         <button class="tool-button dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Switch Language">
-                            <i class="bi bi-translate"></i> <span id="current-lang-label" class="btn-text">English</span>
+                            <i class="bi bi-translate"></i> <span id="current-lang-label" class="btn-text">Tiếng Việt</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
                             <li><a class="dropdown-item lang-select-item active" href="#" data-lang="en">🇺🇸 English</a></li>
@@ -199,6 +205,7 @@
                             <li><a class="dropdown-item lang-select-item" href="#" data-lang="ja">🇯🇵 日本語</a></li>
                             <li><a class="dropdown-item lang-select-item" href="#" data-lang="ko">🇰🇷 한국어</a></li>
                             <li><a class="dropdown-item lang-select-item" href="#" data-lang="pt">🇧🇷 Português (Brasil)</a></li>
+                            <li><a class="dropdown-item lang-select-item" href="#" data-lang="vi">🇻🇳 Tiếng Việt</a></li>
                         </ul>
                     </div>
 
@@ -206,7 +213,10 @@
                         <i class="bi bi-moon"></i>
                     </button>
 
-                    <button id="btn-login" class="tool-button" title="Đăng nhập với Google">
+                    <button id="btn-login" class="tool-button" hidden title="Đăng nhập với Google">
+                        <i class="bi bi-person"></i>
+                    </button>
+                    <button id="btn-account" class="tool-button" title="Đăng nhập với Google">
                         <i class="bi bi-person"></i>
                     </button>
                 </div>
@@ -302,12 +312,16 @@
                                 <i class="bi bi-share me-2"></i> Share
                             </button>
                             
+                            <button id="mobile-auto-share-btn" class="mobile-menu-item auto-share-off" title="Auto-share: Off">
+                                <i class="bi bi-cloud-arrow-up me-2"></i> Auto Share
+                            </button>
+                            
                             <button id="mobile-direction-toggle" class="mobile-menu-item" title="Toggle RTL/LTR">
                                 <i class="bi bi-text-right me-2"></i> Switch to RTL
                             </button>
                             <div class="mobile-menu-item dropdown w-100 p-0 border-0">
                                 <button class="mobile-menu-item w-100 text-start dropdown-toggle" type="button" id="mobileLanguageDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Switch Language">
-                                    <i class="bi bi-translate me-2"></i> Language: <span id="mobile-current-lang-label">English</span>
+                                    <i class="bi bi-translate me-2"></i> Language: <span id="mobile-current-lang-label">Tiếng Việt</span>
                                 </button>
                                 <ul class="dropdown-menu w-100" aria-labelledby="mobileLanguageDropdown">
                                     <li><a class="dropdown-item lang-select-item active" href="#" data-lang="en">us English</a></li>
@@ -315,6 +329,7 @@
                                     <li><a class="dropdown-item lang-select-item" href="#" data-lang="ja">JP 日本語</a></li>
                                     <li><a class="dropdown-item lang-select-item" href="#" data-lang="ko">KR 한국어</a></li>
                                     <li><a class="dropdown-item lang-select-item" href="#" data-lang="pt">BR Português (Brasil)</a></li>
+                                    <li><a class="dropdown-item lang-select-item" href="#" data-lang="vi">VN Tiếng Việt</a></li>
                                 </ul>
                             </div>
                             <button id="mobile-theme-toggle" class="mobile-menu-item" title="Toggle Dark Mode">
@@ -679,10 +694,112 @@
                   <i class="bi bi-clipboard"></i>
                 </button>
               </div>
+              <!-- Cloud Save Section (for logged-in users) -->
+              <div id="share-cloud-section" class="share-cloud-section d-none">
+                <div class="share-cloud-divider">
+                  <span class="share-cloud-divider-text">or</span>
+                </div>
+                <div class="share-cloud-header">
+                  <i class="bi bi-cloud"></i>
+                  <span id="share-cloud-status-text" class="share-cloud-status">Save to cloud</span>
+                </div>
+                <button class="reset-modal-btn share-cloud-btn" id="share-cloud-btn">
+                  <i class="bi bi-cloud-upload"></i>
+                  <span class="share-cloud-btn-text">Save to cloud (view-only link)</span>
+                </button>
+                <div class="share-url-row" id="share-cloud-url-row" style="display:none;">
+                  <input type="text" id="share-cloud-url-input" class="rename-modal-input share-url-input" readonly placeholder="Cloud link will appear here..." aria-label="Cloud share URL" />
+                  <button class="reset-modal-btn share-copy-btn" id="share-cloud-copy-btn" title="Copy cloud link">
+                    <i class="bi bi-clipboard"></i>
+                  </button>
+                </div>
+                <p class="share-modal-notice-sub"><i class="bi bi-shield-check"></i> Saved to Firestore. Only people with the link can view.</p>
+              </div>
               <p class="share-modal-notice"><i class="bi bi-info-circle"></i> The entire document is encoded in the URL. No data is sent to any server.</p>
             </div>
             <div class="reset-modal-actions">
               <button class="reset-modal-btn reset-modal-cancel" id="share-modal-close">Close</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Auth Required Modal (shown for auto-share when guest) -->
+        <div id="auth-required-modal" class="reset-modal-overlay modal-overlay" role="dialog" aria-modal="true"
+          aria-labelledby="auth-required-modal-title" aria-hidden="true" style="display:none;">
+        
+          <div class="reset-modal-box reset-modal-box--wide modal-box">
+            <div class="modal-header">
+              <p id="auth-required-modal-title" class="reset-modal-message">
+                Đăng nhập để lưu và chia sẻ tài liệu
+              </p>
+        
+              <button type="button" class="modal-close-btn" id="auth-required-modal-close-icon" aria-label="Close dialog">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+        
+            <div class="modal-body">
+        
+        
+              <div class="auth-required-content">
+        
+                <div class="auth-required-icon">
+                  <i class="bi bi-cloud-check"></i>
+                </div>
+        
+                <p class="auth-required-description">
+                  Đăng nhập bằng Google để lưu tài liệu lên đám mây và sử dụng
+                  đầy đủ các tính năng đồng bộ.
+                </p>
+        
+                <div class="auth-required-benefits">
+        
+                  <div class="auth-benefit-item">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <div>
+                      <strong>Lưu tự động</strong>
+                      <span>Mọi thay đổi được đồng bộ ngay khi chỉnh sửa.</span>
+                    </div>
+                  </div>
+        
+                  <div class="auth-benefit-item">
+                    <i class="bi bi-save-fill"></i>
+                    <div>
+                      <strong>Lưu ngay</strong>
+                      <span>Tạo bản lưu thủ công bất cứ lúc nào.</span>
+                    </div>
+                  </div>
+        
+                  <div class="auth-benefit-item">
+                    <i class="bi bi-share-fill"></i>
+                    <div>
+                      <strong>Chia sẻ dễ dàng</strong>
+                      <span>Tạo liên kết chia sẻ chỉ với một lần nhấn.</span>
+                    </div>
+                  </div>
+        
+                  <div class="auth-benefit-item">
+                    <i class="bi bi-phone-fill"></i>
+                    <div>
+                      <strong>Đồng bộ đa thiết bị</strong>
+                      <span>Tiếp tục công việc trên mọi thiết bị.</span>
+                    </div>
+                  </div>
+        
+                </div>
+        
+              </div>
+            </div>
+        
+            <div class="reset-modal-actions auth-required-actions">
+              <button class="reset-modal-btn reset-modal-cancel" id="auth-required-modal-cancel">
+                Để sau
+              </button>
+        
+              <button class="reset-modal-btn auth-required-google-btn" id="auth-required-modal-signin">
+                <i class="bi bi-google"></i>
+                Đăng nhập với Google
+              </button>
             </div>
           </div>
         </div>
@@ -1118,71 +1235,8 @@ This is a fully client-side application. Your content never leaves your browser 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script src="script.js"></script>
     <!-- Screen reader dynamic accessibility announcer -->
-    <div id="app-accessibility-announcer" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
-
-    <script type="module">
-        // Import the required Firebase functions from the CDN
-        import {  initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js"
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js"
-        // Your web app's Firebase configuration (Replace with your actual keys)
-        const firebaseConfig = {
-
-        };
-
-
-        // Initialize Firebase and Auth services
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
-        // DOM Elements
-        const loginSection = document.getElementById('login-section');
-        const appSection = document.getElementById('app-section');
-        const btnLogin = document.getElementById('btn-login');
-        const btnLogout = document.getElementById('btn-logout');
-        const userAvatar = document.getElementById('user-avatar');
-        const userName = document.getElementById('user-name');
-        const userEmail = document.getElementById('user-email');
-
-        // 1. Lắng nghe thay đổi trạng thái đăng nhập (Tự động chạy lại khi tải trang)
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Người dùng đã đăng nhập thành công
-                userAvatar.src = user.photoURL || 'https://placeholder.com';
-                userName.textContent = `Xin chào, ${user.displayName}!`;
-                userEmail.textContent = user.email;
-
-                loginSection.classList.add('hidden');
-                appSection.classList.remove('hidden');
-            } else {
-                // Người dùng đã đăng xuất hoặc chưa đăng nhập
-                loginSection.classList.remove('hidden');
-                appSection.classList.add('hidden');
-            }
-        });
-
-        // 2. Xử lý sự kiện nút Đăng nhập
-        btnLogin.addEventListener('click', () => {
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    console.log("Đăng nhập thành công!", result.user);
-                })
-                .catch((error) => {
-                    console.error("Lỗi đăng nhập:", error.message);
-                    alert("Đăng nhập thất bại: " + error.message);
-                });
-        });
-
-        // 3. Xử lý sự kiện nút Đăng xuất
-        btnLogout.addEventListener('click', () => {
-            signOut(auth)
-                .then(() => {
-                    console.log("Đã đăng xuất.");
-                })
-                .catch((error) => {
-                    console.error("Lỗi đăng xuất:", error);
-                });
-        });
-    </script>
+    <script src="auth.js" type="module"></script>
+    <script src="store.js"></script>
+    <script src="extensions.js"></script>
 </body>
 </html>
