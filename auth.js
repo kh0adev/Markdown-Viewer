@@ -3,11 +3,11 @@
 // ========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  
+ 
 };
 
 // Initialize Firebase and Auth services
@@ -128,6 +128,11 @@ window.__FIREBASE_LOAD_DOC__ = async function(docId) {
   return docSnap.data();
 };
 
+window.__FIREBASE_LOAD_MY_DOC__ = async function() {
+  
+};
+
+
 // ============================================================
 // Auth Helper Functions (exposed globally)
 // ============================================================
@@ -141,4 +146,8 @@ window.getFirebaseDocSaver = function() {
 
 window.getFirebaseDocLoader = function() {
   return window.__FIREBASE_LOAD_DOC__ || null;
+};
+
+window.getFirebaseDocList = function() {
+  return window.__FIREBASE_LOAD_MY_DOC__ || null;
 };

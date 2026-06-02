@@ -216,9 +216,31 @@
                     <button id="btn-login" class="tool-button" hidden title="Đăng nhập với Google">
                         <i class="bi bi-person"></i>
                     </button>
-                    <button id="btn-account" class="tool-button" title="Đăng nhập với Google">
+                    <button id="btn-account" class="tool-button" title="Tài khoản">
                         <i class="bi bi-person"></i>
                     </button>
+                    <div id="account-dropdown" class="account-dropdown">
+                        <div class="account-dropdown-header">
+                            <img id="account-dropdown-avatar" class="account-dropdown-avatar" src="" alt="">
+                            <div class="account-dropdown-user">
+                                <span id="account-dropdown-name" class="account-dropdown-name"></span>
+                                <span id="account-dropdown-email" class="account-dropdown-email"></span>
+                            </div>
+                        </div>
+                        <div class="account-dropdown-divider"></div>
+                        <div class="account-dropdown-docs-header">
+                            <i class="bi bi-files"></i> My Documents
+                        </div>
+                        <div id="account-dropdown-docs" class="account-dropdown-docs">
+                            <div class="account-dropdown-docs-loading">
+                                <i class="bi bi-arrow-repeat"></i> Loading...
+                            </div>
+                        </div>
+                        <div class="account-dropdown-divider"></div>
+                        <button id="account-dropdown-logout" class="account-dropdown-item account-dropdown-item-danger">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Hamburger menu for mobile -->
@@ -1225,8 +1247,6 @@ This is a fully client-side application. Your content never leaves your browser 
 </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    <script src="script.js"></script>
-    <!-- Screen reader dynamic accessibility announcer -->
     <script src="auth.js" type="module"></script>
     <script src="store.js"></script>
     <script src="extensions.js"></script>

@@ -25,6 +25,8 @@ loadAutoSharePreference();
 // Listen for auth state changes from auth.js
 window.addEventListener('firebase-auth-changed', function(e) {
   const user = e.detail.user;
+  // Update account button appearance based on auth state
+  updateAccountButton();
   // Update share button appearance based on auth state
   updateShareButtonAuthState();
   // (Re-)load auto-share preference in case it was updated by another tab
@@ -89,16 +91,171 @@ function showAuthRequiredModal() {
   }
 }
 
-var btnAccount = document.getElementById('btn-account');
-if(btnAccount && !btnAccount.dataset.bound){
-btnAccount.dataset.bound = 'true';
-    btnAccount.addEventListener('click', function() {
-      var btnLogin = document.getElementById('auto-share-btn');
-      if (btnLogin) {
-        btnLogin.click();
-      }
-    });
+function updateAccountButton() {
+  var btn = document.getElementById('btn-account');
+  if (!btn) return;
+  if (window.isUserLoggedIn()) {
+    var user = window.__FIREBASE__.currentUser;
+    btn.innerHTML = user.photoURL
+      ? '<img class="btn-account-avatar" src="' + user.photoURL + '" alt="">'
+      : '<i class="bi bi-person"></i>';
+    if (user.displayName) {
+      btn.title = user.displayName;
+    }
+  } else {
+    btn.innerHTML = '<i class="bi bi-person"></i>';
+    btn.title = 'Đăng nhập với Google';
+  }
 }
+
+function closeAccountDropdown() {
+  var dd = document.getElementById('account-dropdown');
+  if (!dd) return;
+  dd.classList.remove('open');
+}
+
+function openAccountDropdown() {
+  var dd = document.getElementById('account-dropdown');
+  if (!dd) return;
+  var btn = document.getElementById('btn-account');
+  if (!btn) return;
+
+  var rect = btn.getBoundingClientRect();
+  dd.style.top = (rect.bottom + 4) + 'px';
+  dd.style.right = (window.innerWidth - rect.right) + 'px';
+  dd.classList.add('open');
+  loadUserDocs();
+}
+
+var _accountDocsCache = {};
+
+function loadUserDocs() {
+  var container = document.getElementById('account-dropdown-docs');
+  if (!container) return;
+  container.innerHTML = '<div class="account-dropdown-docs-loading"><i class="bi bi-arrow-repeat"></i> Loading...</div>';
+
+  var listFn = window.getFirebaseDocList();
+  if (!listFn) {
+    container.innerHTML = '<div class="account-dropdown-docs-empty"><i class="bi bi-exclamation-circle"></i> Service not ready</div>';
+    return;
+  }
+
+  listFn().then(function(docs) {
+    if (!docs || docs.length === 0) {
+      container.innerHTML = '<div class="account-dropdown-docs-empty"><i class="bi bi-file-text"></i> No saved documents yet</div>';
+      return;
+    }
+    _accountDocsCache = {};
+    var html = '';
+    docs.forEach(function(doc) {
+      _accountDocsCache[doc.id] = doc;
+      var updatedStr = '';
+      if (doc.updatedAt) {
+        var d = new Date(doc.updatedAt);
+        updatedStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+      html +=
+        '<button type="button" class="account-dropdown-doc-item" data-doc-id="' + escAttr(doc.id) + '">' +
+          '<span class="account-dropdown-doc-title">' + escHtml(doc.title) + '</span>' +
+          '<span class="account-dropdown-doc-date">' + updatedStr + '</span>' +
+        '</button>';
+    });
+    container.innerHTML = html;
+
+    container.querySelectorAll('.account-dropdown-doc-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        var docId = item.getAttribute('data-doc-id');
+        var doc = _accountDocsCache[docId];
+        if (!doc) return;
+        closeAccountDropdown();
+        if (window.__scriptAPI && window.__scriptAPI.newTab) {
+          window.__scriptAPI.newTab(doc.content, doc.title);
+        }
+      });
+    });
+  }).catch(function(err) {
+    console.error('Failed to list user docs:', err);
+    container.innerHTML = '<div class="account-dropdown-docs-empty"><i class="bi bi-exclamation-circle"></i> Error loading documents</div>';
+  });
+}
+
+function escAttr(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function toggleAccountDropdown() {
+  var dd = document.getElementById('account-dropdown');
+  if (!dd) return;
+  if (dd.classList.contains('open')) {
+    closeAccountDropdown();
+  } else {
+    if (!window.isUserLoggedIn()) {
+      showAuthRequiredModal();
+      return;
+    }
+    // Fill user info
+    var user = window.__FIREBASE__.currentUser;
+    var avatarEl = document.getElementById('account-dropdown-avatar');
+    var nameEl = document.getElementById('account-dropdown-name');
+    var emailEl = document.getElementById('account-dropdown-email');
+    if (avatarEl) {
+      avatarEl.src = user.photoURL || '';
+      avatarEl.style.display = user.photoURL ? '' : 'none';
+    }
+    if (nameEl) nameEl.textContent = user.displayName || 'User';
+    if (emailEl) emailEl.textContent = user.email || '';
+    openAccountDropdown();
+  }
+}
+
+var btnAccount = document.getElementById('btn-account');
+if (btnAccount && !btnAccount.dataset.bound) {
+  btnAccount.dataset.bound = 'true';
+  btnAccount.addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggleAccountDropdown();
+  });
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', function(e) {
+  var dd = document.getElementById('account-dropdown');
+  if (!dd) return;
+  if (dd.classList.contains('open')) {
+    var btn = document.getElementById('btn-account');
+    if (btn && btn.contains(e.target)) return;
+    if (dd.contains(e.target)) return;
+    closeAccountDropdown();
+  }
+});
+
+// Close dropdown on escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeAccountDropdown();
+  }
+});
+
+// Handle logout
+document.addEventListener('click', function(e) {
+  var logoutBtn = document.getElementById('account-dropdown-logout');
+  if (!logoutBtn) return;
+  if (e.target.closest && e.target.closest('#account-dropdown-logout')) {
+    e.preventDefault();
+    closeAccountDropdown();
+    if (typeof window.__FIREBASE_LOGOUT__ === 'function') {
+      window.__FIREBASE_LOGOUT__().catch(function(err) {
+        console.error("Logout error:", err);
+      });
+    }
+  }
+});
 
 function closeAuthRequiredModal() {
   var modal = document.getElementById('auth-required-modal');
@@ -240,3 +397,7 @@ window.triggerAutoShareSave = triggerAutoShareSave;
 window.scheduleAutoShareSave = scheduleAutoShareSave;
 window.updateShareButtonAuthState = updateShareButtonAuthState;
 window.showAuthRequiredModal = showAuthRequiredModal;
+
+document.addEventListener("DOMContentLoaded", () => {
+    updateAccountButton();
+});
