@@ -7,7 +7,6 @@ import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, 
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
- 
 };
 
 // Initialize Firebase and Auth services
@@ -129,7 +128,21 @@ window.__FIREBASE_LOAD_DOC__ = async function(docId) {
 };
 
 window.__FIREBASE_LOAD_MY_DOC__ = async function() {
-  
+  if (!window.__FIREBASE__ || !window.__FIREBASE__.currentUser) {
+    throw new Error("You need to login to list your documents.");
+  }
+  const user = window.__FIREBASE__.currentUser;
+  const q = query(
+    collection(db, "shared-docs"),
+    where("ownerUid", "==", user.uid),
+    orderBy("updatedAt", "desc")
+  );
+  const querySnapshot = await getDocs(q);
+  const docs = [];
+  querySnapshot.forEach((docSnap) => {
+    docs.push({ id: docSnap.id, ...docSnap.data() });
+  });
+  return docs;
 };
 
 

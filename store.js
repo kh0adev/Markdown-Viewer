@@ -151,7 +151,7 @@ function loadUserDocs() {
       _accountDocsCache[doc.id] = doc;
       var updatedStr = '';
       if (doc.updatedAt) {
-        var d = new Date(doc.updatedAt);
+         var d = doc.updatedAt.toDate();
         updatedStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       }
       html +=
