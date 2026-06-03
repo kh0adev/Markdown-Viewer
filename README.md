@@ -1,238 +1,236 @@
-# Markdown Viewer
+# Trình chỉnh sửa Markdown
 
 <div align="center">
   <img src="assets/icon.png" alt="Markdown Viewer Logo" width="140" />
 
-  <p><strong>Professional GitHub-style Markdown editor and previewer</strong></p>
-  <p>Live preview, diagrams, math, export tools, and multi-document workflows — all in your browser.</p>
+  <p><strong>Công cụ soạn thảo Markdown</strong></p>
+  <p>Bảo mật, xem trước trực tiếp, hỗ trợ LaTeX, Mermaid, tô sáng cú pháp và xuất PDF/HTML/MD nhanh chóng trên trình duyệt.</p>
 
   <p>
-    <a href="https://markdownviewer.pages.dev/" target="_blank" rel="noopener noreferrer">Live Demo</a> ·
-    <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki" target="_blank" rel="noopener noreferrer">Documentation</a> ·
-    <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/issues" target="_blank" rel="noopener noreferrer">Issues</a> ·
-    <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+    <a href="https://markdown.com.vn/" target="_blank" rel="noopener noreferrer">Trang Demo</a> ·
+    <a href="https://github.com/kh0adev/Markdown-Viewer/wiki" target="_blank" rel="noopener noreferrer">Tài liệu</a> ·
+    <a href="https://github.com/kh0adev/Markdown-Viewer/issues" target="_blank" rel="noopener noreferrer">Vấn đề</a> ·
+    <a href="https://github.com/kh0adev/Markdown-Viewer/releases" target="_blank" rel="noopener noreferrer">Phát hành</a>
   </p>
 
   <p>
-    <img alt="License" src="https://img.shields.io/github/license/ThisIs-Developer/Markdown-Viewer?color=2ea043" />
-    <img alt="Latest release" src="https://img.shields.io/github/v/release/ThisIs-Developer/Markdown-Viewer" />
-    <img alt="Last commit" src="https://img.shields.io/github/last-commit/ThisIs-Developer/Markdown-Viewer" />
-    <img alt="Stars" src="https://img.shields.io/github/stars/ThisIs-Developer/Markdown-Viewer?style=flat" />
+    <img alt="Giấy phép" src="https://img.shields.io/github/license/kh0adev/Markdown-Viewer?color=2ea043" />
+  
   </p>
-
-  <p>
-  <a href="https://codewiki.google/github.com/thisis-developer/markdown-viewer" target="_blank" rel="noopener noreferrer">
-    <img src="https://img.shields.io/badge/CodeWiki-Explore-4285F4?logo=wikipedia&logoColor=white&style=flat" alt="CodeWiki" />
-  </a>
-  <a href="https://deepwiki.com/ThisIs-Developer/Markdown-Viewer" target="_blank" rel="noopener noreferrer">
-    <img src="https://deepwiki.com/badge.svg" />
-  </a>
-</p>
-<p>
-  <a href="https://oosmetrics.com/repo/ThisIs-Developer/Markdown-Viewer" target="_blank" rel="noopener noreferrer">
-    <img src="https://api.oosmetrics.com/api/v1/badge/achievement/b13c27be-447e-489d-a04d-55f7ccaf9175.svg" />
-  </a>
-</p>
 </div>
 
 ---
 
-## Table of Contents
+## Mục lục
 
-- [About the Project](#about-the-project)
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Getting Started](#getting-started)
-- [Usage](#usage)
-- [Documentation](#documentation)
-- [Built With](#built-with)
-- [Showcase](#showcase)
-- [Contributing](#contributing)
-- [Contributors](#contributors)
-- [Development Journey](#development-journey)
-- [License](#license)
-- [Contact](#contact)
-
----
-
-## About the Project
-
-Markdown Viewer is a full-featured Markdown editor and preview application that renders GitHub-flavored Markdown in real time. It is entirely client-side, lightweight, and optimized for a professional writing workflow — from quick notes to technical documentation with diagrams and LaTeX.
+- [Giới thiệu](#giới-thiệu)
+- [Tính năng](#tính-năng)
+- [Ảnh chụp màn hình](#ảnh-chụp-màn-hình)
+- [Bắt đầu](#bắt-đầu)
+- [Sử dụng](#sử-dụng)
+- [Dự án Firebase](#dự-án-firebase)
+- [Công nghệ sử dụng](#công-nghệ-sử-dụng)
+- [Trưng bày](#trưng-bày)
+- [Người đóng góp](#người-đóng-góp)
+- [Giấy phép](#giấy-phép)
+- [Liên hệ](#liên-hệ)
+- [Bàn giao tài khoản & tên miền](#bàn-giao-tài-khoản--tên-miền)
 
 ---
 
-## Features
+## Giới thiệu
 
-**Editor & Preview**
-- Live split-screen rendering with instant updates
-- GitHub-flavored Markdown (GFM) support
-- Syntax highlighting for 190+ languages
-- GitHub-style alerts/admonitions (`[!NOTE]`, `[!TIP]`, `[!WARNING]`, etc.)
-- Emoji shortcode rendering (JoyPixels) and native Unicode emoji support
-- YAML frontmatter parsing with a rendered metadata table
+Markdown Viewer là trình soạn thảo và xem trước Markdown đầy đủ tính năng, hiển thị Markdown theo phong cách GitHub trong thời gian thực. Ứng dụng hoàn toàn chạy phía client, nhẹ và được tối ưu cho quy trình làm việc chuyên nghiệp — từ ghi chú nhanh đến tài liệu kỹ thuật với biểu đồ và LaTeX.
 
-**Diagrams & Math**
-- LaTeX math rendering via MathJax (inline + block)
-- Mermaid diagrams with an interactive toolbar (zoom, pan, copy, PNG/SVG export)
-
-**File & Sharing Tools**
-- Import from local files, drag & drop, or public GitHub URLs (multi-file selection)
-- Export as Markdown, HTML (standalone), or PDF
-- Share documents via URL with compressed content
-- Copy rendered HTML directly to clipboard
-
-**Productivity & Workflow**
-- Multiple document tabs (new, rename, duplicate, delete)
-- Reset all tabs in one action
-- Drag-and-drop tab reordering
-- Tab/session state saved in localStorage
-- View modes: editor-only, preview-only, or split
-- Resizable editor/preview panes
-- Synchronized scrolling (toggleable)
-- Live content statistics (words, characters, reading time)
-- Keyboard shortcuts (export, copy, new/close tab, sync toggle, indentation)
-
-**UI & Accessibility**
-- Responsive layout with a dedicated mobile menu
-- Light/dark themes with system preference support
-
-**Privacy & Security**
-- 100% client-side processing
-- Sanitized HTML rendering with DOMPurify
-- No tracking, no cookies, no server storage
+Bản fork này được duy trì và triển khai bởi **Khoa Trần** tại **[markdown.com.vn](https://markdown.com.vn/)** với tích hợp Firebase để lưu đám mây, tự động chia sẻ và quản lý tài liệu.
 
 ---
 
-## Screenshots
+## Tính năng
 
-### Code Syntax Highlighting
-![Code Syntax Highlighting](assets/code.png)
+**Soạn thảo & Xem trước**
+- Hiển thị chia đôi màn hình với cập nhật thời gian thực
+- Hỗ trợ Markdown phong cách GitHub (GFM)
+- Tô sáng cú pháp cho 190+ ngôn ngữ
+- Cảnh báo/ghi chú kiểu GitHub (`[!NOTE]`, `[!TIP]`, `[!WARNING]`, v.v.)
+- Hiển thị emoji shortcode (JoyPixels) và hỗ trợ Unicode emoji
+- Phân tích YAML frontmatter với bảng metadata
+- Markdown mở rộng: danh sách định nghĩa, chỉ số trên, chỉ số dưới, tô sáng, chú thích cuối trang
 
-### Mathematical Expressions Support
-![Mathematical Expressions](assets/mathexp.png)
+**Biểu đồ & Toán học**
+- Hiển thị toán học LaTeX qua MathJax (inline + block)
+- Biểu đồ Mermaid với thanh công cụ tương tác (phóng to, kéo, sao chép, xuất PNG/SVG)
 
-### Mermaid Diagrams
-![Mermaid Diagrams](assets/mermaid.png)
+**Đám mây & Chia sẻ (Mới)**
+- Đăng nhập Google qua Firebase Auth
+- **Lưu đám mây** — lưu tài liệu trực tiếp lên Firestore với liên kết chia sẻ
+- **Tự động chia sẻ** — bật để tự động đồng bộ thay đổi lên đám mây khi bạn gõ
+- **Tài liệu của tôi** — duyệt, mở và quản lý tất cả tài liệu đã lưu từ menu tài khoản
+- Chia sẻ tài liệu qua URL với chế độ xem hoặc chỉnh sửa
+- Nén URL chia sẻ bằng pako (deflate)
 
-### Tables Support
-![Tables Support](assets/table.png)
+**Tập tin & Xuất file**
+- Nhập từ tập tin cục bộ, kéo thả hoặc URL GitHub công khai (chọn nhiều tập tin với cây thư mục)
+- Xuất Markdown, HTML (độc lập với CSS nhúng) hoặc PDF (tự động phân tích ngắt trang)
+- Sao chép HTML đã hiển thị trực tiếp vào clipboard
+- Xuất PDF với phát hiện ngắt trang tự động và thu nhỏ đồ họa quá khổ
+
+**Năng suất & Quy trình làm việc**
+- Đa tab tài liệu (mới, đổi tên, nhân bản, xóa, tối đa 20)
+- Đặt lại tất cả tab trong một thao tác
+- Kéo thả sắp xếp tab
+- Lưu trạng thái tab vào localStorage
+- Chế độ xem: chỉ soạn thảo, chỉ xem trước hoặc chia đôi
+- Kích thước khung soạn thảo/xem trước có thể điều chỉnh (hỗ trợ bàn phím)
+- Cuộn đồng bộ (bật/tắt)
+- Thống kê nội dung trực tiếp (số từ, ký tự, thời gian đọc)
+- Tìm kiếm & Thay thế với regex, phân biệt hoa thường, toàn bộ từ, bộ lọc phạm vi (tiêu đề/code/LaTeX/Mermaid/văn bản thường), xem trước thay đổi
+- Hoàn tác / Làm lại
+- Thanh công cụ định dạng Markdown (đậm, nghiêng, tiêu đề, danh sách, liên kết, hình ảnh, bảng, code, emoji, ký hiệu, cảnh báo, căn lề, chuyển đổi chữ hoa/thường)
+- Phím tắt (xuất file, sao chép, tab mới/đóng, cuộn đồng bộ, thụt lề, tìm kiếm)
+
+**Giao diện & Trợ năng**
+- Bố cục responsive với menu di động riêng
+- Giao diện sáng/tối với hỗ trợ phát hiện hệ thống
+- Chuyển đổi hướng RTL/LTR
+- Đa ngôn ngữ: Tiếng Việt, English, 中文, 日本語, 한국어, Português (Brasil)
+- Focus trapping trong modal, nhãn ARIA, thông báo trình đọc màn hình
+
+**Riêng tư & Bảo mật**
+- Xử lý 100% phía client
+- Hiển thị HTML đã được làm sạch bằng DOMPurify
+- Firebase Authentication chỉ dùng cho tính năng lưu đám mây
+- Không theo dõi, không cookie, không lưu trữ máy chủ (trừ khi bạn chọn lưu đám mây)
 
 ---
 
-## Getting Started
+## Ảnh chụp màn hình
 
-### Option 1 — Docker (Recommended)
+### Tô sáng cú pháp Code
+![Tô sáng cú pháp Code](assets/code.png)
+
+### Hỗ trợ biểu thức Toán học
+![Biểu thức Toán học](assets/mathexp.png)
+
+### Biểu đồ Mermaid
+![Biểu đồ Mermaid](assets/mermaid.png)
+
+### Hỗ trợ Bảng
+![Hỗ trợ Bảng](assets/table.png)
+
+---
+
+## Bắt đầu
+
+### Máy chủ tĩnh (phát triển local)
 ```bash
-docker run -d \
-  --name markdown-viewer \
-  -p 8080:80 \
-  --restart unless-stopped \
-  ghcr.io/thisis-developer/markdown-viewer:latest
-```
-Open **http://localhost:8080**.
-
-### Option 2 — Docker Compose
-```bash
-git clone https://github.com/ThisIs-Developer/Markdown-Viewer.git
-cd Markdown-Viewer
-docker compose up -d
-```
-
-### Option 3 — Static Web Server
-```bash
-git clone https://github.com/ThisIs-Developer/Markdown-Viewer.git
+git clone https://github.com/kh0adev/Markdown-Viewer.git
 cd Markdown-Viewer
 python3 -m http.server 8080
 ```
+Sau đó mở **http://localhost:8080**.
 
-### Option 4 — Desktop App
-Download pre-built binaries from the <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/releases" target="_blank" rel="noopener noreferrer">Releases</a> page or build from source (see the <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Desktop-App" target="_blank" rel="noopener noreferrer">Desktop App</a> guide).
+> **Lưu ý:** Firebase Authentication (Đăng nhập Google) yêu cầu tên miền thật hoặc `localhost` — sẽ **không** hoạt động với `127.0.0.1` hoặc IP tùy chỉnh. Dùng `http://localhost:8080` để kiểm tra local.
 
----
-
-## Usage
-
-1. Write Markdown in the left editor pane.
-2. Preview the rendered output on the right.
-3. Import, export, share, or switch view modes using the toolbar.
-4. Use the tab bar to manage multiple documents.
-
-**Keyboard Shortcuts**
-- `Ctrl/Cmd + S` → Export Markdown
-- `Ctrl/Cmd + C` → Copy rendered HTML (when no text is selected)
-- `Ctrl/Cmd + Shift + S` → Toggle sync scrolling (split view)
-- `Ctrl/Cmd + T` → New tab
-- `Ctrl/Cmd + W` → Close tab
-- `Tab` → Insert indentation in editor
+### Trang web trực tiếp
+Bản production đang hoạt động tại **[https://markdown.com.vn/](https://markdown.com.vn/)** với đầy đủ tính năng đám mây Firebase.
 
 ---
 
-## Documentation
+## Sử dụng
 
-Explore the full documentation on the wiki:
+1. Viết Markdown trong khung soạn thảo bên trái.
+2. Xem trước kết quả hiển thị bên phải.
+3. Dùng **Đăng nhập Google** để kích hoạt tính năng lưu đám mây/tự động chia sẻ.
+4. Nhập, xuất, chia sẻ hoặc chuyển chế độ xem bằng thanh công cụ.
+5. Dùng thanh tab để quản lý nhiều tài liệu.
+6. Nhấp vào avatar (góc trên bên phải) để truy cập **Tài liệu của tôi** — các tập tin đã lưu trên đám mây.
 
-- <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Features" target="_blank" rel="noopener noreferrer">Features</a>
-- <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Usage-Guide" target="_blank" rel="noopener noreferrer">Usage Guide</a>
-- <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Installation" target="_blank" rel="noopener noreferrer">Installation</a>
-- <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Markdown-Reference" target="_blank" rel="noopener noreferrer">Markdown Reference</a>
-- <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/FAQ" target="_blank" rel="noopener noreferrer">FAQ</a>
-- <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Configuration" target="_blank" rel="noopener noreferrer">Configuration</a>
-
----
-
-## Built With
-
-- HTML5, CSS3, JavaScript
-- <a href="https://getbootstrap.com/" target="_blank" rel="noopener noreferrer">Bootstrap</a>
-- <a href="https://marked.js.org/" target="_blank" rel="noopener noreferrer">Marked.js</a>
-- <a href="https://highlightjs.org/" target="_blank" rel="noopener noreferrer">highlight.js</a>
-- <a href="https://www.mathjax.org/" target="_blank" rel="noopener noreferrer">MathJax</a>
-- <a href="https://mermaid.js.org/" target="_blank" rel="noopener noreferrer">Mermaid</a>
-- <a href="https://github.com/cure53/DOMPurify" target="_blank" rel="noopener noreferrer">DOMPurify</a>
-- <a href="https://github.com/eligrey/FileSaver.js" target="_blank" rel="noopener noreferrer">FileSaver.js</a>
-- <a href="https://github.com/niklasvh/html2canvas" target="_blank" rel="noopener noreferrer">html2canvas</a> + <a href="https://www.npmjs.com/package/jspdf" target="_blank" rel="noopener noreferrer">jsPDF</a>
-- <a href="https://www.joypixels.com/" target="_blank" rel="noopener noreferrer">JoyPixels</a>
+**Phím tắt**
+- `Ctrl/Cmd + S` → Xuất Markdown
+- `Ctrl/Cmd + F` → Mở Tìm kiếm & Thay thế
+- `Ctrl/Cmd + C` → Sao chép HTML đã hiển thị (khi không chọn văn bản)
+- `Ctrl/Cmd + Shift + S` → Bật/tắt cuộn đồng bộ (chế độ chia đôi)
+- `Ctrl/Cmd + T` → Tab mới
+- `Ctrl/Cmd + W` → Đóng tab
+- `Tab` → Thụt lề trong soạn thảo
 
 ---
 
-## Showcase
+## Dự án Firebase
 
-**Built with Markdown Viewer**
+Ứng dụng này sử dụng **Firebase** cho các tính năng đám mây:
 
-| Project | Description |
-|---------|-------------|
-| <a href="https://github.com/jhrepo/markdown-desk" target="_blank" rel="noopener noreferrer">Markdown Desk</a> | Native macOS wrapper built with <a href="https://tauri.app/" target="_blank" rel="noopener noreferrer">Tauri</a>, adding live reload and native file open/save. |
+| Dịch vụ | Mục đích |
+|---------|----------|
+| **Firebase Authentication** | Đăng nhập Google để xác thực người dùng |
+| **Cloud Firestore** | Lưu trữ tài liệu (collection `shared-docs`) |
 
----
+- **Dự án Firebase:** `markdown-viewer-d4d9b`
+- **Vị trí Firestore:** `asia-southeast1` (Singapore)
+- **Nhà cung cấp xác thực:** Google
 
-## Contributing
-
-Contributions are welcome! Please review the <a href="https://github.com/ThisIs-Developer/Markdown-Viewer/wiki/Contributing" target="_blank" rel="noopener noreferrer">Contributing Guide</a> and open a pull request.
-
----
-
-## Contributors
-
-Thanks to everyone who has contributed to Markdown Viewer.
-
-<a href="https://github.com/ThisIs-Developer/Markdown-Viewer/graphs/contributors" target="_blank" rel="noopener noreferrer">
-  <img src="https://contrib.rocks/image?repo=ThisIs-Developer/Markdown-Viewer" alt="Contributors" />
-</a>
+Cấu hình Firebase được tiêm vào lúc build/triển khai qua đối tượng `firebaseConfig` trong `auth.js`. Kho mã nguồn chứa giá trị mẫu; thông tin production được quản lý an toàn.
 
 ---
 
-## 📈 Development Journey
+## Công nghệ sử dụng
 
-Markdown Viewer has grown from a lightweight Markdown parser into a full-featured, professional application with advanced rendering, workflow, and export capabilities. Compare the <a href="https://markdownviewer.pages.dev/" target="_blank" rel="noopener noreferrer">current version</a> with the <a href="https://a1b91221.markdownviewer.pages.dev/" target="_blank" rel="noopener noreferrer">original version</a> to see the progress in UI design, performance optimization, and feature depth.
+- HTML5, CSS3, JavaScript (Vanilla, không framework)
+- [Bootstrap](https://getbootstrap.com/)
+- [Marked.js](https://marked.js.org/)
+- [highlight.js](https://highlightjs.org/)
+- [MathJax](https://www.mathjax.org/)
+- [Mermaid](https://mermaid.js.org/)
+- [DOMPurify](https://github.com/cure53/DOMPurify)
+- [FileSaver.js](https://github.com/eligrey/FileSaver.js)
+- [html2canvas](https://github.com/niklasvh/html2canvas) + [jsPDF](https://www.npmjs.com/package/jspdf)
+- [JoyPixels](https://www.joypixels.com/)
+- [js-yaml](https://github.com/nodeca/js-yaml)
+- [pako](https://github.com/nodeca/pako)
+- [Firebase](https://firebase.google.com/) (Auth + Firestore)
 
 ---
 
-## License
+## Trưng bày
 
-This project is licensed under the Apache License. See <a href="LICENSE" target="_blank" rel="noopener noreferrer">LICENSE</a> for details.
+**Được xây dựng với Markdown Viewer**
+
+| Dự án | Mô tả |
+|-------|-------|
+| [Markdown Desk](https://github.com/jhrepo/markdown-desk) | Trình bao bọc native macOS xây dựng với [Tauri](https://tauri.app/), thêm tính năng tải lại trực tiếp và mở/lưu tập tin native. |
 
 ---
 
-## Contact
+## Người đóng góp
 
-Developed and maintained by <a href="https://github.com/ThisIs-Developer" target="_blank" rel="noopener noreferrer">ThisIs-Developer</a>.
+- **Khoa Trần** ([@kh0adev](https://github.com/kh0adev)) — Tích hợp Firebase, lưu đám mây/tự động chia sẻ, Tài liệu của tôi, đa ngôn ngữ, triển khai & DevOps
+
+---
+
+## Giấy phép
+
+Dự án này được cấp phép theo Apache License. Xem [LICENSE](LICENSE) để biết chi tiết.
+
+---
+
+## Liên hệ
+
+- **Người duy trì:** Khoa Trần
+- **GitHub:** [@kh0adev](https://github.com/kh0adev)
+- **Trang web production:** [https://markdown.com.vn/](https://markdown.com.vn/)
+
+---
+
+## Bàn giao tài khoản & tên miền
+
+Các tài sản sau đang được quản lý và có thể chuyển giao theo yêu cầu:
+
+| Tài sản | Chi tiết |
+|---------|----------|
+| **Tên miền** | `markdown.com.vn` — đã đăng ký, trỏ đến Cloudflare DNS |
+| **DNS** | Cloudflare — tất cả bản ghi, quy tắc cache, cài đặt SSL/TLS |
+| **Hosting** | Cloudflare Pages — kết nối với GitHub repo `kh0adev/Markdown-Viewer`, tự động triển khai khi push |
+| **Firebase Console** | Dự án `markdown-viewer-d4d9b` — Firestore, Authentication, thanh toán |
+| **GitHub Repository** | `kh0adev/Markdown-Viewer` — mã nguồn, vấn đề, phát hành |
+| **Docker Registry** | `ghcr.io/kh0adev/markdown-viewer` — hình ảnh container |
