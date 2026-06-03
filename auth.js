@@ -164,3 +164,10 @@ window.getFirebaseDocLoader = function() {
 window.getFirebaseDocList = function() {
   return window.__FIREBASE_LOAD_MY_DOC__ || null;
 };
+
+window.__FIREBASE_LOGOUT__ = async function() {
+  if (!window.__FIREBASE__ || !window.__FIREBASE__.auth) {
+    throw new Error("Auth service is not ready.");
+  }
+  await signOut(window.__FIREBASE__.auth);
+};
