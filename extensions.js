@@ -189,8 +189,10 @@
                   typeof window.isUserLoggedIn === 'function'
                     ? window.isUserLoggedIn()
                     : false;
-                if (!isLoggedIn) {
-                  if (guestSection) guestSection.classList.remove('d-none');
+                if (isLoggedIn) {
+                  guestSection.classList.add('d-none');
+                } else {
+                  guestSection.classList.remove('d-none');
                 }
               }
             } else {
