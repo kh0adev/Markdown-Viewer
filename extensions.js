@@ -267,16 +267,14 @@
           }
           var docTitle = activeTab ? activeTab.title : 'Untitled';
 
-          // SỬA TẠI ĐÂY: Truyền thêm tham số thứ 3 là ID cũ nếu có (window.__autoShareLastDocId)
-          // Để Firestore thực hiện UPDATE thay vì cố tạo một document mới tinh
+          var existingDocId = activeTab ? activeTab.cloudDocId : null;
           var docId = await saver(
             markdownEditor ? markdownEditor.value : '',
             docTitle,
-            window.__autoShareLastDocId || null
+            existingDocId
           );
           
-          // Đồng bộ lại ID vừa lưu vào bộ nhớ tạm toàn cục
-          window.__autoShareLastDocId = docId;
+          if (activeTab) activeTab.cloudDocId = docId;
 
           var shareUrl =
             window.location.origin +

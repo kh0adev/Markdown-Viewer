@@ -6395,15 +6395,14 @@ if (!window.isUserLoggedIn()) {
 
     const base = baseUrl + '#share=' + encoded;
     return mode === 'edit' ? base + '&edit=1' : base;
-  } else{
-
-
-  const docId = window.__autoShareLastDocId;
+  } else {
+  const activeT = window.__tabs && window.__activeTabId
+    ? window.__tabs.find(t => t.id === window.__activeTabId)
+    : null;
+  const docId = activeT ? activeT.cloudDocId : null;
   
-  // Nếu vì lý do nào đó chưa có ID, trả về null
   if (!docId) return null;
 
-  // Cố định tên miền chính thức theo yêu cầu của bạn
   const PRODUCTION_URL = 'https://markdown.com.vn';
   
   let base = PRODUCTION_URL + '?sharedoc=' + encodeURIComponent(docId);
@@ -6483,21 +6482,21 @@ function updateShareUrlField() {
 
     // Lấy nội dung và tiêu đề hiện tại của editor
     const markdownEditor = document.getElementById('markdown-editor');
+    let activeTab = null;
     let docTitle = 'Untitled';
     if (window.__tabs && window.__activeTabId) {
-      const activeTab = window.__tabs.find(t => t.id === window.__activeTabId);
+      activeTab = window.__tabs.find(t => t.id === window.__activeTabId);
       if (activeTab) docTitle = activeTab.title;
     }
 
-    // 2. CHẠY LƯU NGẦM LÊN CLOUD: Truyền ID cũ để UPDATE hoặc null để CREATE mới
+    const existingDocId = activeTab ? activeTab.cloudDocId : null;
     const docId = await saver(
       markdownEditor ? markdownEditor.value : '',
       docTitle,
-      window.__autoShareLastDocId || null
+      existingDocId
     );
 
-    // Lưu lại ID tài liệu vào bộ nhớ toàn cục để đồng bộ
-    window.__autoShareLastDocId = docId;
+    if (activeTab) activeTab.cloudDocId = docId;
 
     // 3. THIẾT LẬP GIAO DIỆN MODAL VÀ HIỂN THỊ
     // Reset về chế độ view-only mặc định như logic cũ của bạn
@@ -6505,7 +6504,7 @@ function updateShareUrlField() {
     
     if (typeof syncShareCardStyles === 'function') syncShareCardStyles();
     
-    // Hàm này giờ đây sẽ tự đọc window.__autoShareLastDocId để map thành link rút gọn
+    // Hàm này sẽ đọc cloudDocId từ tab active để map thành link rút gọn
     updateShareUrlField(); 
 
     // Hiển thị Modal Share lên màn hình mượt mà bằng RequestAnimationFrame

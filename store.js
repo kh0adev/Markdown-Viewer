@@ -345,9 +345,9 @@ async function triggerAutoShareSave() {
     const activeTab = tabs.find(function(t) { return t.id === activeTabId; });
     const docTitle = activeTab ? activeTab.title : 'Untitled';
     
-    // SỬA TẠI ĐÂY: Truyền thêm ID cũ (nếu có) vào tham số thứ 3 của hàm saver
-    const docId = await saver(markdownEditor.value, docTitle, window.__autoShareLastDocId);
-    window.__autoShareLastDocId = docId; // Lưu lại ID vừa tạo/cập nhật
+    const cloudDocId = activeTab ? activeTab.cloudDocId : null;
+    const docId = await saver(markdownEditor.value, docTitle, cloudDocId);
+    if (activeTab) activeTab.cloudDocId = docId;
 
     // ... (Giữ nguyên đoạn code đổi UI nút bấm sang "Saved" thành công của bạn) ...
     const autoBtn = document.getElementById('auto-share-btn');
