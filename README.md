@@ -228,9 +228,6 @@ Các tài sản sau đang được quản lý và có thể chuyển giao theo y
 
 | Tài sản | Chi tiết |
 |---------|----------|
-| **Tên miền** | `markdown.com.vn` — đã đăng ký, trỏ đến Cloudflare DNS |
-| **DNS** | Cloudflare — tất cả bản ghi, quy tắc cache, cài đặt SSL/TLS |
-| **Hosting** | Cloudflare Pages — kết nối với GitHub repo `kh0adev/Markdown-Viewer`, tự động triển khai khi push |
-| **Firebase Console** | Dự án `markdown-viewer-d4d9b` — Firestore, Authentication, thanh toán |
+| **Tên miền** | `markdown.com.vn` — đã đăng ký |
+| **Firebase Console** | Dự án `markdown-viewer-d4d9b` — Firestore, Authentication |
 | **GitHub Repository** | `kh0adev/Markdown-Viewer` — mã nguồn, vấn đề, phát hành |
-| **Docker Registry** | `ghcr.io/kh0adev/markdown-viewer` — hình ảnh container |
