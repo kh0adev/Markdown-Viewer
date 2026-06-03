@@ -183,19 +183,14 @@
               );
               if (cloudUrlInput) cloudUrlInput.value = '';
               if (cloudUrlRow) cloudUrlRow.style.display = 'none';
-              if (cloudSection) {
+              var guestSection = document.getElementById('share-guest-section');
+              if (guestSection) {
                 var isLoggedIn =
                   typeof window.isUserLoggedIn === 'function'
                     ? window.isUserLoggedIn()
                     : false;
-                if (isLoggedIn) {
-                  cloudSection.classList.remove('d-none');
-                  if (cloudStatus) {
-                    cloudStatus.textContent = 'Save to cloud';
-                    cloudStatus.className = 'share-cloud-status';
-                  }
-                } else {
-                  cloudSection.classList.add('d-none');
+                if (!isLoggedIn) {
+                  if (guestSection) guestSection.classList.remove('d-none');
                 }
               }
             } else {
@@ -338,6 +333,20 @@
         }
       });
     }
+
+    // Guest Sign-in Button in Share Modal
+    var guestSigninBtn = document.getElementById('share-guest-signin-btn');
+    if (guestSigninBtn && !guestSigninBtn.dataset.bound) {
+      guestSigninBtn.dataset.bound = 'true';
+      guestSigninBtn.addEventListener('click', function () {
+        var shareModal = document.getElementById('share-modal');
+        if (shareModal && typeof window.closeShareModal === 'function') {
+          window.closeShareModal();
+        }
+        var btnLogin = document.getElementById('btn-login');
+        if (btnLogin) btnLogin.click();
+      });
+    }
   }
 
   // ──────────────────────────────────────────────
@@ -450,7 +459,7 @@
     initSharedDocLoading();
 
     // Init cloud save modal observer and buttons
-    // initCloudSave();
+    initCloudSave();
 
     // Init auto-share toggle buttons
     initAutoShareButtons();
