@@ -946,69 +946,16 @@ document.addEventListener("DOMContentLoaded", function () {
   // DOCUMENT TABS & SESSION MANAGEMENT
   // ========================================
 
-  const STORAGE_KEY = 'markdownViewerTabs';
-  const ACTIVE_TAB_KEY = 'markdownViewerActiveTab';
-  const UNTITLED_COUNTER_KEY = 'markdownViewerUntitledCounter';
   let tabs = [];
   let activeTabId = null;
   // Expose tabs and activeTabId reactively for store.js
   Object.defineProperty(window, '__tabs', { get: function() { return tabs; } });
   Object.defineProperty(window, '__activeTabId', { get: function() { return activeTabId; } });
   let draggedTabId = null;
-  let saveTabStateTimeout = null;
   let untitledCounter = 0;
-
-  function loadTabsFromStorage() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    } catch (e) {
-      return [];
-    }
-  }
-
-  function saveTabsToStorage(tabsArr) {
-    // PERF-008: Debounce tab saves to reduce main thread blocking from JSON.stringify
-    // on large document arrays. Immediate flush happens on visibilitychange/beforeunload.
-    clearTimeout(saveTabStateTimeout);
-    saveTabStateTimeout = setTimeout(function() {
-      _flushTabsToStorage(tabsArr);
-    }, 500);
-  }
-
-  function _flushTabsToStorage(tabsArr) {
-    clearTimeout(saveTabStateTimeout);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tabsArr || tabs));
-    } catch (e) {
-      console.warn('Failed to save tabs to localStorage:', e);
-    }
-  }
-
-  // Ensure tabs are persisted before page close (PERF-008)
-  window.addEventListener('beforeunload', function() { _flushTabsToStorage(tabs); });
-  document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'hidden') _flushTabsToStorage(tabs);
-  });
-
-  function loadActiveTabId() {
-    return localStorage.getItem(ACTIVE_TAB_KEY);
-  }
-
-  function saveActiveTabId(id) {
-    localStorage.setItem(ACTIVE_TAB_KEY, id);
-  }
-
-  function loadUntitledCounter() {
-    return parseInt(localStorage.getItem(UNTITLED_COUNTER_KEY) || '0', 10);
-  }
-
-  function saveUntitledCounter(val) {
-    localStorage.setItem(UNTITLED_COUNTER_KEY, String(val));
-  }
 
   function nextUntitledTitle() {
     untitledCounter += 1;
-    saveUntitledCounter(untitledCounter);
     return 'Untitled ' + untitledCounter;
   }
 
@@ -1194,7 +1141,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (fromIdx === -1 || toIdx === -1) return;
         const moved = tabs.splice(fromIdx, 1)[0];
         tabs.splice(toIdx, 0, moved);
-        saveTabsToStorage(tabs);
         renderTabBar(tabs, activeTabId);
       });
 
@@ -1331,7 +1277,6 @@ document.addEventListener("DOMContentLoaded", function () {
     tab.content = markdownEditor.value;
     tab.scrollPos = markdownEditor.scrollTop;
     tab.viewMode = currentViewMode || 'split';
-    saveTabsToStorage(tabs);
   }
 
   function restoreViewMode(mode) {
@@ -1343,7 +1288,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (tabId === activeTabId) return;
     saveCurrentTabState();
     activeTabId = tabId;
-    saveActiveTabId(activeTabId);
     const tab = tabs.find(function(t) { return t.id === tabId; });
     if (!tab) return;
     markdownEditor.value = tab.content;
@@ -1377,14 +1321,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const newT = createTab('', nextUntitledTitle());
       tabs.push(newT);
       activeTabId = newT.id;
-      saveActiveTabId(activeTabId);
       markdownEditor.value = '';
       restoreViewMode('split');
       renderMarkdown();
     } else if (activeTabId === tabId) {
       const newIdx = Math.max(0, idx - 1);
       activeTabId = tabs[newIdx].id;
-      saveActiveTabId(activeTabId);
       const newActiveTab = tabs[newIdx];
       markdownEditor.value = newActiveTab.content;
       restoreViewMode(newActiveTab.viewMode);
@@ -1393,7 +1335,6 @@ document.addEventListener("DOMContentLoaded", function () {
         markdownEditor.scrollTop = newActiveTab.scrollPos || 0;
       });
     }
-    saveTabsToStorage(tabs);
     renderTabBar(tabs, activeTabId);
   }
 
@@ -1415,7 +1356,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const newName = input.value.trim();
       if (newName) {
         tab.title = newName;
-        saveTabsToStorage(tabs);
         renderTabBar(tabs, activeTabId);
       }
       closeAppModal(modal);
@@ -1464,7 +1404,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (shouldSwitchToDuplicate) {
       switchTab(dup.id);
     } else {
-      saveTabsToStorage(tabs);
       renderTabBar(tabs, activeTabId);
     }
   }
@@ -1480,12 +1419,9 @@ document.addEventListener("DOMContentLoaded", function () {
       cleanup();
       tabs = [];
       untitledCounter = 0;
-      saveUntitledCounter(0);
       const welcome = createTab(sampleMarkdown, 'Chào mừng đến Markdown');
       tabs.push(welcome);
       activeTabId = welcome.id;
-      saveActiveTabId(activeTabId);
-      saveTabsToStorage(tabs);
       markdownEditor.value = sampleMarkdown;
       restoreViewMode('split');
       renderMarkdown();
@@ -1511,29 +1447,70 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  function initTabs() {
-    untitledCounter = loadUntitledCounter();
-    tabs = loadTabsFromStorage();
-    activeTabId = loadActiveTabId();
+  async function tryLoadCloudDocs() {
+    if (!window.isUserLoggedIn || !window.isUserLoggedIn()) return;
+    try {
+      const listFn = window.getFirebaseDocList();
+      if (!listFn) return;
+      const docs = await listFn();
+      if (docs && docs.length > 0) {
+        const mostRecent = docs[0];
+        const activeTab = tabs.find(function(t) { return t.id === activeTabId; });
+        if (activeTab) {
+          activeTab.content = mostRecent.content || '';
+          activeTab.title = mostRecent.title || 'Untitled';
+          markdownEditor.value = activeTab.content;
+          restoreViewMode(activeTab.viewMode || 'split');
+          renderMarkdown();
+          renderTabBar(tabs, activeTabId);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load cloud docs:', err);
+    }
+  }
 
-    // Check if Neutralino passed an initial file via command line (early load)
-    if (window.NL_INITIAL_FILE_CONTENT) {
+  window.addEventListener('firebase-auth-changed', function(e) {
+    if (e.detail && e.detail.user) {
+      tryLoadCloudDocs();
+    }
+  });
+
+  function initTabs() {
+    untitledCounter = 0;
+    tabs = [];
+    activeTabId = null;
+
+    // Check for shared doc from sessionStorage (set by handlePureClientRedirect before redirect)
+    const sharedContent = sessionStorage.getItem('__cloud_shared_content');
+    const sharedTitle = sessionStorage.getItem('__cloud_shared_title');
+    const sharedDocId = sessionStorage.getItem('__last_shared_doc_id');
+    const sharedEditMode = sessionStorage.getItem('__cloud_shared_edit_mode');
+
+    if (sharedContent && sharedDocId) {
+      const tab = createTab(sharedContent, sharedTitle || 'Shared Document');
+      tab.cloudDocId = sharedDocId;
+      if (sharedEditMode === '1') {
+        tab.viewMode = 'split';
+      } else {
+        tab.viewMode = 'preview';
+      }
+      tabs.push(tab);
+      activeTabId = tab.id;
+      sessionStorage.removeItem('__cloud_shared_content');
+      sessionStorage.removeItem('__cloud_shared_title');
+      sessionStorage.removeItem('__last_shared_doc_id');
+      sessionStorage.removeItem('__cloud_shared_edit_mode');
+    } else if (window.NL_INITIAL_FILE_CONTENT) {
       const initialFile = window.NL_INITIAL_FILE_CONTENT;
       const tab = createTab(initialFile.content, initialFile.name);
       tabs.push(tab);
       activeTabId = tab.id;
-      saveTabsToStorage(tabs);
-      saveActiveTabId(activeTabId);
       delete window.NL_INITIAL_FILE_CONTENT;
-    } else if (tabs.length === 0) {
+    } else {
       const tab = createTab(sampleMarkdown, 'Welcome to Markdown');
       tabs.push(tab);
       activeTabId = tab.id;
-      saveTabsToStorage(tabs);
-      saveActiveTabId(activeTabId);
-    } else if (!tabs.find(function(t) { return t.id === activeTabId; })) {
-      activeTabId = tabs[0].id;
-      saveActiveTabId(activeTabId);
     }
     const activeTab = tabs.find(function(t) { return t.id === activeTabId; });
     markdownEditor.value = activeTab.content;
@@ -1547,6 +1524,9 @@ document.addEventListener("DOMContentLoaded", function () {
       markdownEditor.scrollTop = activeTab.scrollPos || 0;
     });
     renderTabBar(tabs, activeTabId);
+
+    // If auth already resolved before DOMContentLoaded, try loading cloud docs now
+    tryLoadCloudDocs();
   }
 
   // Late-load callback hook for Neutralino command-line files
@@ -5201,8 +5181,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   markdownEditor.addEventListener("input", function() {
     debouncedRender();
-    clearTimeout(saveTabStateTimeout);
-    saveTabStateTimeout = setTimeout(saveCurrentTabState, 500);
     if (isFindModalOpen) {
       refreshFindMatches();
     } else {
@@ -5325,7 +5303,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (activeTab) {
           activeTab.title = fileName;
           activeTab.content = content;
-          saveTabsToStorage(tabs);
           renderTabBar(tabs, activeTabId);
         }
       }
