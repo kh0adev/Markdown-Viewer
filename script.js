@@ -1245,6 +1245,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function newTab(id, content, title) {
     if (content === undefined) content = '';
+    if (id) {
+      const existing = tabs.find(function(t) { return t.id === id; });
+      if (existing) {
+        switchTab(id);
+        markdownEditor.focus();
+        return;
+      }
+    }
     if (tabs.length >= 20) {
       alert('Maximum of 20 tabs reached. Please close an existing tab to open a new one.');
       return;
@@ -1423,7 +1431,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   window.addEventListener('firebase-auth-changed', function(e) {
-    if (e.detail && e.detail.user) {
+    if (e.detail && e.detail.user && _initStarted) {
       tryLoadCloudDocs().then(function(cloudDoc) {
         if (!cloudDoc) return;
         const activeTab = tabs.find(function(t) { return t.id === activeTabId; });
@@ -1469,6 +1477,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // If opening a shared doc link, let extensions.js handle tab creation
     if (window.location.search.includes('sharedoc=')) {
+      return;
+    }
+
+    // If opening a guest share link (#share=), let loadFromShareHash handle tab creation
+    if (window.location.hash.startsWith('#share=')) {
       return;
     }
 
@@ -6083,12 +6096,14 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
     }
+    let progressContainer = null;
     try {
       const originalText = exportPdf.innerHTML;
       exportPdf.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating...';
       exportPdf.disabled = true;
 
-      const progressContainer = document.createElement('div');
+      progressContainer = document.createElement('div');
+      progressContainer.id = 'pdf-progress-container';
       progressContainer.style.position = 'fixed';
       progressContainer.style.top = '50%';
       progressContainer.style.left = '50%';
@@ -6239,8 +6254,7 @@ document.addEventListener("DOMContentLoaded", function () {
       exportPdf.innerHTML = '<i class="bi bi-file-earmark-pdf"></i> Export';
       exportPdf.disabled = false;
 
-      const progressContainer = document.querySelector('div[style*="Preparing PDF"]');
-      if (progressContainer) {
+      if (progressContainer && progressContainer.parentNode) {
         document.body.removeChild(progressContainer);
       }
     }
@@ -6357,7 +6371,7 @@ if (!window.isUserLoggedIn()) {
   const activeT = window.__tabs && window.__activeTabId
     ? window.__tabs.find(t => t.id === window.__activeTabId)
     : null;
-  const docId = activeT ? activeT.id : null;
+  const docId = activeT ? (activeT.cloudDocId || activeT.id) : null;
   
   if (!docId) return null;
 
@@ -6368,11 +6382,6 @@ if (!window.isUserLoggedIn()) {
 }
 
 function updateShareUrlField() {
-  // SỬA TẠI ĐÂY: Thay đổi ID cho đúng với file HTML thực tế của bạn
-  const shareUrlInput = document.getElementById('share-url-input'); // Tên ô input bị trống của bạn
-  const shareCopyBtn = document.getElementById('share-copy-btn'); // Nút copy đi kèm (thay ID nếu cần)
-  const shareModeView = document.getElementById('share-mode-view');
-
   const mode = (shareModeView && shareModeView.checked) ? 'view' : 'edit';
   const url = buildShareUrl(mode);
   
@@ -6437,8 +6446,6 @@ function updateShareUrlField() {
       mainShareBtn.innerHTML = '<i class="bi bi-spinner spinning me-2"></i> Đang chuẩn bị link...';
     }
 
-    // Lấy nội dung và tiêu đề hiện tại của editor
-    const markdownEditor = document.getElementById('markdown-editor');
     let activeTab = null;
     let docTitle = 'Untitled';
     if (window.__tabs && window.__activeTabId) {
@@ -6611,10 +6618,7 @@ function updateShareUrlField() {
     if (!encoded) return;
     try {
       const decoded = decodeMarkdownFromShare(encoded);
-      markdownEditor.value = decoded;
-      renderMarkdown();
-      saveCurrentTabState();
-      // Apply the correct view mode: edit=1 → split, default → preview only
+      newTab(null, decoded, isEdit ? 'Shared Document (edit)' : 'Shared Document');
       setViewMode(isEdit ? 'split' : 'preview');
     } catch (e) {
       console.error("Failed to load shared content:", e);

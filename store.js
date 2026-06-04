@@ -284,9 +284,11 @@ function updateAutoShareUI() {
     if (window.__autoShareEnabled) {
       autoBtn.classList.remove(inactiveClass);
       autoBtn.classList.add(activeClass);
+      autoBtn.classList.add('is-active');
       autoBtn.title = 'Auto-share: On — Saving changes to cloud automatically';
     } else {
       autoBtn.classList.remove(activeClass);
+      autoBtn.classList.remove('is-active');
       autoBtn.classList.add(inactiveClass);
       autoBtn.title = 'Auto-share: Off — Save changes to cloud automatically';
     }
@@ -295,9 +297,11 @@ function updateAutoShareUI() {
     if (window.__autoShareEnabled) {
       mobileAutoBtn.classList.remove(inactiveClass);
       mobileAutoBtn.classList.add(activeClass);
+      mobileAutoBtn.classList.add('is-active');
       mobileAutoBtn.title = 'Auto-share: On';
     } else {
       mobileAutoBtn.classList.remove(activeClass);
+      mobileAutoBtn.classList.remove('is-active');
       mobileAutoBtn.classList.add(inactiveClass);
       mobileAutoBtn.title = 'Auto-share: Off';
     }
@@ -325,31 +329,34 @@ function toggleAutoShare() {
 
 async function triggerAutoShareSave() {
   if (!window.__autoShareEnabled) return;
+  if (window.__autoShareSaving) return;
+  window.__autoShareSaving = true;
 
-  // SỬA TẠI ĐÂY: Lấy auth chuẩn từ cấu hình hệ thống của bạn
   const firebaseCtx = window.__FIREBASE__;
   const currentUser = firebaseCtx ? firebaseCtx.currentUser : null;
 
   if (!currentUser) {
     console.warn('Auto-share aborted: Firebase auth not fully initialized or user logged out.');
+    window.__autoShareSaving = false;
     return; 
   }
 
   const saver = window.getFirebaseDocSaver();
-  if (!saver) return;
+  if (!saver) {
+    window.__autoShareSaving = false;
+    return;
+  }
 
   try {
     const tabs = window.__tabs || [];
     const activeTabId = window.__activeTabId;
-    const markdownEditor = document.getElementById('markdown-editor');
     const activeTab = tabs.find(function(t) { return t.id === activeTabId; });
     const docTitle = activeTab ? activeTab.title : 'Untitled';
     
     const cloudDocId = activeTab ? activeTab.cloudDocId : null;
-    const docId = await saver(markdownEditor.value, docTitle, cloudDocId);
+    const docId = await saver(document.getElementById('markdown-editor').value, docTitle, cloudDocId);
     if (activeTab) activeTab.cloudDocId = docId;
 
-    // ... (Giữ nguyên đoạn code đổi UI nút bấm sang "Saved" thành công của bạn) ...
     const autoBtn = document.getElementById('auto-share-btn');
     const mobileAutoBtn = document.getElementById('mobile-auto-share-btn');
     if (autoBtn && window.__autoShareEnabled) {
@@ -373,6 +380,8 @@ async function triggerAutoShareSave() {
     if (err.code === 'permission-denied') {
       alert('Bạn không có quyền lưu tài liệu này, vui lòng tạo bản copy để tiếp tục.');
     } 
+  } finally {
+    window.__autoShareSaving = false;
   }
 }
 

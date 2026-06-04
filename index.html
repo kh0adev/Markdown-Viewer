@@ -680,7 +680,8 @@
         </div>
 
         <!-- Share Modal -->
-        <div id="share-modal" class="reset-modal-overlay modal-overlay" role="dialog" aria-modal="true" aria-labelledby="share-modal-title" aria-hidden="true" style="display:none;">
+        <div id="share-modal" class="reset-modal-overlay modal-overlay" role="dialog" aria-modal="true"
+          aria-labelledby="share-modal-title" aria-hidden="true" style="display:none;">
           <div class="reset-modal-box reset-modal-box--wide modal-box">
             <div class="modal-header">
               <p id="share-modal-title" class="reset-modal-message">Chia sẻ tài liệu</p>
@@ -711,50 +712,51 @@
                 </label>
               </div>
               <div class="share-url-row">
-                <input type="text" id="share-url-input" class="rename-modal-input share-url-input" readonly placeholder="Đang tạo liên kết…" aria-label="URL chia sẻ" />
+                <input type="text" id="share-url-input" class="rename-modal-input share-url-input" readonly
+                  placeholder="Đang tạo liên kết…" aria-label="URL chia sẻ" />
                 <button class="reset-modal-btn share-copy-btn" id="share-copy-btn" title="Sao chép liên kết">
                   <i class="bi bi-clipboard"></i>
                 </button>
               </div>
               <!-- Guest Section (for non-logged-in users) -->
-              <div class="text-center mb-3" id="share-guest-section">      
-    <div class="small text-secondary mb-2">
-        Đăng nhập để đồng bộ tài liệu trên nhiều thiết bị
-    </div>
-
-    <div class="row g-2 mb-3 text-center">
-        <div class="col-4">
-            <i class="bi bi-lightning-charge-fill text-warning fs-5"></i>
-            <div class="fw-semibold small">Lưu tự động</div>
-            <div class="small">
-                Đồng bộ ngay khi chỉnh sửa
-            </div>
-        </div>
-
-        <div class="col-4">
-            <i class="bi bi-share-fill text-primary fs-5"></i>
-            <div class="fw-semibold small">Chia sẻ dễ dàng</div>
-            <div class="small">
-                Tạo liên kết chỉ một lần nhấn
-            </div>
-        </div>
-
-        <div class="col-4">
-            <i class="bi bi-phone-fill text-success fs-5"></i>
-            <div class="fw-semibold small">Đa thiết bị</div>
-            <div class="small">
-                Tiếp tục trên mọi thiết bị
-            </div>
-        </div>
-    </div>
-
-    <button
-        id="share-guest-signin-btn"
-        class="btn btn-primary btn-sm px-4">
-        <i class="bi bi-google me-1"></i>
-        Đăng nhập với Google
-    </button>
-</div>
+              <div class="text-center mb-3 overflow-hidden" id="share-guest-section">
+                <div class="small text-secondary mb-3">
+                  Đăng nhập để đồng bộ tài liệu trên nhiều thiết bị
+                </div>
+        
+                <!-- Thêm w-100 để kiểm soát độ rộng, g-3 hoặc g-4 tùy bạn chọn -->
+                <div class="row g-3 mb-4 justify-content-center w-100 mx-auto">
+                  <!-- Thêm text-wrap để chữ tự động xuống dòng khi màn hình nhỏ -->
+                  <div class="col-4 text-wrap">
+                    <i class="bi bi-lightning-charge-fill" style="font-size:13px;color:#0d6efd"></i>
+                    <div class="fw-semibold small mt-1">Lưu tự động</div>
+                    <div style="font-size: 11px;">
+                      Đồng bộ ngay khi chỉnh sửa
+                    </div>
+                  </div>
+        
+                  <div class="col-4 text-wrap">
+                    <i class="bi bi-share-fill" style="font-size:13px;color:#0d6efd"></i>
+                    <div class="fw-semibold small mt-1">Chia sẻ dễ dàng</div>
+                    <div style="font-size: 11px;">
+                      Tạo liên kết chỉ một lần nhấn
+                    </div>
+                  </div>
+        
+                  <div class="col-4 text-wrap">
+                    <i class="bi bi-phone-fill" style="font-size:13px;color:#0d6efd"></i>
+                    <div class="fw-semibold small mt-1">Đa thiết bị</div>
+                    <div style="font-size: 11px;">
+                      Tiếp tục trên mọi thiết bị
+                    </div>
+                  </div>
+                </div>
+        
+                <button id="share-guest-signin-btn" class="btn btn-primary btn-sm px-4 shadow-sm">
+                  <i class="bi bi-google me-1"></i>
+                  Đăng nhập với Google
+                </button>
+              </div>
               <!-- Cloud Save Section (for logged-in users) -->
               <div id="share-cloud-section" class="share-cloud-section d-none">
                 <div class="share-cloud-divider">
@@ -814,25 +816,25 @@
         
                 <div class="auth-required-benefits">
         
-                  <div class="auth-benefit-item">
-                    <i class="bi bi-lightning-charge-fill"></i>
-                    <div>
+                  <div class="auth-benefit-item row mx-0">
+                    <i class="bi bi-lightning-charge-fill col-1 px-0"></i>
+                    <div class="col-11 px-0">
                       <strong>Lưu tự động</strong>
                       <span>Mọi thay đổi được đồng bộ ngay khi chỉnh sửa.</span>
                     </div>
                   </div>
         
-                  <div class="auth-benefit-item">
-                    <i class="bi bi-share-fill"></i>
-                    <div>
+                  <div class="auth-benefit-item row mx-0">
+                    <i class="bi bi-share-fill col-1 px-0"></i>
+                    <div class="col-11 px-0">
                       <strong>Chia sẻ dễ dàng</strong>
                       <span>Tạo liên kết chia sẻ chỉ với một lần nhấn.</span>
                     </div>
                   </div>
         
-                  <div class="auth-benefit-item">
-                    <i class="bi bi-phone-fill"></i>
-                    <div>
+                  <div class="auth-benefit-item row mx-0">
+                    <i class="bi bi-phone-fill col-1 px-0"></i>
+                    <div class="col-11 px-0">
                       <strong>Đồng bộ đa thiết bị</strong>
                       <span>Tiếp tục công việc trên mọi thiết bị.</span>
                     </div>
