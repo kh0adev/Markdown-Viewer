@@ -353,9 +353,9 @@ async function triggerAutoShareSave() {
     const activeTab = tabs.find(function(t) { return t.id === activeTabId; });
     const docTitle = activeTab ? activeTab.title : 'Untitled';
     
-    const cloudDocId = activeTab ? activeTab.cloudDocId : null;
-    const docId = await saver(document.getElementById('markdown-editor').value, docTitle, cloudDocId);
-    if (activeTab) activeTab.cloudDocId = docId;
+    const id = activeTab ? activeTab.id : null;
+    const docId = await saver(document.getElementById('markdown-editor').value, docTitle, id);
+    if (activeTab) activeTab.id = docId;
 
     const autoBtn = document.getElementById('auto-share-btn');
     const mobileAutoBtn = document.getElementById('mobile-auto-share-btn');

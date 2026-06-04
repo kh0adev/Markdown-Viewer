@@ -3,11 +3,11 @@
 // ========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, deleteDoc, serverTimestamp, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-
+ 
 };
 
 // Initialize Firebase and Auth services
@@ -150,6 +150,21 @@ window.__FIREBASE_LOAD_MY_DOC__ = async function() {
 };
 
 
+window.__FIREBASE_DELETE_DOC__ = async function(docId) {
+  if (!window.__FIREBASE__ || !window.__FIREBASE__.db) {
+    throw new Error("Firestore is not ready.");
+  }
+  const docRef = doc(db, "shared-docs", docId);
+  await deleteDoc(docRef);
+};
+
+window.__FIREBASE_DOC_EXISTS__ = async function(docId) {
+  if (!window.__FIREBASE__ || !window.__FIREBASE__.db) return false;
+  const docRef = doc(db, "shared-docs", docId);
+  const docSnap = await getDoc(docRef);
+  return docSnap.exists();
+};
+
 // ============================================================
 // Auth Helper Functions (exposed globally)
 // ============================================================
@@ -167,6 +182,14 @@ window.getFirebaseDocLoader = function() {
 
 window.getFirebaseDocList = function() {
   return window.__FIREBASE_LOAD_MY_DOC__ || null;
+};
+
+window.getFirebaseDocDeleter = function() {
+  return window.__FIREBASE_DELETE_DOC__ || null;
+};
+
+window.getFirebaseDocExistsChecker = function() {
+  return window.__FIREBASE_DOC_EXISTS__ || null;
 };
 
 window.__FIREBASE_LOGOUT__ = async function() {

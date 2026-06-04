@@ -959,7 +959,7 @@ document.addEventListener("DOMContentLoaded", function () {
       duplicateTab(tabId);
       if (isMobileMenu) closeMobileMenu();
     } else if (action === 'delete') {
-      deleteTab(tabId);
+      closeTabWithConfirm(tabId);
     }
   }
 
@@ -1269,6 +1269,99 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  async function closeTabWithConfirm(tabId) {
+    const tab = tabs.find(function(t) { return t.id === tabId; });
+    if (!tab) return;
+
+    var existsOnCloud = false;
+    if (tab.id && window.isUserLoggedIn && window.isUserLoggedIn()) {
+      try {
+        var checker = window.getFirebaseDocExistsChecker && window.getFirebaseDocExistsChecker();
+        if (checker) {
+          existsOnCloud = await checker(tab.id);
+        }
+      } catch (e) {
+        console.warn('Failed to check doc existence:', e);
+      }
+    }
+
+    if (existsOnCloud) {
+      var modal = document.createElement('div');
+      modal.className = 'reset-modal-overlay';
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.style.display = 'none';
+      modal.innerHTML =
+        '<div class="reset-modal-box">' +
+          '<p class="reset-modal-message">Xoá tài liệu này khỏi đám mây?</p>' +
+          '<p class="modal-subtext">Tài liệu sẽ bị xóa khỏi danh sách tài liệu của bạn trên đám mây.</p>' +
+          '<div class="reset-modal-actions">' +
+            '<button class="reset-modal-btn reset-modal-cancel" id="close-tab-cancel">Huỷ</button>' +
+            '<button class="reset-modal-btn reset-modal-confirm" id="close-tab-delete-cloud" style="background-color:var(--color-danger-fg,#d73a49);border-color:var(--color-danger-fg,#d73a49)">Xoá khỏi đám mây</button>' +
+            '<button class="reset-modal-btn reset-modal-confirm" id="close-tab-keep-cloud">Chỉ đóng tab</button>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(modal);
+
+      function closeModal() {
+        closeAppModal(modal);
+        modal.remove();
+      }
+
+      document.getElementById('close-tab-cancel').addEventListener('click', closeModal);
+      document.getElementById('close-tab-keep-cloud').addEventListener('click', function() {
+        closeModal();
+        closeTab(tabId);
+      });
+      document.getElementById('close-tab-delete-cloud').addEventListener('click', async function() {
+        try {
+          var deleter = window.getFirebaseDocDeleter && window.getFirebaseDocDeleter();
+          if (deleter) {
+            await deleter(tab.id);
+          }
+        } catch (e) {
+          console.error('Failed to delete from cloud:', e);
+        }
+        closeModal();
+        closeTab(tabId);
+        if (typeof window.loadUserDocs === 'function') window.loadUserDocs();
+      });
+
+      openAppModal(modal, { onClose: closeModal });
+    } else {
+      var modal2 = document.createElement('div');
+      modal2.className = 'reset-modal-overlay';
+      modal2.setAttribute('role', 'dialog');
+      modal2.setAttribute('aria-modal', 'true');
+      modal2.setAttribute('aria-hidden', 'true');
+      modal2.style.display = 'none';
+      modal2.innerHTML =
+        '<div class="reset-modal-box">' +
+          '<p class="reset-modal-message">Tài liệu chưa được lưu lên đám mây</p>' +
+          '<p class="modal-subtext">Nếu đóng tab, nội dung chưa được đồng bộ sẽ bị mất.</p>' +
+          '<div class="reset-modal-actions">' +
+            '<button class="reset-modal-btn reset-modal-cancel" id="close-tab-unsaved-cancel">Huỷ</button>' +
+            '<button class="reset-modal-btn reset-modal-confirm" id="close-tab-unsaved-confirm" style="background-color:var(--color-danger-fg,#d73a49);border-color:var(--color-danger-fg,#d73a49)">Đóng tab</button>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(modal2);
+
+      function closeModal2() {
+        closeAppModal(modal2);
+        modal2.remove();
+      }
+
+      document.getElementById('close-tab-unsaved-cancel').addEventListener('click', closeModal2);
+      document.getElementById('close-tab-unsaved-confirm').addEventListener('click', function() {
+        closeModal2();
+        closeTab(tabId);
+      });
+
+      openAppModal(modal2, { onClose: closeModal2 });
+    }
+  }
+
   function closeTab(tabId) {
     const idx = tabs.findIndex(function(t) { return t.id === tabId; });
     if (idx === -1) return;
@@ -1423,7 +1516,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!tab || !cloudDoc) return;
     tab.content = cloudDoc.content || '';
     tab.title = cloudDoc.title || 'Untitled';
-    tab.cloudDocId = cloudDoc.id;
+    tab.id = cloudDoc.id;
     markdownEditor.value = tab.content;
     restoreViewMode(tab.viewMode || 'split');
     renderMarkdown();
@@ -1435,7 +1528,7 @@ document.addEventListener("DOMContentLoaded", function () {
       tryLoadCloudDocs().then(function(cloudDoc) {
         if (!cloudDoc) return;
         const activeTab = tabs.find(function(t) { return t.id === activeTabId; });
-        if (activeTab && !activeTab.cloudDocId) {
+        if (activeTab && !activeTab.id) {
           _applyCloudDocToTab(activeTab, cloudDoc);
         }
       });
@@ -6371,7 +6464,7 @@ if (!window.isUserLoggedIn()) {
   const activeT = window.__tabs && window.__activeTabId
     ? window.__tabs.find(t => t.id === window.__activeTabId)
     : null;
-  const docId = activeT ? (activeT.cloudDocId || activeT.id) : null;
+  const docId = activeT ? (activeT.id || activeT.id) : null;
   
   if (!docId) return null;
 
@@ -6468,7 +6561,7 @@ function updateShareUrlField() {
     
     if (typeof syncShareCardStyles === 'function') syncShareCardStyles();
     
-    // Hàm này sẽ đọc cloudDocId từ tab active để map thành link rút gọn
+    // Hàm này sẽ đọc id từ tab active để map thành link rút gọn
     updateShareUrlField(); 
 
     // Hiển thị Modal Share lên màn hình mượt mà bằng RequestAnimationFrame
@@ -6712,7 +6805,7 @@ function updateShareUrlField() {
     // Close tab (Ctrl+W on desktop, Alt+Shift+W on web/desktop)
     if ((isDesktop && (e.ctrlKey || e.metaKey) && e.key === "w") || (e.altKey && e.shiftKey && e.key.toLowerCase() === "w")) {
       e.preventDefault();
-      closeTab(activeTabId);
+      closeTabWithConfirm(activeTabId);
     }
     // Close Mermaid zoom modal with Escape
     if (e.key === "Escape") {
