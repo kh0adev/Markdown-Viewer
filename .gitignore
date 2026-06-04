@@ -1,3 +1,6 @@
+# Firebase config (contains API keys)
+firebase-config.js
+
 # Dependency directories
 node_modules/
 
