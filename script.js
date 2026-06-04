@@ -6485,7 +6485,11 @@ function updateShareUrlField() {
 
   } catch (err) {
     console.error('Khởi tạo liên kết share thất bại:', err);
-    alert('Không thể tạo liên kết chia sẻ: ' + err.message);
+    if (err.code === 'permission-denied') {
+      alert('Bạn không có quyền tạo link share tài liệu này, vui lòng tạo bản copy để tiếp tục.');
+    } else {
+      alert('Không thể tạo liên kết chia sẻ: ' + (err.message || ''));
+    }
   } finally {
     // Khôi phục lại trạng thái ban đầu của nút bấm ngoài màn hình
     if (mainShareBtn) {

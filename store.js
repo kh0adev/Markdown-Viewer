@@ -370,6 +370,9 @@ async function triggerAutoShareSave() {
     }
   } catch (err) {
     console.error('Auto-share save failed:', err);
+    if (err.code === 'permission-denied') {
+      alert('Bạn không có quyền lưu tài liệu này, vui lòng tạo bản copy để tiếp tục.');
+    } 
   }
 }
 
