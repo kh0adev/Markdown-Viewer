@@ -3,10 +3,11 @@
 // ========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
+
 };
 
 // Initialize Firebase and Auth services
@@ -17,6 +18,7 @@ const provider = new GoogleAuthProvider();
 
 // Expose Firebase services globally for script.js
 window.__FIREBASE__ = { db, auth, currentUser: null };
+window.__FIREBASE_RESOLVED__ = false;
 
 // DOM Elements
 const btnLogin = document.getElementById('btn-login');
@@ -26,6 +28,7 @@ onAuthStateChanged(auth, (user) => {
   // Update global state for script.js
   if (window.__FIREBASE__) {
     window.__FIREBASE__.currentUser = user;
+    window.__FIREBASE_RESOLVED__ = true;
     // Dispatch custom event so other scripts can react to auth changes
     window.dispatchEvent(new CustomEvent('firebase-auth-changed', { detail: { user } }));
   }
@@ -135,7 +138,8 @@ window.__FIREBASE_LOAD_MY_DOC__ = async function() {
   const q = query(
     collection(db, "shared-docs"),
     where("ownerUid", "==", user.uid),
-    orderBy("updatedAt", "desc")
+    orderBy("updatedAt", "desc"),
+    // limit(1)
   );
   const querySnapshot = await getDocs(q);
   const docs = [];

@@ -1,58 +1,3 @@
-(async function handlePureClientRedirect() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const docId = urlParams.get('sharedoc');
-  const isEditMode = urlParams.get('edit') === '1';
-
-  if (!docId) return;
-
-  // Tạo màn hình chờ đơn giản
-  const loadingOverlay = document.createElement('div');
-  loadingOverlay.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:#1e1e1e;color:#fff;display:flex;justify-content:center;align-items:center;z-index:99999;font-family:sans-serif;';
-  loadingOverlay.innerHTML = '<div>Đang tải tài liệu chia sẻ từ Cloud...</div>';
-  document.documentElement.appendChild(loadingOverlay);
-
-  try {
-    // Chờ tối đa 3 giây cho đến khi Firebase Loader sẵn sàng trên đối tượng window
-    const getLoader = () => typeof window.getFirebaseDocLoader === 'function' ? window.getFirebaseDocLoader() : null;
-    let loader = getLoader();
-    let attempts = 0;
-    
-    while (!loader && attempts < 30) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      loader = getLoader();
-      attempts++;
-    }
-
-    if (!loader) {
-      throw new Error("Không thể kết nối tới dịch vụ Cloud. Vui lòng F5 lại trang.");
-    }
-
-    // 1. Gọi Firebase lấy dữ liệu document
-    const docData = await loader(docId);
-    if (!docData || !docData.content) {
-      throw new Error("Tài liệu không tồn tại hoặc đã bị xóa.");
-    }
-
-    // 2. KHẮC PHỤC: Đẩy thẳng nội dung chữ thô và ID vào bộ nhớ tạm sessionStorage
-    sessionStorage.setItem('__cloud_shared_content', docData.content);
-    sessionStorage.setItem('__cloud_shared_title', docData.title || 'Untitled');
-    sessionStorage.setItem('__last_shared_doc_id', docId);
-    if (isEditMode) {
-      sessionStorage.setItem('__cloud_shared_edit_mode', '1');
-    }
-
-    // 3. REDIRECT CỨNG: Chuyển hướng về trang chủ sạch sẽ không chứa query/hash phức tạp để hệ thống tự load
-    window.location.replace(window.location.origin + window.location.pathname);
-
-  } catch (err) {
-    console.error("Redirect failed:", err);
-    loadingOverlay.innerHTML = `<div style="text-align:center;color:#ff6b6b;padding:20px;">
-      <h3>Lỗi tải tài liệu</h3>
-      <p>${err.message}</p>
-      <button onclick="window.location.href=window.location.origin" style="padding:8px 16px;background:#333;color:#fff;border:1px solid #555;border-radius:4px;cursor:pointer;margin-top:10px;">Quay lại trang chủ</button>
-    </div>`;
-  }
-})();
 document.addEventListener("DOMContentLoaded", function () {
   // PERF-002: Lazy script loader for optional heavy libraries
   const _loadedScripts = new Set();
@@ -959,12 +904,22 @@ document.addEventListener("DOMContentLoaded", function () {
     return 'Untitled ' + untitledCounter;
   }
 
-  function createTab(content, title, viewMode) {
+  function _generateShortId() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
+  let id = '';
+  for (let i = 0; i < 8; i++) {
+    id += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return id;
+}
+
+  function createTab(id, content, title, viewMode) {
     if (content === undefined) content = '';
     if (title === undefined) title = null;
     if (viewMode === undefined) viewMode = 'split';
+    if (!id){ id = _generateShortId()}
     return {
-      id: 'tab_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
+      id: id,
       title: title || 'Untitled',
       content: content,
       scrollPos: 0,
@@ -1299,14 +1254,14 @@ document.addEventListener("DOMContentLoaded", function () {
     renderTabBar(tabs, activeTabId);
   }
 
-  function newTab(content, title) {
+  function newTab(id, content, title) {
     if (content === undefined) content = '';
     if (tabs.length >= 20) {
       alert('Maximum of 20 tabs reached. Please close an existing tab to open a new one.');
       return;
     }
     if (!title) title = nextUntitledTitle();
-    const tab = createTab(content, title);
+    const tab = createTab(id, content, title);
     tabs.push(tab);
     switchTab(tab.id);
     markdownEditor.focus();
@@ -1318,7 +1273,7 @@ document.addEventListener("DOMContentLoaded", function () {
     tabs.splice(idx, 1);
     if (tabs.length === 0) {
       // Auto-create new "Untitled" when last tab is deleted
-      const newT = createTab('', nextUntitledTitle());
+      const newT = createTab(null, '', nextUntitledTitle());
       tabs.push(newT);
       activeTabId = newT.id;
       markdownEditor.value = '';
@@ -1398,7 +1353,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const shouldSwitchToDuplicate = tabId === activeTabId;
     saveCurrentTabState();
     const dupTitle = tab.title + ' (copy)';
-    const dup = createTab(tab.content, dupTitle, tab.viewMode);
+    const dup = createTab(null, tab.content, dupTitle, tab.viewMode);
     const idx = tabs.findIndex(function(t) { return t.id === tabId; });
     tabs.splice(idx + 1, 0, dup);
     if (shouldSwitchToDuplicate) {
@@ -1419,7 +1374,7 @@ document.addEventListener("DOMContentLoaded", function () {
       cleanup();
       tabs = [];
       untitledCounter = 0;
-      const welcome = createTab(sampleMarkdown, 'Chào mừng đến Markdown');
+      const welcome = createTab(null, sampleMarkdown, 'Chào mừng đến Markdown');
       tabs.push(welcome);
       activeTabId = welcome.id;
       markdownEditor.value = sampleMarkdown;
@@ -1448,31 +1403,40 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   async function tryLoadCloudDocs() {
-    if (!window.isUserLoggedIn || !window.isUserLoggedIn()) return;
+    if (!window.isUserLoggedIn || !window.isUserLoggedIn()) return null;
     try {
       const listFn = window.getFirebaseDocList();
-      if (!listFn) return;
+      if (!listFn) return null;
       const docs = await listFn();
       if (docs && docs.length > 0) {
-        const mostRecent = docs[0];
-        const activeTab = tabs.find(function(t) { return t.id === activeTabId; });
-        if (activeTab) {
-          activeTab.content = mostRecent.content || '';
-          activeTab.title = mostRecent.title || 'Untitled';
-          markdownEditor.value = activeTab.content;
-          restoreViewMode(activeTab.viewMode || 'split');
-          renderMarkdown();
-          renderTabBar(tabs, activeTabId);
-        }
+        return docs[0];
       }
     } catch (err) {
       console.warn('Failed to load cloud docs:', err);
     }
+    return null;
+  }
+
+  function _applyCloudDocToTab(tab, cloudDoc) {
+    if (!tab || !cloudDoc) return;
+    tab.content = cloudDoc.content || '';
+    tab.title = cloudDoc.title || 'Untitled';
+    tab.cloudDocId = cloudDoc.id;
+    markdownEditor.value = tab.content;
+    restoreViewMode(tab.viewMode || 'split');
+    renderMarkdown();
+    renderTabBar(tabs, activeTabId);
   }
 
   window.addEventListener('firebase-auth-changed', function(e) {
     if (e.detail && e.detail.user) {
-      tryLoadCloudDocs();
+      tryLoadCloudDocs().then(function(cloudDoc) {
+        if (!cloudDoc) return;
+        const activeTab = tabs.find(function(t) { return t.id === activeTabId; });
+        if (activeTab && !activeTab.cloudDocId) {
+          _applyCloudDocToTab(activeTab, cloudDoc);
+        }
+      });
     }
   });
 
@@ -1481,52 +1445,45 @@ document.addEventListener("DOMContentLoaded", function () {
     tabs = [];
     activeTabId = null;
 
-    // Check for shared doc from sessionStorage (set by handlePureClientRedirect before redirect)
-    const sharedContent = sessionStorage.getItem('__cloud_shared_content');
-    const sharedTitle = sessionStorage.getItem('__cloud_shared_title');
-    const sharedDocId = sessionStorage.getItem('__last_shared_doc_id');
-    const sharedEditMode = sessionStorage.getItem('__cloud_shared_edit_mode');
-
-    if (sharedContent && sharedDocId) {
-      const tab = createTab(sharedContent, sharedTitle || 'Shared Document');
-      tab.cloudDocId = sharedDocId;
-      if (sharedEditMode === '1') {
-        tab.viewMode = 'split';
-      } else {
-        tab.viewMode = 'preview';
+    function _finalizeTab() {
+      const activeTab = tabs.find(function(t) { return t.id === activeTabId; });
+      if (!activeTab) return;
+      markdownEditor.value = activeTab.content;
+      restoreViewMode(activeTab.viewMode);
+      renderMarkdown();
+      const editorPane = document.querySelector('.editor-pane');
+      if (editorPane) {
+        editorPane.classList.remove('is-loading');
       }
-      tabs.push(tab);
-      activeTabId = tab.id;
-      sessionStorage.removeItem('__cloud_shared_content');
-      sessionStorage.removeItem('__cloud_shared_title');
-      sessionStorage.removeItem('__last_shared_doc_id');
-      sessionStorage.removeItem('__cloud_shared_edit_mode');
-    } else if (window.NL_INITIAL_FILE_CONTENT) {
+      requestAnimationFrame(function() {
+        markdownEditor.scrollTop = activeTab.scrollPos || 0;
+      });
+      renderTabBar(tabs, activeTabId);
+    }
+
+    if (window.NL_INITIAL_FILE_CONTENT) {
       const initialFile = window.NL_INITIAL_FILE_CONTENT;
-      const tab = createTab(initialFile.content, initialFile.name);
+      const tab = createTab(null, initialFile.content, initialFile.name);
       tabs.push(tab);
       activeTabId = tab.id;
       delete window.NL_INITIAL_FILE_CONTENT;
-    } else {
-      const tab = createTab(sampleMarkdown, 'Welcome to Markdown');
-      tabs.push(tab);
-      activeTabId = tab.id;
+      _finalizeTab();
+      return;
     }
-    const activeTab = tabs.find(function(t) { return t.id === activeTabId; });
-    markdownEditor.value = activeTab.content;
-    restoreViewMode(activeTab.viewMode);
-    renderMarkdown();
-    const editorPane = document.querySelector('.editor-pane');
-    if (editorPane) {
-      editorPane.classList.remove('is-loading');
-    }
-    requestAnimationFrame(function() {
-      markdownEditor.scrollTop = activeTab.scrollPos || 0;
-    });
-    renderTabBar(tabs, activeTabId);
 
-    // If auth already resolved before DOMContentLoaded, try loading cloud docs now
-    tryLoadCloudDocs();
+    // Try cloud docs first; fall back to sample markdown
+    tryLoadCloudDocs().then(function(cloudDoc) {
+      if (cloudDoc) {
+        const tab = createTab(cloudDoc.id, cloudDoc.content || '', cloudDoc.title || 'Untitled');
+        tabs.push(tab);
+        activeTabId = tab.id;
+      } else {
+        const tab = createTab(null, sampleMarkdown, 'Welcome to Markdown');
+        tabs.push(tab);
+        activeTabId = tab.id;
+      }
+      _finalizeTab();
+    });
   }
 
   // Late-load callback hook for Neutralino command-line files
@@ -1537,7 +1494,7 @@ document.addEventListener("DOMContentLoaded", function () {
       switchTab(existing.id);
       return;
     }
-    newTab(content, name);
+    newTab(null, content, name);
   };
 
   function showPreviewSkeleton() {
@@ -1714,7 +1671,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
 
-      newTab(text, file.name.replace(/\.md$/i, ''));
+      newTab(null, text, file.name.replace(/\.md$/i, ''));
     };
     reader.onerror = function() {
       alert('Failed to read the file. Please check permissions and try again.');
@@ -2032,7 +1989,7 @@ document.addEventListener("DOMContentLoaded", function () {
       try {
         for (const selectedPath of selectedPaths) {
           const markdown = await fetchTextContent(buildRawGitHubUrl(owner, repo, ref, selectedPath));
-          newTab(markdown, getFileName(selectedPath).replace(/\.(md|markdown)$/i, ""));
+          newTab(null, markdown, getFileName(selectedPath).replace(/\.(md|markdown)$/i, ""));
         }
         closeGitHubImportModal();
         announceToScreenReader("Files imported successfully.");
@@ -2069,7 +2026,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         announceToScreenReader("Fetching file from GitHub...");
         const markdown = await fetchTextContent(buildRawGitHubUrl(parsed.owner, parsed.repo, parsed.ref, parsed.filePath));
-        newTab(markdown, getFileName(parsed.filePath).replace(/\.(md|markdown)$/i, ""));
+        newTab(null, markdown, getFileName(parsed.filePath).replace(/\.(md|markdown)$/i, ""));
         closeGitHubImportModal();
         announceToScreenReader("File imported successfully.");
         return;
@@ -2103,7 +2060,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const targetPath = files[0];
         announceToScreenReader("Fetching file content...");
         const markdown = await fetchTextContent(buildRawGitHubUrl(parsed.owner, parsed.repo, ref, targetPath));
-        newTab(markdown, getFileName(targetPath).replace(/\.(md|markdown)$/i, ""));
+        newTab(null, markdown, getFileName(targetPath).replace(/\.(md|markdown)$/i, ""));
         closeGitHubImportModal();
         announceToScreenReader("File imported successfully.");
         return;
@@ -5116,7 +5073,26 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
   
-  initTabs();
+  // Wait for Firebase auth before initializing tabs
+  var _initStarted = false;
+  function _startInitTabs() {
+    if (_initStarted) return;
+    _initStarted = true;
+    initTabs();
+  }
+  if (window.__FIREBASE_RESOLVED__) {
+    _startInitTabs();
+  } else {
+    var _onFirebaseReady = function() {
+      window.removeEventListener('firebase-auth-changed', _onFirebaseReady);
+      _startInitTabs();
+    };
+    window.addEventListener('firebase-auth-changed', _onFirebaseReady);
+    setTimeout(function() {
+      window.removeEventListener('firebase-auth-changed', _onFirebaseReady);
+      _startInitTabs();
+    }, 5000);
+  }
   if (loadGlobalState().syncScrollingEnabled === false) toggleSyncScrolling();
   initEditorGeometry();
   refreshEditorWidth();
@@ -5341,7 +5317,7 @@ document.addEventListener("DOMContentLoaded", function () {
         for (const filePath of result) {
           const content = await Neutralino.filesystem.readFile(filePath);
           const fileName = filePath.split(/[/\\]/).pop().replace(/\.(md|markdown)$/i, "");
-          newTab(content, fileName);
+          newTab(null, content, fileName);
         }
       }
     } catch (e) {
@@ -6376,7 +6352,7 @@ if (!window.isUserLoggedIn()) {
   const activeT = window.__tabs && window.__activeTabId
     ? window.__tabs.find(t => t.id === window.__activeTabId)
     : null;
-  const docId = activeT ? activeT.cloudDocId : null;
+  const docId = activeT ? activeT.id : null;
   
   if (!docId) return null;
 
@@ -6466,14 +6442,14 @@ function updateShareUrlField() {
       if (activeTab) docTitle = activeTab.title;
     }
 
-    const existingDocId = activeTab ? activeTab.cloudDocId : null;
+    const existingDocId = activeTab ? activeTab.id : null;
     const docId = await saver(
       markdownEditor ? markdownEditor.value : '',
       docTitle,
       existingDocId
     );
 
-    if (activeTab) activeTab.cloudDocId = docId;
+    if (activeTab) activeTab.id = docId;
 
     // 3. THIẾT LẬP GIAO DIỆN MODAL VÀ HIỂN THỊ
     // Reset về chế độ view-only mặc định như logic cũ của bạn

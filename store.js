@@ -169,7 +169,7 @@ function loadUserDocs() {
         if (!doc) return;
         closeAccountDropdown();
         if (window.__scriptAPI && window.__scriptAPI.newTab) {
-          window.__scriptAPI.newTab(doc.content, doc.title);
+          window.__scriptAPI.newTab(doc.id, doc.content, doc.title);
         }
       });
     });

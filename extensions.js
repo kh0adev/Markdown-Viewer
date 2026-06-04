@@ -42,7 +42,7 @@
   // ──────────────────────────────────────────────
   // 3. Shared document loading (?sharedoc=XXX)
   // ──────────────────────────────────────────────
-  function doLoadSharedDoc(docId, loader) {
+  function doLoadSharedDoc(docId, loader, isEditMode) {
     loader(docId)
       .then(function (data) {
         if (!data || !data.content) {
@@ -51,12 +51,16 @@
         }
         var docTitle = data.title || 'Shared Document';
         if (window.__scriptAPI && window.__scriptAPI.newTab) {
-          window.__scriptAPI.newTab(data.content, docTitle);
+          window.__scriptAPI.newTab(docId, data.content, docTitle);
         }
-        if (data.mode === 'view' || !data.mode) {
-          if (window.__scriptAPI && window.__scriptAPI.setViewMode) {
-            window.__scriptAPI.setViewMode('preview');
-          }
+        // Set cloudDocId on the active tab so subsequent saves update this doc
+        if (window.__tabs && window.__activeTabId) {
+          var activeT = window.__tabs.find(function(t) { return t.id === window.__activeTabId; });
+          if (activeT) activeT.cloudDocId = docId;
+        }
+        var viewMode = isEditMode ? 'split' : 'preview';
+        if (window.__scriptAPI && window.__scriptAPI.setViewMode) {
+          window.__scriptAPI.setViewMode(viewMode);
         }
         if (window.history && window.history.replaceState) {
           var cleanUrl = window.location.origin + window.location.pathname;
@@ -394,6 +398,8 @@
     var sharedDocId = params.get('sharedoc');
     if (!sharedDocId) return;
 
+    var isEditMode = params.get('edit') === '1';
+
     var loader =
       typeof window.getFirebaseDocLoader === 'function'
         ? window.getFirebaseDocLoader()
@@ -408,7 +414,7 @@
             ? window.getFirebaseDocLoader()
             : null;
         if (retryLoader) {
-          doLoadSharedDoc(sharedDocId, retryLoader);
+          doLoadSharedDoc(sharedDocId, retryLoader, isEditMode);
         } else {
           console.error(
             'Failed to load shared document: Firebase not available'
@@ -417,7 +423,7 @@
       }, 2000);
       return;
     }
-    doLoadSharedDoc(sharedDocId, loader);
+    doLoadSharedDoc(sharedDocId, loader, isEditMode);
   }
 
   // ──────────────────────────────────────────────
