@@ -44,8 +44,6 @@ document.addEventListener("DOMContentLoaded", function () {
   let isEditorScrolling = false;
   let isPreviewScrolling = false;
   let scrollSyncTimeout = null;
-  const SCROLL_SYNC_DELAY = 10;
-
   // View Mode State - Story 1.1
   let currentViewMode = 'split'; // 'editor', 'split', or 'preview'
   const APP_VERSION = '3.7.0';
@@ -132,13 +130,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const findReplaceModal = document.getElementById("find-replace-modal");
   const findReplaceInput = document.getElementById("find-replace-input");
   const findReplaceWith = document.getElementById("find-replace-with");
-  const findReplaceCount = document.getElementById("find-replace-count");
-  const findReplacePrev = document.getElementById("find-prev");
-  const findReplaceNext = document.getElementById("find-next");
-  const findReplaceCurrent = document.getElementById("find-replace-current");
-  const findReplaceAll = document.getElementById("find-replace-all");
-  const findReplaceClose = document.getElementById("find-replace-close");
-  const findReplaceCloseIcon = document.getElementById("find-replace-close-icon");
   const helpModal = document.getElementById("help-modal");
   const helpModalClose = document.getElementById("help-modal-close");
   const helpModalCloseIcon = document.getElementById("help-modal-close-icon");
@@ -322,8 +313,6 @@ document.addEventListener("DOMContentLoaded", function () {
   };
   const LINE_NUMBER_GUTTER_MIN_CH = 3;
   const LINE_NUMBER_GUTTER_PADDING_CH = 1;
-  const LINE_NUMBER_EMPTY_PLACEHOLDER = '\u200b';
-  let lineNumberMeasure = null;
   let lineNumberUpdateFrame = null;
 
   const renderer = new marked.Renderer();
@@ -6396,12 +6385,11 @@ function updateShareUrlField() {
   if (tooLarge) {
     shareUrlInput.value = 'Document too large to share via URL.';
     shareCopyBtn.disabled = true;
+    return;
   }
 
-  // Thực hiện gán giá trị URL vào ô input
   if (shareUrlInput) {
     shareUrlInput.value = url;
-    console.log("Đã gán thành công URL vào ô input:", url);
   } else {
     console.error("KHÔNG TÌM THẤY THẺ INPUT! Hãy kiểm tra lại ID trong file HTML.");
   }
