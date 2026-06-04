@@ -24,5 +24,6 @@ jobs:
         run: |
           ssh root@163.61.72.110 "
             cd /www/wwwroot/markdown.com.vn &&
+            git restore . &&
             git pull origin main
           "
