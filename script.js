@@ -1265,6 +1265,11 @@ document.addEventListener("DOMContentLoaded", function () {
     tabs.push(tab);
     switchTab(tab.id);
     markdownEditor.focus();
+    // Remove loading skeleton when first tab is created (e.g. shared doc)
+    const editorPane = document.querySelector('.editor-pane');
+    if (editorPane && editorPane.classList.contains('is-loading')) {
+      editorPane.classList.remove('is-loading');
+    }
   }
 
   function closeTab(tabId) {
@@ -1441,9 +1446,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function initTabs() {
-    untitledCounter = 0;
-    tabs = [];
-    activeTabId = null;
+    // If tabs already exist (e.g. shared doc loaded by extensions.js), don't reset
+    if (tabs.length > 0) return;
 
     function _finalizeTab() {
       const activeTab = tabs.find(function(t) { return t.id === activeTabId; });
@@ -1462,6 +1466,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (window.NL_INITIAL_FILE_CONTENT) {
+      untitledCounter = 0;
+      tabs = [];
+      activeTabId = null;
       const initialFile = window.NL_INITIAL_FILE_CONTENT;
       const tab = createTab(null, initialFile.content, initialFile.name);
       tabs.push(tab);
@@ -1470,6 +1477,15 @@ document.addEventListener("DOMContentLoaded", function () {
       _finalizeTab();
       return;
     }
+
+    // If opening a shared doc link, let extensions.js handle tab creation
+    if (window.location.search.includes('sharedoc=')) {
+      return;
+    }
+
+    untitledCounter = 0;
+    tabs = [];
+    activeTabId = null;
 
     // Try cloud docs first; fall back to sample markdown
     tryLoadCloudDocs().then(function(cloudDoc) {
