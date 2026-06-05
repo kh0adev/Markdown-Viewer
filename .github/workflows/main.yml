@@ -1,0 +1,29 @@
+name: Deploy Markdown
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.MARKDOWN }}
+
+      - name: Add VPS to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H 163.61.72.110 >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: |
+          ssh root@163.61.72.110 "
+            cd /www/wwwroot/markdown.com.vn &&
+            git restore . &&
+            git pull origin main
+          "
