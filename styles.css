@@ -3305,6 +3305,15 @@ a:focus {
   display: none;
 }
 
+.show-only-row #share-public-permission-section,
+.show-only-row #share-permission-details > *:not(#share-row) { 
+  display: none;
+}
+
+.show-only-row #share-permission-details {
+  display: block !important; 
+}
+
 /* ==========================================================================
    Multilingual & CJK Optimization styles added by Aegis SEO agency
    ========================================================================== */

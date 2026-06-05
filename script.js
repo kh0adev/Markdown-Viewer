@@ -6445,6 +6445,7 @@ window.addEventListener('firebase-auth-changed', async function(e) {
   const shareCardView     = document.getElementById('share-card-view');
   const shareCardEdit     = document.getElementById('share-card-edit');
   const sharePermissionSelect = document.getElementById('share-public-permission');
+  const shareSection = document.getElementById('public-section');
 
 function buildShareUrl(mode) {
 if (!window.isUserLoggedIn()) {
@@ -6475,7 +6476,6 @@ if (!window.isUserLoggedIn()) {
   if (!docId) return null;
 
   const PRODUCTION_URL = 'https://markdown.com.vn';
-  if (sharePermissionSelect && sharePermissionSelect.value === 'restricted') return null;
 
   const canEdit = mode === 'edit';
 
@@ -6520,7 +6520,8 @@ function updateShareUrlField() {
       });
       return;
     }
-    shareModeView.checked = true;
+     shareSection.classList.remove('share-permission-restricted');
+              shareSection.classList.add('show-only-row');
     syncShareCardStyles();
     updateShareUrlField();
     shareModal.style.display = '';
@@ -6562,16 +6563,19 @@ function updateShareUrlField() {
       try {
         const docData = await loader(docId);
         if (docData) {
+          if(docData.ownerUid === window.__FIREBASE__.currentUser.uid){ 
           // Binding permission & mode từ isPublicRead/isPublicWrite
           if (docData.isPublicRead) {
             if (sharePermissionSelect) sharePermissionSelect.value = 'anyone';
-            document.getElementById('public-section').classList.remove('share-permission-restricted');
-
+            shareSection.classList.remove('share-permission-restricted');
             if (docData.isPublicWrite) {
               shareModeEdit.checked = true;
             } else {
               shareModeView.checked = true;
             }
+          }} else{
+            shareSection.classList.remove('share-permission-restricted');
+              shareSection.classList.add('show-only-row');
           }
         }
       } catch (e) {
@@ -6620,20 +6624,46 @@ function updateShareUrlField() {
     }
   }
 
+  function getCurrentDocId() {
+    if (window.__tabs && window.__activeTabId) {
+      var tab = window.__tabs.find(function(t) { return t.id === window.__activeTabId; });
+      return tab ? tab.id : null;
+    }
+    return null;
+  }
+
+  function updateCloudPermissions(isPublicRead, isPublicWrite) {
+    var docId = getCurrentDocId();
+    if (!docId) return;
+    var updater = window.__FIREBASE_UPDATE_PERMISSIONS__;
+    if (updater) {
+      updater(docId, isPublicRead, isPublicWrite).catch(function(err) {
+        console.error('Failed to update cloud permissions:', err);
+      });
+    }
+  }
+
   shareModeView.addEventListener('change', function () {
     syncShareCardStyles();
     updateShareUrlField();
+    updateCloudPermissions(true, false);
   });
   shareModeEdit.addEventListener('change', function () {
     syncShareCardStyles();
     updateShareUrlField();
+    updateCloudPermissions(true, true);
   });
 
   if (sharePermissionSelect) {
     sharePermissionSelect.addEventListener('change', function () {
-      const isRestricted = sharePermissionSelect.value === 'restricted';
+      var isRestricted = sharePermissionSelect.value === 'restricted';
       document.getElementById('public-section').classList.toggle('share-permission-restricted', isRestricted);
       updateShareUrlField();
+      if (isRestricted) {
+        updateCloudPermissions(false, false);
+      } else {
+        updateCloudPermissions(true, shareModeEdit.checked);
+      }
     });
   }
 

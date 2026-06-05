@@ -65,7 +65,7 @@ function _generateShortId() {
   return crypto.randomUUID();
 }
 
-window.__FIREBASE_SAVE_DOC__ = async function(content, title, existingDocId = null, options = null) {
+window.__FIREBASE_SAVE_DOC__ = async function(content, title, existingDocId = null) {
   if (!window.__FIREBASE__ || !window.__FIREBASE__.currentUser) {
     throw new Error("You need to login to save documents to the cloud.");
   }
@@ -82,39 +82,25 @@ window.__FIREBASE_SAVE_DOC__ = async function(content, title, existingDocId = nu
   } catch (e) {
     console.error("Failed to encode hash before saving to Firestore:", e);
   }
-
-  const docData = {
+  var docData;
+  let docId = existingDocId;
+  let docRef = doc(db, "shared-docs", docId);
+  const snap = await getDoc(docRef);
+  if (snap.exists()) {
+    docData = {
     content: content,
     hash: hashEncoded,
     title: title || "Untitled",
-    updatedAt: serverTimestamp(),
-    ownerUid: user.uid,
-    ownerName: user.displayName || "Anonymous",
-    ownerPhoto: user.photoURL || "",
-  };
-
-  if (options) {
-    if (options.isPublicRead !== undefined) docData.isPublicRead = options.isPublicRead;
-    if (options.isPublicWrite !== undefined) docData.isPublicWrite = options.isPublicWrite;
-  }
-
-  let docId = existingDocId;
-  let docRef;
-
-  if (docId) {
-    // Nếu có ID rồi thì cập nhật đè lên document cũ
-    docRef = doc(db, "shared-docs", docId);
+    updatedAt: serverTimestamp()}
   } else {
-    // Nếu chưa có ID thì tạo ID mới
-    docData.createdAt = serverTimestamp();
-    docId = _generateShortId();
-    docRef = doc(db, "shared-docs", docId);
-    
-    const snap = await getDoc(docRef);
-    if (snap.exists()) {
-      docId = _generateShortId();
-      docRef = doc(db, "shared-docs", docId);
-    }
+    docData = {
+    content: content,
+    hash: hashEncoded,
+    title: title || "Untitled",
+    createdAt:serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    ownerUid: user.uid
+    };
   }
 
   await setDoc(docRef, docData, { merge: true });
@@ -159,6 +145,14 @@ window.__FIREBASE_DELETE_DOC__ = async function(docId) {
   }
   const docRef = doc(db, "shared-docs", docId);
   await deleteDoc(docRef);
+};
+
+window.__FIREBASE_UPDATE_PERMISSIONS__ = async function(docId, isPublicRead, isPublicWrite) {
+  if (!window.__FIREBASE__ || !window.__FIREBASE__.db) {
+    throw new Error("Firestore is not ready.");
+  }
+  const docRef = doc(db, "shared-docs", docId);
+  await setDoc(docRef, { isPublicRead, isPublicWrite }, { merge: true });
 };
 
 window.__FIREBASE_DOC_EXISTS__ = async function(docId, uid = window.__FIREBASE__.currentUser?.uid) {

@@ -69,6 +69,28 @@
         }
       })
       .catch(function (err) {
+        alert('Bạn không có quyền xem tài liệu này');
+        if (window.isUserLoggedIn()) {
+          var listFn = window.getFirebaseDocList();
+          if (listFn) {
+            listFn().then(function(docs) {
+              if (docs && docs.length > 0) {
+                var recent = docs[0];
+                if (window.__scriptAPI && window.__scriptAPI.newTab) {
+                  window.__scriptAPI.newTab(recent.id, recent.content, recent.title);
+                }
+              }
+            }).catch(function(e) {
+              console.error('Failed to load recent document:', e);
+            });
+          }
+        } else {
+          if (window.__scriptAPI && window.__scriptAPI.newTab) {
+            window.__scriptAPI.newTab(null, '# Chào mừng đến Markdown\n\nStart typing your markdown here...', 'Chào mừng');
+          }
+        }
+        var cleanUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
         console.error('Failed to load shared document:', err);
       });
   }
