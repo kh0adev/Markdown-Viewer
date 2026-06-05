@@ -3301,6 +3301,10 @@ a:focus {
   border-color: var(--accent-color, #0969da);
 }
 
+.share-permission-restricted #share-permission-details {
+  display: none;
+}
+
 /* ==========================================================================
    Multilingual & CJK Optimization styles added by Aegis SEO agency
    ========================================================================== */

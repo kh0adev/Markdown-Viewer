@@ -894,12 +894,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function _generateShortId() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
-  let id = '';
-  for (let i = 0; i < 8; i++) {
-    id += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return id;
+  return crypto.randomUUID();
 }
 
   function createTab(id, content, title, viewMode) {
@@ -5213,19 +5208,7 @@ window.addEventListener('firebase-auth-changed', async function(e) {
     _initStarted = true;
     initTabs();
   }
-  if (window.__FIREBASE_RESOLVED__) {
-    _startInitTabs();
-  } else {
-    var _onFirebaseReady = function() {
-      window.removeEventListener('firebase-auth-changed', _onFirebaseReady);
-      _startInitTabs();
-    };
-    window.addEventListener('firebase-auth-changed', _onFirebaseReady);
-    setTimeout(function() {
-      window.removeEventListener('firebase-auth-changed', _onFirebaseReady);
-      _startInitTabs();
-    }, 5000);
-  }
+  window.__FIREBASE_AUTH_READY__.then(_startInitTabs);
   if (loadGlobalState().syncScrollingEnabled === false) toggleSyncScrolling();
   initEditorGeometry();
   refreshEditorWidth();
@@ -6461,6 +6444,7 @@ window.addEventListener('firebase-auth-changed', async function(e) {
   const shareModeEdit     = document.getElementById('share-mode-edit');
   const shareCardView     = document.getElementById('share-card-view');
   const shareCardEdit     = document.getElementById('share-card-edit');
+  const sharePermissionSelect = document.getElementById('share-public-permission');
 
 function buildShareUrl(mode) {
 if (!window.isUserLoggedIn()) {
@@ -6491,9 +6475,10 @@ if (!window.isUserLoggedIn()) {
   if (!docId) return null;
 
   const PRODUCTION_URL = 'https://markdown.com.vn';
-  const permSelect = document.getElementById('share-public-permission');
-  const canEdit = mode === 'edit' || (permSelect && permSelect.value === 'write');
-  
+  if (sharePermissionSelect && sharePermissionSelect.value === 'restricted') return null;
+
+  const canEdit = mode === 'edit';
+
   let base = PRODUCTION_URL + '?sharedoc=' + encodeURIComponent(docId);
   return canEdit ? base + '&edit=1' : base;}
 }
@@ -6545,24 +6530,13 @@ function updateShareUrlField() {
     });
   } else{
 
-  // Lấy hàm saver từ hệ thống Firebase
   const saver = typeof window.getFirebaseDocSaver === 'function' ? window.getFirebaseDocSaver() : null;
   if (!saver) {
     alert('Dịch vụ Cloud chưa sẵn sàng. Vui lòng thử lại sau vài giây.');
     return;
   }
-
-  // Lấy các phần tử giao diện để hiển thị trạng thái chờ (Loading) nếu cần
-  const mainShareBtn = document.getElementById('main-share-btn'); // Thay bằng ID nút bấm kích hoạt của bạn nếu có
-  const originalHtml = mainShareBtn ? mainShareBtn.innerHTML : '';
   
   try {
-    // Thay đổi trạng thái nút bấm ngoài màn hình để người dùng biết hệ thống đang xử lý
-    if (mainShareBtn) {
-      mainShareBtn.disabled = true;
-      mainShareBtn.innerHTML = '<i class="bi bi-spinner spinning me-2"></i> Đang chuẩn bị link...';
-    }
-
     let activeTab = null;
     let docTitle = 'Untitled';
     if (window.__tabs && window.__activeTabId) {
@@ -6571,6 +6545,7 @@ function updateShareUrlField() {
     }
 
     const existingDocId = activeTab ? activeTab.id : null;
+
     const docId = await saver(
       markdownEditor ? markdownEditor.value : '',
       docTitle,
@@ -6579,13 +6554,33 @@ function updateShareUrlField() {
 
     if (activeTab) activeTab.id = docId;
 
-    // 3. THIẾT LẬP GIAO DIỆN MODAL VÀ HIỂN THỊ
-    // Reset về chế độ view-only mặc định như logic cũ của bạn
-    shareModeView.checked = true;
+    // 3. LOAD TỪ CLOUD ĐỂ LẤY SHARE STATE THỰC TẾ
+    const loader = typeof window.getFirebaseDocLoader === 'function'
+      ? window.getFirebaseDocLoader()
+      : null;
+    if (loader) {
+      try {
+        const docData = await loader(docId);
+        if (docData) {
+          // Binding permission & mode từ isPublicRead/isPublicWrite
+          if (docData.isPublicRead) {
+            if (sharePermissionSelect) sharePermissionSelect.value = 'anyone';
+            document.getElementById('public-section').classList.remove('share-permission-restricted');
+
+            if (docData.isPublicWrite) {
+              shareModeEdit.checked = true;
+            } else {
+              shareModeView.checked = true;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Không thể load lại doc từ cloud, dùng mặc định:', e);
+      }
+    } 
     
     if (typeof syncShareCardStyles === 'function') syncShareCardStyles();
     
-    // Hàm này sẽ đọc id từ tab active để map thành link rút gọn
     updateShareUrlField(); 
 
     // Hiển thị Modal Share lên màn hình mượt mà bằng RequestAnimationFrame
@@ -6602,13 +6597,8 @@ function updateShareUrlField() {
     } else {
       alert('Không thể tạo liên kết chia sẻ: ' + (err.message || ''));
     }
-  } finally {
-    // Khôi phục lại trạng thái ban đầu của nút bấm ngoài màn hình
-    if (mainShareBtn) {
-      mainShareBtn.disabled = false;
-      mainShareBtn.innerHTML = originalHtml;
-    }
-  }}
+  }
+}
 }
 
   function closeShareModal() {
@@ -6638,6 +6628,14 @@ function updateShareUrlField() {
     syncShareCardStyles();
     updateShareUrlField();
   });
+
+  if (sharePermissionSelect) {
+    sharePermissionSelect.addEventListener('change', function () {
+      const isRestricted = sharePermissionSelect.value === 'restricted';
+      document.getElementById('public-section').classList.toggle('share-permission-restricted', isRestricted);
+      updateShareUrlField();
+    });
+  }
 
   shareCopyBtn.addEventListener('click', function () {
     const url = shareUrlInput.value;

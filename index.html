@@ -690,34 +690,45 @@
               </button>
             </div>
             <div class="modal-body">
-              <p class="share-modal-description">Chọn cách người nhận có thể tương tác với tài liệu này.</p>
-              <div class="share-mode-cards">
-                <label class="share-mode-card" id="share-card-view" for="share-mode-view">
-                  <input type="radio" id="share-mode-view" name="share-mode" value="view" checked />
-                  <span class="share-card-icon"><i class="bi bi-eye"></i></span>
-                  <span class="share-card-body">
-                    <span class="share-card-title">Chỉ xem</span>
-                    <span class="share-card-desc">Mở ở chế độ xem trước. Trình soạn thảo được ẩn.</span>
-                  </span>
-                  <span class="share-card-check"><i class="bi bi-check-lg"></i></span>
-                </label>
-                <label class="share-mode-card" id="share-card-edit" for="share-mode-edit">
-                  <input type="radio" id="share-mode-edit" name="share-mode" value="edit" />
-                  <span class="share-card-icon"><i class="bi bi-pencil-square"></i></span>
-                  <span class="share-card-body">
-                    <span class="share-card-title">Chỉnh sửa</span>
-                    <span class="share-card-desc">Mở ở chế độ chia đôi soạn thảo + xem trước.</span>
-                  </span>
-                  <span class="share-card-check"><i class="bi bi-check-lg"></i></span>
-                </label>
-              </div>
-              <div class="share-url-row">
-                <input type="text" id="share-url-input" class="rename-modal-input share-url-input" readonly
-                  placeholder="Đang tạo liên kết…" aria-label="URL chia sẻ" />
-                <button class="reset-modal-btn share-copy-btn" id="share-copy-btn" title="Sao chép liên kết">
-                  <i class="bi bi-clipboard"></i>
-                </button>
-              </div>
+              <div id="public-section" class="share-permission-restricted">
+                <div class="share-public-permission" id="share-public-permission-section">
+                  <label class="share-public-label" for="share-public-permission">Quyền truy cập:</label>
+                  <select id="share-public-permission" class="share-public-select">
+                    <option value="restricted" selected>Hạn chế</option>
+                    <option value="anyone">Bất kì ai có liên kết</option>
+                  </select>
+                </div>
+                <div id="share-permission-details">
+                <p class="share-modal-description">Chọn cách người nhận có thể tương tác với tài liệu này.</p>
+                <div class="share-mode-cards">
+                  <label class="share-mode-card" id="share-card-view" for="share-mode-view">
+                    <input type="radio" id="share-mode-view" name="share-mode" value="view" checked />
+                    <span class="share-card-icon"><i class="bi bi-eye"></i></span>
+                    <span class="share-card-body">
+                      <span class="share-card-title">Chỉ xem</span>
+                      <span class="share-card-desc">Mở ở chế độ xem trước. Trình soạn thảo được ẩn.</span>
+                    </span>
+                    <span class="share-card-check"><i class="bi bi-check-lg"></i></span>
+                  </label>
+                  <label class="share-mode-card" id="share-card-edit" for="share-mode-edit">
+                    <input type="radio" id="share-mode-edit" name="share-mode" value="edit" />
+                    <span class="share-card-icon"><i class="bi bi-pencil-square"></i></span>
+                    <span class="share-card-body">
+                      <span class="share-card-title">Chỉnh sửa</span>
+                      <span class="share-card-desc">Mở ở chế độ chia đôi soạn thảo + xem trước.</span>
+                    </span>
+                    <span class="share-card-check"><i class="bi bi-check-lg"></i></span>
+                  </label>
+                </div>
+                <div class="share-url-row">
+                  <input type="text" id="share-url-input" class="rename-modal-input share-url-input" readonly
+                    placeholder="Đang tạo liên kết…" aria-label="URL chia sẻ" />
+                  <button class="reset-modal-btn share-copy-btn" id="share-copy-btn" title="Sao chép liên kết">
+                    <i class="bi bi-clipboard"></i>
+                  </button>
+                </div>
+                </div>
+                </div>
               <!-- Guest Section (for non-logged-in users) -->
               <div class="text-center mb-3 overflow-hidden" id="share-guest-section">
                 <div class="small text-secondary mb-3">
@@ -756,34 +767,6 @@
                   <i class="bi bi-google me-1"></i>
                   Đăng nhập với Google
                 </button>
-              </div>
-              <!-- Cloud Save Section (for logged-in users) -->
-              <div id="share-cloud-section" class="share-cloud-section d-none">
-                <div class="share-cloud-divider">
-                  <span class="share-cloud-divider-text">hoặc</span>
-                </div>
-                <div class="share-cloud-header">
-                  <i class="bi bi-cloud"></i>
-                  <span id="share-cloud-status-text" class="share-cloud-status">Lưu lên đám mây</span>
-                </div>
-                <div class="share-public-permission mb-2">
-                  <label class="share-public-label" for="share-public-permission">Quyền truy cập công khai:</label>
-                  <select id="share-public-permission" class="share-public-select">
-                    <option value="read">Chỉ xem</option>
-                    <option value="write">Có thể chỉnh sửa</option>
-                  </select>
-                </div>
-                <button class="reset-modal-btn share-cloud-btn" id="share-cloud-btn">
-                  <i class="bi bi-cloud-upload"></i>
-                  <span class="share-cloud-btn-text">Lưu lên đám mây</span>
-                </button>
-                <div class="share-url-row" id="share-cloud-url-row" style="display:none;">
-                  <input type="text" id="share-cloud-url-input" class="rename-modal-input share-url-input" readonly placeholder="Liên kết đám mây sẽ hiện ở đây..." aria-label="URL chia sẻ đám mây" />
-                  <button class="reset-modal-btn share-copy-btn" id="share-cloud-copy-btn" title="Sao chép liên kết đám mây">
-                    <i class="bi bi-clipboard"></i>
-                  </button>
-                </div>
-                <p class="share-modal-notice-sub"><i class="bi bi-shield-check"></i> Đã lưu vào Firestore. Chỉ người có liên kết mới xem được.</p>
               </div>
             </div>
             <div class="reset-modal-actions">

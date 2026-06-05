@@ -162,209 +162,49 @@
     };
   }
 
-  // ──────────────────────────────────────────────
-  // 6. Cloud save modal observer + button handlers
-  // ──────────────────────────────────────────────
-  function initCloudSave() {
+  async function initCloudSave() {
     var shareModal = document.getElementById('share-modal');
+    if (!shareModal) return;
 
-    // Observe share modal visibility changes
-    if (shareModal) {
-      var observer = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-          if (
-            mutation.type === 'attributes' &&
-            mutation.attributeName === 'class'
-          ) {
-            if (shareModal.classList.contains('is-visible')) {
-              // --- Modal opened: prepare cloud save UI ---
-              var cloudSection = document.getElementById('share-cloud-section');
-              var cloudUrlInput = document.getElementById(
-                'share-cloud-url-input'
-              );
-              var cloudUrlRow = document.getElementById('share-cloud-url-row');
-              var cloudStatus = document.getElementById(
-                'share-cloud-status-text'
-              );
-              if (cloudUrlInput) cloudUrlInput.value = '';
-              if (cloudUrlRow) cloudUrlRow.style.display = 'none';
-              var permSelect = document.getElementById('share-public-permission');
-              if (permSelect) permSelect.value = 'read';
-              var guestSection = document.getElementById('share-guest-section');
-              if (guestSection) {
-                var isLoggedIn =
-                  typeof window.isUserLoggedIn === 'function'
-                    ? window.isUserLoggedIn()
-                    : false;
-                if (isLoggedIn) {
-                  guestSection.classList.add('d-none');
-                } else {
-                  guestSection.classList.remove('d-none');
-                }
-              }
-            } else {
-              // --- Modal closed: reset cloud save state ---
-              _firestoreSaveInProgress = false;
-              var cloudStatus2 = document.getElementById(
-                'share-cloud-status-text'
-              );
-              if (cloudStatus2) {
-                cloudStatus2.textContent = 'Save to cloud';
-                cloudStatus2.className = 'share-cloud-status';
-              }
-              var cloudUrlRow2 = document.getElementById(
-                'share-cloud-url-row'
-              );
-              if (cloudUrlRow2) cloudUrlRow2.style.display = 'none';
-            }
-          }
-        });
-      });
-      observer.observe(shareModal, { attributes: true });
-    }
+    // Wait for Firebase Auth to be fully initialized
+    await window.__FIREBASE_AUTH_READY__;
 
-    // Cloud Save Button
-    var shareCloudBtn = document.getElementById('share-cloud-btn');
-    var shareCloudCopyBtn = document.getElementById('share-cloud-copy-btn');
+    function updateCloudSaveUI() {
+      var isLoggedIn =
+        typeof window.isUserLoggedIn === 'function'
+          ? window.isUserLoggedIn()
+          : false;
 
-    if (shareCloudBtn) {
-      shareCloudBtn.addEventListener('click', async function () {
-        if (_firestoreSaveInProgress) return;
-        _firestoreSaveInProgress = true;
-
-        var shareCloudUrlInput = document.getElementById(
-          'share-cloud-url-input'
-        );
-        var shareCloudUrlRow = document.getElementById('share-cloud-url-row');
-        var shareCloudStatus = document.getElementById(
-          'share-cloud-status-text'
-        );
-        var cloudBtnIcon = shareCloudBtn.querySelector('i.bi');
-        var cloudBtnText = shareCloudBtn.querySelector('.share-cloud-btn-text');
-
-        try {
-          if (cloudBtnIcon) cloudBtnIcon.className = 'bi bi-cloud-upload';
-          if (cloudBtnText) cloudBtnText.textContent = 'Saving...';
-          if (shareCloudStatus) {
-            shareCloudStatus.textContent = 'Saving...';
-            shareCloudStatus.className = 'share-cloud-status text-muted';
-          }
-          shareCloudBtn.disabled = true;
-
-          var saver =
-            typeof window.getFirebaseDocSaver === 'function'
-              ? window.getFirebaseDocSaver()
-              : null;
-          if (!saver)
-            throw new Error('Cloud save is not available. Please sign in.');
-
-          var permissionSelect = document.getElementById('share-public-permission');
-          var permission = permissionSelect ? permissionSelect.value : 'read';
-          var options = {
-            isPublicRead: true,
-            isPublicWrite: permission === 'write'
-          };
-
-          var markdownEditor = document.getElementById('markdown-editor');
-          var activeTab = null;
-          if (window.__tabs && window.__activeTabId) {
-            var tabs = window.__tabs;
-            var activeTabId = window.__activeTabId;
-            if (tabs && activeTabId) {
-              for (var i = 0; i < tabs.length; i++) {
-                if (tabs[i].id === activeTabId) {
-                  activeTab = tabs[i];
-                  break;
-                }
-              }
-            }
-          }
-          var docTitle = activeTab ? activeTab.title : 'Untitled';
-
-          var existingDocId = activeTab ? activeTab.id : null;
-          var docId = await saver(
-            markdownEditor ? markdownEditor.value : '',
-            docTitle,
-            existingDocId,
-            options
-          );
-          
-          if (activeTab) activeTab.id = docId;
-
-          var shareUrl =
-            window.location.origin +
-            window.location.pathname +
-            '?sharedoc=' +
-            encodeURIComponent(docId) +
-            (permission === 'write' ? '&edit=1' : '');
-
-          if (shareCloudUrlInput) shareCloudUrlInput.value = shareUrl;
-          if (shareCloudUrlRow) shareCloudUrlRow.style.display = 'flex';
-          if (shareCloudStatus) {
-            shareCloudStatus.textContent = permission === 'write'
-              ? 'Saved! Public can edit link ready.'
-              : 'Saved! Public view-only link ready.';
-            shareCloudStatus.className = 'share-cloud-status text-success';
-          }
-          if (cloudBtnIcon) cloudBtnIcon.className = 'bi bi-check-circle';
-          if (cloudBtnText) cloudBtnText.textContent = 'Saved';
-        } catch (err) {
-          console.error('Cloud save failed:', err);
-          if (shareCloudStatus) {
-            shareCloudStatus.textContent = 'Save failed: ' + err.message;
-            shareCloudStatus.className = 'share-cloud-status text-danger';
-          }
-          if (cloudBtnIcon)
-            cloudBtnIcon.className = 'bi bi-cloud-exclamation';
-          if (cloudBtnText) cloudBtnText.textContent = 'Try Again';
-        } finally {
-          _firestoreSaveInProgress = false;
-          shareCloudBtn.disabled = false;
-        }
-      });
-    }
-
-    // Cloud Save Copy Button
-    if (shareCloudCopyBtn) {
-      shareCloudCopyBtn.addEventListener('click', function () {
-        var shareCloudUrlInput = document.getElementById(
-          'share-cloud-url-input'
-        );
-        if (!shareCloudUrlInput || !shareCloudUrlInput.value) return;
-        var url = shareCloudUrlInput.value;
-        if (navigator.clipboard && window.isSecureContext !== false) {
-          navigator.clipboard
-            .writeText(url)
-            .then(function () {
-              shareCloudCopyBtn.innerHTML =
-                '<i class="bi bi-check-lg"></i>';
-              setTimeout(function () {
-                shareCloudCopyBtn.innerHTML =
-                  '<i class="bi bi-clipboard"></i>';
-              }, 2000);
-            })
-            .catch(function () {
-              fallbackCopy(url, shareCloudCopyBtn);
-            });
+      var guestSection = document.getElementById('share-guest-section');
+      var permissionSection = document.getElementById('share-public-permission-section');
+      if (guestSection) {
+        if (isLoggedIn) {
+          guestSection.classList.add('d-none');
         } else {
-          fallbackCopy(url, shareCloudCopyBtn);
+          guestSection.classList.remove('d-none');
         }
-      });
+      }
+
+      // Guest Sign-in Button in Share Modal
+      var guestSigninBtn = document.getElementById('share-guest-signin-btn');
+      if (guestSigninBtn && !guestSigninBtn.dataset.bound) {
+        guestSigninBtn.dataset.bound = 'true';
+        guestSigninBtn.addEventListener('click', function () {
+          var shareModal = document.getElementById('share-modal');
+          if (shareModal && typeof window.closeShareModal === 'function') {
+            window.closeShareModal();
+          }
+          var btnLogin = document.getElementById('btn-login');
+          if (btnLogin) btnLogin.click();
+        });
+      }
     }
 
-    // Guest Sign-in Button in Share Modal
-    var guestSigninBtn = document.getElementById('share-guest-signin-btn');
-    if (guestSigninBtn && !guestSigninBtn.dataset.bound) {
-      guestSigninBtn.dataset.bound = 'true';
-      guestSigninBtn.addEventListener('click', function () {
-        var shareModal = document.getElementById('share-modal');
-        if (shareModal && typeof window.closeShareModal === 'function') {
-          window.closeShareModal();
-        }
-        var btnLogin = document.getElementById('btn-login');
-        if (btnLogin) btnLogin.click();
-      });
-    }
+    // Auth is ready, run with correct state
+    updateCloudSaveUI();
+
+    // Re-run on subsequent auth changes (login/logout)
+    window.addEventListener('firebase-auth-changed', updateCloudSaveUI);
   }
 
   // ──────────────────────────────────────────────

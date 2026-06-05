@@ -16,7 +16,9 @@ const provider = new GoogleAuthProvider();
 
 // Expose Firebase services globally for script.js
 window.__FIREBASE__ = { db, auth, currentUser: null };
-window.__FIREBASE_RESOLVED__ = false;
+window.__FIREBASE_AUTH_READY__ = new Promise((resolve) => {
+  window.__FIREBASE_AUTH_RESOLVE__ = resolve;
+});
 
 // DOM Elements
 const btnLogin = document.getElementById('btn-login');
@@ -26,7 +28,11 @@ onAuthStateChanged(auth, (user) => {
   // Update global state for script.js
   if (window.__FIREBASE__) {
     window.__FIREBASE__.currentUser = user;
-    window.__FIREBASE_RESOLVED__ = true;
+    // Resolve the auth ready promise
+    if (window.__FIREBASE_AUTH_RESOLVE__) {
+      window.__FIREBASE_AUTH_RESOLVE__(user);
+      window.__FIREBASE_AUTH_RESOLVE__ = null;
+    }
     // Dispatch custom event so other scripts can react to auth changes
     window.dispatchEvent(new CustomEvent('firebase-auth-changed', { detail: { user } }));
   }
@@ -56,15 +62,10 @@ if (btnLogin) {
 // ============================================================
 // Generate a short 8-character alphanumeric ID
 function _generateShortId() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
-  let id = '';
-  for (let i = 0; i < 8; i++) {
-    id += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return id;
+  return crypto.randomUUID();
 }
 
-window.__FIREBASE_SAVE_DOC__ = async function(content, title, existingDocId = null, options = {}) {
+window.__FIREBASE_SAVE_DOC__ = async function(content, title, existingDocId = null, options = null) {
   if (!window.__FIREBASE__ || !window.__FIREBASE__.currentUser) {
     throw new Error("You need to login to save documents to the cloud.");
   }
@@ -84,16 +85,18 @@ window.__FIREBASE_SAVE_DOC__ = async function(content, title, existingDocId = nu
 
   const docData = {
     content: content,
-    hash: hashEncoded, // Thêm trường hash lưu mã băm để phục vụ map dữ liệu nhanh
+    hash: hashEncoded,
     title: title || "Untitled",
-    mode: "view",
     updatedAt: serverTimestamp(),
     ownerUid: user.uid,
     ownerName: user.displayName || "Anonymous",
     ownerPhoto: user.photoURL || "",
-    isPublicRead: options.isPublicRead !== undefined ? options.isPublicRead : true,
-    isPublicWrite: options.isPublicWrite !== undefined ? options.isPublicWrite : false
   };
+
+  if (options) {
+    if (options.isPublicRead !== undefined) docData.isPublicRead = options.isPublicRead;
+    if (options.isPublicWrite !== undefined) docData.isPublicWrite = options.isPublicWrite;
+  }
 
   let docId = existingDocId;
   let docRef;
