@@ -1333,7 +1333,7 @@ document.addEventListener("DOMContentLoaded", function () {
       modal2.style.display = 'none';
       modal2.innerHTML =
         '<div class="reset-modal-box">' +
-          '<p class="reset-modal-message">Tài liệu chưa được lưu lên đám mây</p>' +
+          '<p class="reset-modal-message">Tài liệu chưa được lưu lên đám mây của bạn</p>' +
           '<p class="modal-subtext">Nếu đóng tab, nội dung chưa được đồng bộ sẽ bị mất.</p>' +
           '<div class="reset-modal-actions">' +
             '<button class="reset-modal-btn reset-modal-cancel" id="close-tab-unsaved-cancel">Huỷ</button>' +
