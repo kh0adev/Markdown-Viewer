@@ -1523,17 +1523,39 @@ document.addEventListener("DOMContentLoaded", function () {
     renderTabBar(tabs, activeTabId);
   }
 
-  window.addEventListener('firebase-auth-changed', function(e) {
-    if (e.detail && e.detail.user && _initStarted) {
-      tryLoadCloudDocs().then(function(cloudDoc) {
-        if (!cloudDoc) return;
-        const activeTab = tabs.find(function(t) { return t.id === activeTabId; });
-        if (activeTab && !activeTab.id) {
-          _applyCloudDocToTab(activeTab, cloudDoc);
-        }
-      });
+window.addEventListener('firebase-auth-changed', async function(e) {
+  if (!_initStarted) return;
+
+  const user = e.detail?.user;
+  
+  if (user) {
+    try {
+      const cloudDoc = await tryLoadCloudDocs();
+      if (!cloudDoc) return;
+
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      
+      // Sửa lại logic kiểm tra tab ở đây cho phù hợp
+      if (activeTab) {
+        _applyCloudDocToTab(activeTab, cloudDoc);
+        renderMarkdown();
+      }
+    } catch (err) {
+      console.error("Lỗi khi chuyển đổi tài khoản:", err);
     }
-  });
+  } else {
+    // Xử lý khi user logout: đóng tất cả các tab
+    tabs = [];
+    untitledCounter = 0;
+    const blank = createTab(null, '', nextUntitledTitle());
+    tabs.push(blank);
+    activeTabId = blank.id;
+    markdownEditor.value = '';
+    restoreViewMode('split');
+    renderMarkdown();
+    renderTabBar(tabs, activeTabId);
+  }
+});
 
   function initTabs() {
     // If tabs already exist (e.g. shared doc loaded by extensions.js), don't reset
@@ -6469,9 +6491,11 @@ if (!window.isUserLoggedIn()) {
   if (!docId) return null;
 
   const PRODUCTION_URL = 'https://markdown.com.vn';
+  const permSelect = document.getElementById('share-public-permission');
+  const canEdit = mode === 'edit' || (permSelect && permSelect.value === 'write');
   
   let base = PRODUCTION_URL + '?sharedoc=' + encodeURIComponent(docId);
-  return mode === 'edit' ? base + '&edit=1' : base;}
+  return canEdit ? base + '&edit=1' : base;}
 }
 
 function updateShareUrlField() {

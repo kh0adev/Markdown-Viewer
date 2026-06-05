@@ -64,7 +64,7 @@ function _generateShortId() {
   return id;
 }
 
-window.__FIREBASE_SAVE_DOC__ = async function(content, title, existingDocId = null) {
+window.__FIREBASE_SAVE_DOC__ = async function(content, title, existingDocId = null, options = {}) {
   if (!window.__FIREBASE__ || !window.__FIREBASE__.currentUser) {
     throw new Error("You need to login to save documents to the cloud.");
   }
@@ -90,7 +90,9 @@ window.__FIREBASE_SAVE_DOC__ = async function(content, title, existingDocId = nu
     updatedAt: serverTimestamp(),
     ownerUid: user.uid,
     ownerName: user.displayName || "Anonymous",
-    ownerPhoto: user.photoURL || ""
+    ownerPhoto: user.photoURL || "",
+    isPublicRead: options.isPublicRead !== undefined ? options.isPublicRead : true,
+    isPublicWrite: options.isPublicWrite !== undefined ? options.isPublicWrite : false
   };
 
   let docId = existingDocId;
@@ -156,11 +158,14 @@ window.__FIREBASE_DELETE_DOC__ = async function(docId) {
   await deleteDoc(docRef);
 };
 
-window.__FIREBASE_DOC_EXISTS__ = async function(docId) {
+window.__FIREBASE_DOC_EXISTS__ = async function(docId, uid = window.__FIREBASE__.currentUser?.uid) {
   if (!window.__FIREBASE__ || !window.__FIREBASE__.db) return false;
   const docRef = doc(db, "shared-docs", docId);
   const docSnap = await getDoc(docRef);
-  return docSnap.exists();
+  if (!docSnap.exists()) return false;
+  const data = docSnap.data();
+  if (uid && data.ownerUid !== uid) return false;
+  return true;
 };
 
 // ============================================================

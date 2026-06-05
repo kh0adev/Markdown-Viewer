@@ -155,16 +155,21 @@ function loadUserDocs() {
         updatedStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       }
       html +=
-        '<button type="button" class="account-dropdown-doc-item" data-doc-id="' + escAttr(doc.id) + '">' +
-          '<span class="account-dropdown-doc-title">' + escHtml(doc.title) + '</span>' +
-          '<span class="account-dropdown-doc-date">' + updatedStr + '</span>' +
-        '</button>';
+        '<div class="account-dropdown-doc-item" data-doc-id="' + escAttr(doc.id) + '">' +
+          '<button type="button" class="account-dropdown-doc-info">' +
+            '<span class="account-dropdown-doc-title">' + escHtml(doc.title) + '</span>' +
+            '<span class="account-dropdown-doc-date">' + updatedStr + '</span>' +
+          '</button>' +
+          '<button type="button" class="account-dropdown-doc-delete" title="Xoá tài liệu" data-doc-id="' + escAttr(doc.id) + '">' +
+            '<i class="bi bi-trash"></i>' +
+          '</button>' +
+        '</div>';
     });
     container.innerHTML = html;
 
-    container.querySelectorAll('.account-dropdown-doc-item').forEach(function(item) {
+    container.querySelectorAll('.account-dropdown-doc-info').forEach(function(item) {
       item.addEventListener('click', function() {
-        var docId = item.getAttribute('data-doc-id');
+        var docId = item.parentElement.getAttribute('data-doc-id');
         var doc = _accountDocsCache[docId];
         if (!doc) return;
         closeAccountDropdown();
@@ -173,10 +178,65 @@ function loadUserDocs() {
         }
       });
     });
+    container.querySelectorAll('.account-dropdown-doc-delete').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var docId = btn.getAttribute('data-doc-id');
+        var doc = _accountDocsCache[docId];
+        if (!doc) return;
+        showDeleteDocConfirm(docId, doc.title);
+      });
+    });
   }).catch(function(err) {
     console.error('Failed to list user docs:', err);
     container.innerHTML = '<div class="account-dropdown-docs-empty"><i class="bi bi-exclamation-circle"></i> Error loading documents</div>';
   });
+}
+
+function showDeleteDocConfirm(docId, docTitle) {
+  var overlay = document.createElement('div');
+  overlay.className = 'reset-modal-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.style.display = 'none';
+  overlay.innerHTML =
+    '<div class="reset-modal-box">' +
+      '<p class="reset-modal-message">Xoá tài liệu "' + escHtml(docTitle) + '" khỏi đám mây?</p>' +
+      '<p class="modal-subtext">Tài liệu sẽ bị xóa vĩnh viễn khỏi tài khoản của bạn.</p>' +
+      '<div class="reset-modal-actions">' +
+        '<button class="reset-modal-btn reset-modal-cancel" id="del-doc-cancel">Huỷ</button>' +
+        '<button class="reset-modal-btn reset-modal-confirm" id="del-doc-confirm" style="background-color:var(--color-danger-fg,#d73a49);border-color:var(--color-danger-fg,#d73a49)">Xoá</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  function closeModal() {
+    if (typeof closeAppModal === 'function') {
+      closeAppModal(overlay);
+    }
+    overlay.remove();
+  }
+
+  document.getElementById('del-doc-cancel').addEventListener('click', closeModal);
+  document.getElementById('del-doc-confirm').addEventListener('click', async function() {
+    try {
+      var deleter = window.getFirebaseDocDeleter && window.getFirebaseDocDeleter();
+      if (deleter) {
+        await deleter(docId);
+      }
+    } catch (e) {
+      console.error('Failed to delete document:', e);
+    }
+    closeModal();
+    loadUserDocs();
+  });
+
+  if (typeof openAppModal === 'function') {
+    openAppModal(overlay, { onClose: closeModal });
+  } else {
+    overlay.style.display = 'flex';
+  }
 }
 
 function escAttr(str) {

@@ -53,12 +53,13 @@
         if (window.__scriptAPI && window.__scriptAPI.newTab) {
           window.__scriptAPI.newTab(docId, data.content, docTitle);
         }
-        // Set cloudDocId on the active tab so subsequent saves update this doc
+        // Set id on the active tab so subsequent saves update this doc
         if (window.__tabs && window.__activeTabId) {
           var activeT = window.__tabs.find(function(t) { return t.id === window.__activeTabId; });
-          if (activeT) activeT.cloudDocId = docId;
+          if (activeT) activeT.id = docId;
         }
-        var viewMode = isEditMode ? 'split' : 'preview';
+        var canEdit = isEditMode || data.isPublicWrite === true;
+        var viewMode = canEdit ? 'split' : 'preview';
         if (window.__scriptAPI && window.__scriptAPI.setViewMode) {
           window.__scriptAPI.setViewMode(viewMode);
         }
@@ -187,6 +188,8 @@
               );
               if (cloudUrlInput) cloudUrlInput.value = '';
               if (cloudUrlRow) cloudUrlRow.style.display = 'none';
+              var permSelect = document.getElementById('share-public-permission');
+              if (permSelect) permSelect.value = 'read';
               var guestSection = document.getElementById('share-guest-section');
               if (guestSection) {
                 var isLoggedIn =
@@ -255,6 +258,13 @@
           if (!saver)
             throw new Error('Cloud save is not available. Please sign in.');
 
+          var permissionSelect = document.getElementById('share-public-permission');
+          var permission = permissionSelect ? permissionSelect.value : 'read';
+          var options = {
+            isPublicRead: true,
+            isPublicWrite: permission === 'write'
+          };
+
           var markdownEditor = document.getElementById('markdown-editor');
           var activeTab = null;
           if (window.__tabs && window.__activeTabId) {
@@ -271,25 +281,29 @@
           }
           var docTitle = activeTab ? activeTab.title : 'Untitled';
 
-          var existingDocId = activeTab ? activeTab.cloudDocId : null;
+          var existingDocId = activeTab ? activeTab.id : null;
           var docId = await saver(
             markdownEditor ? markdownEditor.value : '',
             docTitle,
-            existingDocId
+            existingDocId,
+            options
           );
           
-          if (activeTab) activeTab.cloudDocId = docId;
+          if (activeTab) activeTab.id = docId;
 
           var shareUrl =
             window.location.origin +
             window.location.pathname +
             '?sharedoc=' +
-            encodeURIComponent(docId);
+            encodeURIComponent(docId) +
+            (permission === 'write' ? '&edit=1' : '');
 
           if (shareCloudUrlInput) shareCloudUrlInput.value = shareUrl;
           if (shareCloudUrlRow) shareCloudUrlRow.style.display = 'flex';
           if (shareCloudStatus) {
-            shareCloudStatus.textContent = 'Saved! View-only link ready.';
+            shareCloudStatus.textContent = permission === 'write'
+              ? 'Saved! Public can edit link ready.'
+              : 'Saved! Public view-only link ready.';
             shareCloudStatus.className = 'share-cloud-status text-success';
           }
           if (cloudBtnIcon) cloudBtnIcon.className = 'bi bi-check-circle';
