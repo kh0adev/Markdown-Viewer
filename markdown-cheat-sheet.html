@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="canonical" href="https://markdown.com.vn/markdown-cheat-sheet">
+
+    <link rel="alternate" hreflang="x-default" href="https://markdown.com.vn/markdown-cheat-sheet" />
+    <link rel="alternate" hreflang="vi" href="https://markdown.com.vn/markdown-cheat-sheet" />
+    <link rel="alternate" hreflang="en" href="https://markdown.com.vn/markdown-cheat-sheet?lang=en" />
+
+    <title>Markdown Cheat Sheet - Cú pháp Markdown đầy đủ | Markdown Editor Online</title>
+    <meta name="title" content="Markdown Cheat Sheet - Cú pháp Markdown đầy đủ">
+    <meta name="description" content="Cheat Sheet Markdown đầy đủ: tiêu đề, định dạng văn bản, code, danh sách, bảng, LaTeX, Mermaid, GitHub alerts. Tra cứu nhanh cú pháp Markdown online miễn phí.">
+    <meta name="keywords" content="markdown cheat sheet, cú pháp markdown, markdown syntax, hướng dẫn markdown, markdown tutorial, markdown tips, markdown reference, markdown guide">
+    <meta name="author" content="Khoa Trần">
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://markdown.com.vn/markdown-cheat-sheet">
+    <meta property="og:title" content="Markdown Cheat Sheet - Cú pháp Markdown đầy đủ">
+    <meta property="og:description" content="Cheat Sheet Markdown đầy đủ: tiêu đề, định dạng văn bản, code, danh sách, bảng, LaTeX, Mermaid, GitHub alerts.">
+    <meta property="og:image" content="https://markdown.com.vn/assets/icon.png">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://markdown.com.vn/markdown-cheat-sheet">
+    <meta property="twitter:title" content="Markdown Cheat Sheet - Cú pháp Markdown đầy đủ">
+    <meta property="twitter:description" content="Cheat Sheet Markdown đầy đủ: tiêu đề, định dạng văn bản, code, danh sách, bảng, LaTeX, Mermaid, GitHub alerts.">
+    <meta property="twitter:image" content="https://markdown.com.vn/assets/icon.png">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Markdown Cheat Sheet",
+      "url": "https://markdown.com.vn/markdown-cheat-sheet",
+      "description": "Cheat Sheet Markdown đầy đủ với tất cả cú pháp cơ bản và nâng cao.",
+      "isPartOf": {
+        "@type": "WebApplication",
+        "name": "Markdown Editor Online",
+        "url": "https://markdown.com.vn/"
+      }
+    }
+    </script>
+
+    <link rel="icon" href="assets/icon.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" crossorigin="anonymous">
+    <style>
+        body { background: #0d1117; color: #e6edf3; }
+        a { color: #2ea043; }
+        a:hover { color: #3fb950; }
+        code { background: #161b22; color: #f0f6fc; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+        pre code { background: none; padding: 0; }
+        pre { background: #161b22; border: 1px solid #30363d; border-radius: 6px; }
+        .table-dark { --bs-table-bg: #161b22; --bs-table-border-color: #30363d; }
+        .card { background: #161b22; border-color: #30363d; }
+        .bg-editor { background: #0d1117; }
+        .border-editor { border-color: #30363d; }
+        .section-heading { color: #2ea043; font-weight: 700; }
+        .nav-bar { background: #161b22; border-bottom: 1px solid #30363d; }
+        .example-output { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; }
+        .btn-success { background-color: #2ea043; border-color: #2ea043; }
+        .btn-success:hover { background-color: #3fb950; border-color: #3fb950; }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-bar py-3">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a href="./" class="text-decoration-none d-flex align-items-center gap-2">
+                <img src="assets/icon.png" alt="Markdown Editor" width="32" height="32">
+                <span class="text-light fw-bold fs-5">Markdown Editor</span>
+            </a>
+            <div class="d-flex gap-2">
+                <a href="markdown-examples.html" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-file-text"></i> Ví dụ
+                </a>
+                <a href="./" class="btn btn-success btn-sm">
+                    <i class="bi bi-arrow-left"></i> Editor
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold">Markdown Cheat Sheet</h1>
+            <p class="lead text-secondary">Tra cứu nhanh toàn bộ cú pháp Markdown — từ cơ bản đến nâng cao</p>
+        </div>
+
+        <!-- Mục lục -->
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="text-light fw-bold mb-3">
+                            <i class="bi bi-list-ul text-success me-2"></i>Mục lục
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1"><a href="#co-ban" class="text-decoration-none">1. Cơ bản</a></li>
+                                    <li class="mb-1"><a href="#dinh-dang" class="text-decoration-none">2. Định dạng văn bản</a></li>
+                                    <li class="mb-1"><a href="#code" class="text-decoration-none">3. Code</a></li>
+                                    <li class="mb-1"><a href="#danh-sach" class="text-decoration-none">4. Danh sách</a></li>
+                                    <li class="mb-1"><a href="#bang" class="text-decoration-none">5. Bảng</a></li>
+                                    <li class="mb-1"><a href="#trich-dan" class="text-decoration-none">6. Trích dẫn</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1"><a href="#lien-ket-hinh-anh" class="text-decoration-none">7. Liên kết & Hình ảnh</a></li>
+                                    <li class="mb-1"><a href="#duong-ke" class="text-decoration-none">8. Đường kẻ & Ngắt trang</a></li>
+                                    <li class="mb-1"><a href="#nang-cao" class="text-decoration-none">9. Cú pháp nâng cao</a></li>
+                                    <li class="mb-1"><a href="#latex" class="text-decoration-none">10. LaTeX</a></li>
+                                    <li class="mb-1"><a href="#mermaid" class="text-decoration-none">11. Biểu đồ Mermaid</a></li>
+                                    <li class="mb-1"><a href="#github-alerts" class="text-decoration-none">12. GitHub Alerts</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. Cơ bản -->
+        <section id="co-ban" class="mb-5">
+            <h2 class="section-heading mb-4"><span class="badge bg-success me-2">1</span>Cơ bản — Tiêu đề</h2>
+            <p class="text-secondary mb-4">Sử dụng dấu <code>#</code> để tạo tiêu đề. Từ 1 đến 6 dấu <code>#</code> tương ứng với 6 cấp độ tiêu đề.</p>
+            <div class="table-responsive">
+                <table class="table table-dark table-bordered border-editor">
+                    <thead>
+                        <tr><th style="width:40%">Cú pháp</th><th style="width:30%">Kết quả</th><th style="width:30%">Ghi chú</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code># Tiêu đề 1</code></td><td><span style="font-size:1.5em;font-weight:700">Tiêu đề 1</span></td><td>Tiêu đề lớn nhất, mỗi trang chỉ nên 1 thẻ H1</td></tr>
+                        <tr><td><code>## Tiêu đề 2</code></td><td><span style="font-size:1.25em;font-weight:700">Tiêu đề 2</span></td><td>Phân chia phần chính</td></tr>
+                        <tr><td><code>### Tiêu đề 3</code></td><td><span style="font-size:1.1em;font-weight:700">Tiêu đề 3</span></td><td>Phân chia phần phụ</td></tr>
+                        <tr><td><code>#### Tiêu đề 4</code></td><td><span style="font-weight:700">Tiêu đề 4</span></td><td>Tiêu đề nhỏ</td></tr>
+                        <tr><td><code>##### Tiêu đề 5</code></td><td><span style="font-weight:600">Tiêu đề 5</span></td><td>Tiêu đề rất nhỏ</td></tr>
+                        <tr><td><code>###### Tiêu đề 6</code></td><td><span style="font-weight:500">Tiêu đề 6</span></td><td>Tiêu đề nhỏ nhất</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="alert alert-dark border-editor bg-editor" role="alert">
+                <i class="bi bi-info-circle text-success me-1"></i>
+                <strong>Mẹo:</strong> Luôn có một khoảng trắng sau dấu <code>#</code> để cú pháp hoạt động chính xác.
+            </div>
+        </section>
+
+        <!-- 2. Định dạng văn bản -->
+        <section id="dinh-dang" class="mb-5">
+            <h2 class="section-heading mb-4"><span class="badge bg-success me-2">2</span>Định dạng văn bản</h2>
+            <div class="table-responsive">
+                <table class="table table-dark table-bordered border-editor">
+                    <thead>
+                        <tr><th style="width:40%">Cú pháp</th><th style="width:30%">Kết quả</th><th style="width:30%">Ghi chú</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>**In đậm**</code> hoặc <code>__In đậm__</code></td><td><strong>In đậm</strong></td><td>Nhấn mạnh mạnh</td></tr>
+                        <tr><td><code>*In nghiêng*</code> hoặc <code>_In nghiêng_</code></td><td><em>In nghiêng</em></td><td>Nhấn mạnh nhẹ</td></tr>
+                        <tr><td><code>***Đậm nghiêng***</code></td><td><strong><em>Đậm nghiêng</em></strong></td><td>Kết hợp cả hai</td></tr>
+                        <tr><td><code>~~Gạch ngang~~</code></td><td><del>Gạch ngang</del></td><td>Thể hiện xóa bỏ</td></tr>
+                        <tr><td><code>^Chỉ số trên^</code></td><td>Chỉ số trên<sup>2</sup></td><td>Mở rộng, dùng cho chú thích</td></tr>
+                        <tr><td><code>~Chỉ số dưới~</code></td><td>Chỉ số dưới<sub>2</sub></td><td>Mở rộng, dùng cho công thức</td></tr>
+                        <tr><td><code>==Tô sáng==</code></td><td><mark>Tô sáng</mark></td><td>Mở rộng, làm nổi bật văn bản</td></tr>
+                        <tr><td><code>`Mã inline`</code></td><td><code>Mã inline</code></td><td>Code ngắn trong dòng</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="alert alert-dark border-editor bg-editor" role="alert">
+                <i class="bi bi-info-circle text-success me-1"></i>
+                <strong>Mẹo:</strong> Có thể kết hợp nhiều định dạng: <code>***Đậm nghiêng***</code>, <code>**~~Đậm gạch ngang~~**</code>.
+            </div>
+        </section>
+
+        <!-- 3. Code -->
+        <section id="code" class="mb-5">
+            <h2 class="section-heading mb-4"><span class="badge bg-success me-2">3</span>Code</h2>
+            <p class="text-secondary mb-4">Code inline với backtick đơn, code block với 3 backtick kèm tên ngôn ngữ để tô sáng cú pháp.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <h5 class="text-light">Code block JavaScript</h5>
+                    <pre><code class="language-javascript">function greet(name) {
+  return `Hello, ${name}!`;
+}
+
+console.log(greet('Markdown'));</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light">Code block Python</h5>
+                    <pre><code class="language-python">def fibonacci(n):
+    a, b = 0, 1
+    for _ in range(n):
+        yield a
+        a, b = b, a + b
+
+list(fibonacci(10))</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light">Code block HTML</h5>
+                    <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="vi"&gt;
+&lt;head&gt;
+    &lt;title&gt;Xin chào&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Hello World!&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light">Code block Bash</h5>
+                    <pre><code class="language-bash">#!/bin/bash
+# Git deployment script
+git add .
+git commit -m "Update"
+git push origin main
+echo "✅ Deployed!"</code></pre>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p class="text-secondary">Các ngôn ngữ được hỗ trợ: <code>javascript</code>, <code>python</code>, <code>html</code>, <code>css</code>, <code>bash</code>, <code>json</code>, <code>typescript</code>, <code>java</code>, <code>cpp</code>, <code>csharp</code>, <code>go</code>, <code>rust</code>, <code>sql</code>, <code>yaml</code>, và 180+ ngôn ngữ khác.</p>
+            </div>
+        </section>
+
+        <!-- 4. Danh sách -->
+        <section id="danh-sach" class="mb-5">
+            <h2 class="section-heading mb-4"><span class="badge bg-success me-2">4</span>Danh sách</h2>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h5 class="text-light">Danh sách không thứ tự</h5>
+                    <pre><code>- Mục 1
+- Mục 2
+  - Mục lồng nhau
+    - Mục lồng sâu hơn
+- Mục 3</code></pre>
+                    <div class="example-output">
+                        <ul class="mb-0">
+                            <li>Mục 1</li>
+                            <li>Mục 2
+                                <ul>
+                                    <li>Mục lồng nhau
+                                        <ul>
+                                            <li>Mục lồng sâu hơn</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>Mục 3</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-light">Danh sách có thứ tự</h5>
+                    <pre><code>1. Bước đầu tiên
+2. Bước thứ hai
+   1. Bước phụ 2.1
+   2. Bước phụ 2.2
+3. Bước thứ ba</code></pre>
+                    <div class="example-output">
+                        <ol class="mb-0">
+                            <li>Bước đầu tiên</li>
+                            <li>Bước thứ hai
+                                <ol>
+                                    <li>Bước phụ 2.1</li>
+                                    <li>Bước phụ 2.2</li>
+                                </ol>
+                            </li>
+                            <li>Bước thứ ba</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-light">Checklist / Task list</h5>
+                    <pre><code>- [x] Viết tài liệu
+- [ ] Kiểm thử
+- [ ] Triển khai</code></pre>
+                    <div class="example-output">
+                        <ul class="mb-0" style="list-style:none;padding-left:0;">
+                            <li><input type="checkbox" checked disabled> Viết tài liệu</li>
+                            <li><input type="checkbox" disabled> Kiểm thử</li>
+                            <li><input type="checkbox" disabled> Triển khai</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-light">Danh sách định nghĩa</h5>
+                    <pre><code>HTML
+: Ngôn ngữ đánh dấu
+
+CSS
+: Ngôn ngữ định kiểu</code></pre>
+                    <div class="example-output">
+                        <dl class="mb-0">
+                            <dt>HTML</dt>
+                            <dd>Ngôn ngữ đánh dấu</dd>
+                            <dt>CSS</dt>
+                            <dd>Ngôn ngữ định kiểu</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Bảng -->
+        <section id="bang" class="mb-5">
+            <h2 class="section-heading mb-4"><span class="badge bg-success me-2">5</span>Bảng (Table)</h2>
+            <p class="text-secondary mb-4">Tạo bảng với dấu <code>|</code> và <code>-</code>. Dùng dấu <code>:</code> để căn chỉnh cột.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <h5 class="text-light">Cú pháp</h5>
+                    <pre><code>| Cột trái | Cột giữa | Cột phải |
+|:---------|:--------:|---------:|
+| Trái     | Giữa     | Phải     |
+| Dòng 2   | Dòng 2   | Dòng 2   |</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light">Kết quả</h5>
+                    <div class="example-output">
+                        <table class="table table-dark table-bordered">
+                            <thead>
+                                <tr><th style="text-align:left">Cột trái</th><th style="text-align:center">Cột giữa</th><th style="text-align:right">Cột phải</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td style="text-align:left">Trái</td><td style="text-align:center">Giữa</td><td style="text-align:right">Phải</td></tr>
+                                <tr><td style="text-align:left">Dòng 2</td><td style="text-align:center">Dòng 2</td><td style="text-align:right">Dòng 2</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <h5 class="text-light">Bảng nâng cao với ô gộp</h5>
+                <pre><code>| Loại      | Tính năng A | Tính năng B |
+|-----------|:-----------:|:-----------:|
+| Cơ bản    | ✅           | ❌           |
+| Pro       | ✅           | ✅           |
+| **VIP**   | ✅           | ✅           |</code></pre>
+            </div>
+        </section>
+
+        <!-- 6. Trích dẫn -->
+        <section id="trich-dan" class="mb-5">
+            <h2 class="section-heading mb-4"><span class="badge bg-success me-2">6</span>Trích dẫn (Blockquote)</h2>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <pre><code>> Đây là một trích dẫn.
+> Nó có thể kéo dài nhiều dòng.
+>
+> > Trích dẫn lồng nhau cũng được hỗ trợ.</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <div class="example-output">
+                        <blockquote class="mb-0">
+                            <p>Đây là một trích dẫn. Nó có thể kéo dài nhiều dòng.</p>
+                            <blockquote>
+                                <p>Trích dẫn lồng nhau cũng được hỗ trợ.</p>
+                            </blockquote>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <h5 class="text-light">Kết hợp với các định dạng khác</h5>
+                <pre><code>> **Lưu ý:** Đây là thông tin quan trọng.
+> * Điểm 1
+> * Điểm 2
+> `code` trong trích dẫn</code></pre>
+            </div>
+        </section>
+
+        <!-- 7. Liên kết & Hình ảnh -->
+        <section id="lien-ket-hinh-anh" class="mb-5">
+            <h2 class="section-heading mb-4"><span class="badge bg-success me-2">7</span>Liên kết & Hình ảnh</h2>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h5 class="text-light">Liên kết</h5>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-bordered border-editor">
+                            <thead>
+                                <tr><th>Cú pháp</th><th>Mô tả</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code>[text](url)</code></td><td>Liên kết cơ bản</td></tr>
+                                <tr><td><code>[text](url "title")</code></td><td>Liên kết có tiêu đề</td></tr>
+                                <tr><td><code>[text][ref]</code><br><code>[ref]: url</code></td><td>Liên kết dạng tham chiếu</td></tr>
+                                <tr><td><code>&lt;url&gt;</code></td><td>Tự động liên kết</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-light">Hình ảnh</h5>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-bordered border-editor">
+                            <thead>
+                                <tr><th>Cú pháp</th><th>Mô tả</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code>![alt](url)</code></td><td>Hình ảnh cơ bản</td></tr>
+                                <tr><td><code>![alt](url "title")</code></td><td>Hình ảnh có tiêu đề</td></tr>
+                                <tr><td><code>![alt][ref]</code><br><code>[ref]: url</code></td><td>Hình ảnh dạng tham chiếu</td></tr>
+                                <tr><td><code>&lt;img src="url"&gt;</code></td><td>Thẻ HTML trực tiếp</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <h5 class="text-light">Chú thích cuối trang (Footnote)</h5>
+                <pre><code>Đây là văn bản có chú thích[^1].
+
+[^1]: Nội dung chú thích hiện ở cuối trang.</code></pre>
+            </div>
+        </section>
+
+        <!-- 8. Đường kẻ & Ngắt trang -->
+        <section id="duong-ke" class="mb-5">
+            <h2 class="section-heading mb-4"><span class="badge bg-success me-2">8</span>Đường kẻ ngang & Ngắt trang</h2>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h5 class="text-light">Đường kẻ ngang</h5>
+                    <pre><code>---</code></pre>
+                    <p class="text-secondary mt-2">Kết quả: đường kẻ ngang phân cách nội dung.</p>
+                    <hr class="border-secondary">
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-light">Ngắt trang thủ công</h5>
+                    <pre><code>&lt;div style="page-break-after: always;"&gt;&lt;/div&gt;</code></pre>
+                    <p class="text-secondary mt-2">Hữu ích khi xuất PDF, cho phép kiểm soát vị trí ngắt trang.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. Cú pháp nâng cao -->
+        <section id="nang-cao" class="mb-5">
+            <h2 class="section-heading mb-4"><span class="badge bg-success me-2">9</span>Cú pháp nâng cao</h2>
+            <div class="table-responsive">
+                <table class="table table-dark table-bordered border-editor">
+                    <thead>
+                        <tr><th style="width:35%">Cú pháp</th><th style="width:35%">Kết quả</th><th style="width:30%">Ghi chú</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>:-)</code>, <code>:joy:</code>, <code>:rocket:</code></td><td>😃, 🤣, 🚀</td><td>Emoji shortcode (JoyPixels)</td></tr>
+                        <tr><td><code>[!NOTE]</code></td><td>Khối cảnh báo NOTE</td><td>GitHub Alert</td></tr>
+                        <tr><td><code>[!TIP]</code></td><td>Khối cảnh báo TIP</td><td>GitHub Alert</td></tr>
+                        <tr><td><code>[!WARNING]</code></td><td>Khối cảnh báo WARNING</td><td>GitHub Alert</td></tr>
+                        <tr><td><code>[!CAUTION]</code></td><td>Khối cảnh báo CAUTION</td><td>GitHub Alert</td></tr>
+                        <tr><td><code>[!IMPORTANT]</code></td><td>Khối cảnh báo IMPORTANT</td><td>GitHub Alert</td></tr>
+                        <tr><td><code>---</code></td><td>YAML frontmatter</td><td>Metadata ở đầu file</td></tr>
+                        <tr><td><code>&lt;div align="center"&gt;</code></td><td>Căn giữa nội dung</td><td>HTML inline</td></tr>
+                        <tr><td><code>&lt;abbr title="..."&gt;API&lt;/abbr&gt;</code></td><td><abbr title="Giao diện lập trình ứng dụng">API</abbr></td><td>Viết tắt</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 10. LaTeX -->
+        <section id="latex" class="mb-5">
+            <h2 class="section-heading mb-4"><span class="badge bg-success me-2">10</span>LaTeX — Công thức toán học</h2>
+            <p class="text-secondary mb-4">Hỗ trợ hiển thị công thức toán học qua MathJax. Dùng <code>$$</code> cho inline và <code>$$</code> cho block.</p>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h5 class="text-light">Inline</h5>
+                    <pre><code>Công thức: $$E = mc^2$$</code></pre>
+                    <p class="text-secondary mt-2">Kết quả: Công thức: E = mc²</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-light">Block</h5>
+                    <pre><code>$$
+\sum_{i=1}^{n} i^2 = \frac{n(n+1)(2n+1)}{6}
+$$</code></pre>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-light">Phân số & Căn thức</h5>
+                    <pre><code>$$
+\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+$$</code></pre>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-light">Ma trận</h5>
+                    <pre><code>$$
+\begin{pmatrix}
+a & b \\
+c & d
+\end{pmatrix}
+$$</code></pre>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-light">Tích phân</h5>
+                    <pre><code>$$
+\int_{0}^{\infty} e^{-x^2} dx = \frac{\sqrt{\pi}}{2}
+$$</code></pre>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-light">Ký hiệu Hy Lạp</h5>
+                    <pre><code>$$
+\alpha, \beta, \gamma, \delta, \epsilon
+\pi, \sigma, \omega, \theta, \lambda
+$$</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- 11. Mermaid -->
+        <section id="mermaid" class="mb-5">
+            <h2 class="section-heading mb-4"><span class="badge bg-success me-2">11</span>Biểu đồ Mermaid</h2>
+            <p class="text-secondary mb-4">Tạo biểu đồ trực quan ngay trong Markdown với cú pháp Mermaid.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <h5 class="text-light">Flowchart</h5>
+                    <pre><code>```mermaid
+flowchart LR
+    A[Bắt đầu] --> B{Xử lý}
+    B -->|OK| C[Kết thúc]
+    B -->|Lỗi| D[Báo lỗi]
+```</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light">Sequence Diagram</h5>
+                    <pre><code>```mermaid
+sequenceDiagram
+    User->>Server: Yêu cầu
+    Server->>DB: Truy vấn
+    DB-->>Server: Dữ liệu
+    Server-->>User: Phản hồi
+```</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light">Biểu đồ tròn (Pie)</h5>
+                    <pre><code>```mermaid
+pie title Phân bố
+    "Đã xong" : 60
+    "Đang làm" : 25
+    "Chưa làm" : 15
+```</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light">Gantt Chart</h5>
+                    <pre><code>```mermaid
+gantt title Dự án
+    Phần A    :a1, 2024-01-01, 30d
+    Phần B    :a2, after a1, 20d
+```</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- 12. GitHub Alerts -->
+        <section id="github-alerts" class="mb-5">
+            <h2 class="section-heading mb-4"><span class="badge bg-success me-2">12</span>GitHub Alerts</h2>
+            <p class="text-secondary mb-4">Cảnh báo phong cách GitHub dùng trong tài liệu kỹ thuật. Hỗ trợ 5 loại alert.</p>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <pre><code>&gt; [!NOTE]
+&gt; Thông tin hữu ích.
+
+&gt; [!TIP]
+&gt; Mẹo hay cho bạn.
+
+&gt; [!IMPORTANT]
+&gt; Thông tin quan trọng.
+
+&gt; [!WARNING]
+&gt; Cảnh báo cẩn thận.
+
+&gt; [!CAUTION]
+&gt; Nguy hiểm, cần chú ý.</code></pre>
+                </div>
+                <div class="col-md-6">
+                    <div class="example-output">
+                        <blockquote class="mb-3" style="border-left:4px solid #0969da;padding-left:12px;">
+                            <p><strong>NOTE</strong><br>Thông tin hữu ích.</p>
+                        </blockquote>
+                        <blockquote class="mb-3" style="border-left:4px solid #1a7f37;padding-left:12px;">
+                            <p><strong>TIP</strong><br>Mẹo hay cho bạn.</p>
+                        </blockquote>
+                        <blockquote class="mb-3" style="border-left:4px solid #8250df;padding-left:12px;">
+                            <p><strong>IMPORTANT</strong><br>Thông tin quan trọng.</p>
+                        </blockquote>
+                        <blockquote class="mb-3" style="border-left:4px solid #9a6700;padding-left:12px;">
+                            <p><strong>WARNING</strong><br>Cảnh báo cẩn thận.</p>
+                        </blockquote>
+                        <blockquote class="mb-0" style="border-left:4px solid #cf222e;padding-left:12px;">
+                            <p><strong>CAUTION</strong><br>Nguy hiểm, cần chú ý.</p>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <hr class="border-secondary my-5">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="text-secondary mb-0">
+                    <i class="bi bi-arrow-left text-success me-1"></i>
+                    <a href="./" class="text-decoration-none">Quay lại Markdown Editor Online</a>
+                </p>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <a href="https://markdown.com.vn/" class="text-decoration-none text-secondary me-3" target="_blank"><i class="bi bi-globe"></i></a>
+                <a href="https://github.com/kh0adev/Markdown-Viewer" class="text-decoration-none text-secondary me-3" target="_blank"><i class="bi bi-github"></i></a>
+                <span class="text-secondary small">© 2026 Markdown Editor Online</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" crossorigin="anonymous"></script>
+    <script>hljs.highlightAll();</script>
+</body>
+</html>

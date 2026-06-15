@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="canonical" href="https://markdown.com.vn/markdown-examples">
+
+    <link rel="alternate" hreflang="x-default" href="https://markdown.com.vn/markdown-examples" />
+    <link rel="alternate" hreflang="vi" href="https://markdown.com.vn/markdown-examples" />
+    <link rel="alternate" hreflang="en" href="https://markdown.com.vn/markdown-examples?lang=en" />
+
+    <title>Ví dụ Markdown - Tuyển tập mẫu Markdown thực tế | Markdown Editor Online</title>
+    <meta name="title" content="Ví dụ Markdown - Tuyển tập mẫu Markdown thực tế">
+    <meta name="description" content="Tuyển tập ví dụ Markdown thực tế: tài liệu kỹ thuật, ghi chú học tập, blog, báo cáo, README, CV, LaTeX, Mermaid. Học Markdown qua ví dụ cụ thể.">
+    <meta name="keywords" content="ví dụ markdown, markdown examples, markdown mẫu, markdown tutorial, học markdown, markdown thực tế, markdown blog, markdown tài liệu">
+    <meta name="author" content="Khoa Trần">
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://markdown.com.vn/markdown-examples">
+    <meta property="og:title" content="Ví dụ Markdown - Tuyển tập mẫu Markdown thực tế">
+    <meta property="og:description" content="Tuyển tập ví dụ Markdown thực tế: tài liệu kỹ thuật, ghi chú học tập, blog, báo cáo, README, CV, LaTeX, Mermaid.">
+    <meta property="og:image" content="https://markdown.com.vn/assets/icon.png">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://markdown.com.vn/markdown-examples">
+    <meta property="twitter:title" content="Ví dụ Markdown - Tuyển tập mẫu Markdown thực tế">
+    <meta property="twitter:description" content="Tuyển tập ví dụ Markdown thực tế: tài liệu kỹ thuật, ghi chú học tập, blog, báo cáo, README, CV, LaTeX, Mermaid.">
+    <meta property="twitter:image" content="https://markdown.com.vn/assets/icon.png">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Ví dụ Markdown",
+      "url": "https://markdown.com.vn/markdown-examples",
+      "description": "Tuyển tập ví dụ Markdown thực tế cho nhiều mục đích sử dụng.",
+      "isPartOf": {
+        "@type": "WebApplication",
+        "name": "Markdown Editor Online",
+        "url": "https://markdown.com.vn/"
+      }
+    }
+    </script>
+
+    <link rel="icon" href="assets/icon.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" crossorigin="anonymous">
+    <style>
+        body { background: #0d1117; color: #e6edf3; }
+        a { color: #2ea043; }
+        a:hover { color: #3fb950; }
+        code { background: #161b22; color: #f0f6fc; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+        pre code { background: none; padding: 0; }
+        pre { background: #161b22; border: 1px solid #30363d; border-radius: 6px; }
+        .card { background: #161b22; border-color: #30363d; }
+        .bg-editor { background: #0d1117; }
+        .border-editor { border-color: #30363d; }
+        .section-heading { color: #2ea043; font-weight: 700; }
+        .nav-bar { background: #161b22; border-bottom: 1px solid #30363d; }
+        .example-output { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; }
+        .btn-success { background-color: #2ea043; border-color: #2ea043; }
+        .btn-success:hover { background-color: #3fb950; border-color: #3fb950; }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-bar py-3">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a href="./" class="text-decoration-none d-flex align-items-center gap-2">
+                <img src="assets/icon.png" alt="Markdown Editor" width="32" height="32">
+                <span class="text-light fw-bold fs-5">Markdown Editor</span>
+            </a>
+            <div class="d-flex gap-2">
+                <a href="markdown-cheat-sheet.html" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-book"></i> Cheat Sheet
+                </a>
+                <a href="./" class="btn btn-success btn-sm">
+                    <i class="bi bi-arrow-left"></i> Editor
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold">Ví dụ Markdown</h1>
+            <p class="lead text-secondary">Tuyển tập các mẫu Markdown thực tế cho nhiều mục đích sử dụng khác nhau</p>
+        </div>
+
+        <!-- Mục lục -->
+        <div class="row mb-5">
+            <div class="col-lg-10 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="text-light fw-bold mb-3">
+                            <i class="bi bi-list-ul text-success me-2"></i>Danh mục ví dụ
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1"><a href="#api-docs" class="text-decoration-none">1. Tài liệu API</a></li>
+                                    <li class="mb-1"><a href="#blog-post" class="text-decoration-none">2. Blog Post</a></li>
+                                    <li class="mb-1"><a href="#readme" class="text-decoration-none">3. README dự án</a></li>
+                                    <li class="mb-1"><a href="#study-notes" class="text-decoration-none">4. Ghi chú học tập</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1"><a href="#report" class="text-decoration-none">5. Báo cáo dự án</a></li>
+                                    <li class="mb-1"><a href="#meeting-minutes" class="text-decoration-none">6. Biên bản họp</a></li>
+                                    <li class="mb-1"><a href="#cv" class="text-decoration-none">7. CV / Résumé</a></li>
+                                    <li class="mb-1"><a href="#technical-guide" class="text-decoration-none">8. Hướng dẫn kỹ thuật</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1"><a href="#research-paper" class="text-decoration-none">9. Bài báo khoa học</a></li>
+                                    <li class="mb-1"><a href="#release-notes" class="text-decoration-none">10. Release Notes</a></li>
+                                    <li class="mb-1"><a href="#proposal" class="text-decoration-none">11. Đề xuất dự án</a></li>
+                                    <li class="mb-1"><a href="#cheatsheet" class="text-decoration-none">12. Cheat Sheet cá nhân</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. Tài liệu API -->
+        <section id="api-docs" class="mb-5">
+            <h2 class="section-heading mb-3"><span class="badge bg-success me-2">1</span>Tài liệu API</h2>
+            <p class="text-secondary mb-3">Ví dụ tài liệu API endpoint với các phương thức HTTP, request/response mẫu.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <h5 class="text-light mb-2">Markdown</h5>
+                    <pre><code># API Users
+
+## Lấy danh sách người dùng
+
+`GET /api/users`
+
+### Parameters
+
+| Tên     | Kiểu   | Bắt buộc | Mô tả             |
+|---------|--------|----------|-------------------|
+| page    | number | Không    | Số trang (mặc định 1) |
+| limit   | number | Không    | Số lượng (mặc định 20)|
+
+### Response 200
+
+```json
+{
+  "data": [
+    { "id": 1, "name": "Khoa" },
+    { "id": 2, "name": "Anh" }
+  ],
+  "total": 2,
+  "page": 1
+}
+```
+
+### Errors
+
+| Mã lỗi | Mô tả           |
+|--------|------------------|
+| 401    | Chưa xác thực    |
+| 403    | Không có quyền   |
+| 404    | Không tìm thấy   |</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light mb-2">Kết quả hiển thị</h5>
+                    <div class="example-output">
+                        <h4>API Users</h4>
+                        <h5>Lấy danh sách người dùng</h5>
+                        <p><code>GET /api/users</code></p>
+                        <h6>Parameters</h6>
+                        <table class="table table-dark table-sm table-bordered">
+                            <thead><tr><th>Tên</th><th>Kiểu</th><th>Bắt buộc</th><th>Mô tả</th></tr></thead>
+                            <tbody>
+                                <tr><td>page</td><td>number</td><td>Không</td><td>Số trang (mặc định 1)</td></tr>
+                                <tr><td>limit</td><td>number</td><td>Không</td><td>Số lượng (mặc định 20)</td></tr>
+                            </tbody>
+                        </table>
+                        <h6>Response 200</h6>
+                        <pre><code class="language-json">{"data":[{"id":1,"name":"Khoa"},{"id":2,"name":"Anh"}],"total":2,"page":1}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Blog Post -->
+        <section id="blog-post" class="mb-5">
+            <h2 class="section-heading mb-3"><span class="badge bg-success me-2">2</span>Bài viết Blog</h2>
+            <p class="text-secondary mb-3">Mẫu bài viết blog với YAML frontmatter, tiêu đề, trích dẫn, code và hình ảnh.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <pre><code>---
+title: "Hướng dẫn Markdown cho người mới"
+date: 2026-06-15
+author: Khoa Trần
+tags: [markdown, tutorial, beginners]
+---
+
+# Hướng dẫn Markdown cho người mới
+
+Markdown là ngôn ngữ đánh dấu nhẹ do **John Gruber** tạo ra.
+
+## Tại sao nên dùng Markdown?
+
+- Đơn giản, dễ học
+- Không phụ thuộc nền tảng
+- Tập trung vào nội dung
+
+## Ví dụ code
+
+```python
+def hello():
+    print("Hello, Markdown!")
+```
+
+> *"Viết là nghĩ, Markdown là công cụ."*
+> — Khoa Trần
+
+---
+
+Đọc thêm tại [markdown.com.vn](https://markdown.com.vn/).</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light mb-2">Kết quả hiển thị</h5>
+                    <div class="example-output">
+                        <p class="text-secondary small">tiêu đề: Hướng dẫn Markdown cho người mới<br>tác giả: Khoa Trần</p>
+                        <hr>
+                        <h4>Hướng dẫn Markdown cho người mới</h4>
+                        <p>Markdown là ngôn ngữ đánh dấu nhẹ do <strong>John Gruber</strong> tạo ra.</p>
+                        <h5>Tại sao nên dùng Markdown?</h5>
+                        <ul>
+                            <li>Đơn giản, dễ học</li>
+                            <li>Không phụ thuộc nền tảng</li>
+                            <li>Tập trung vào nội dung</li>
+                        </ul>
+                        <blockquote><em>"Viết là nghĩ, Markdown là công cụ." — Khoa Trần</em></blockquote>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. README dự án -->
+        <section id="readme" class="mb-5">
+            <h2 class="section-heading mb-3"><span class="badge bg-success me-2">3</span>README dự án</h2>
+            <p class="text-secondary mb-3">Mẫu README chuẩn cho dự án open-source trên GitHub.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <pre><code># Markdown Viewer
+
+<div align="center">
+  <img src="assets/icon.png" width="120">
+  <p><strong>Trình soạn thảo Markdown mạnh mẽ</strong></p>
+</div>
+
+## Tính năng
+
+- [x] Xem trước thời gian thực
+- [x] Hỗ trợ LaTeX & Mermaid
+- [ ] Chế độ tối (coming soon)
+
+## Cài đặt
+
+```bash
+git clone https://github.com/user/project.git
+cd project
+npm install
+```
+
+## Sử dụng
+
+| Cờ | Mô tả |
+|----|-------|
+| `-h` | Trợ giúp |
+| `-v` | Phiên bản |
+
+## Giấy phép
+
+MIT &copy; 2026</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light mb-2">Kết quả hiển thị</h5>
+                    <div class="example-output">
+                        <h4>Markdown Viewer</h4>
+                        <p><strong>Trình soạn thảo Markdown mạnh mẽ</strong></p>
+                        <h5>Tính năng</h5>
+                        <ul>
+                            <li><input type="checkbox" checked disabled> Xem trước thời gian thực</li>
+                            <li><input type="checkbox" checked disabled> Hỗ trợ LaTeX & Mermaid</li>
+                            <li><input type="checkbox" disabled> Chế độ tối (coming soon)</li>
+                        </ul>
+                        <h5>Cài đặt</h5>
+                        <pre><code>git clone https://github.com/user/project.git</code></pre>
+                        <h5>Giấy phép</h5>
+                        <p>MIT &copy; 2026</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Ghi chú học tập -->
+        <section id="study-notes" class="mb-5">
+            <h2 class="section-heading mb-3"><span class="badge bg-success me-2">4</span>Ghi chú học tập</h2>
+            <p class="text-secondary mb-3">Ghi chú môn học với công thức, code và định nghĩa.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <pre><code># Machine Learning - Tuần 1
+
+## Linear Regression
+
+$$h_\theta(x) = \theta^T x$$
+
+### Cost Function
+
+$$J(\theta) = \frac{1}{2m} \sum_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)})^2$$
+
+### Gradient Descent
+
+Lặp lại cho đến khi hội tụ:
+
+$$
+\theta_j := \theta_j - \alpha \frac{\partial}{\partial \theta_j} J(\theta)
+$$
+
+## Code mẫu
+
+```python
+import numpy as np
+
+def predict(X, theta):
+    return X.dot(theta)
+```
+
+> **Ghi nhớ:** *Learning rate $\alpha$ quyết định tốc độ hội tụ.*</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light mb-2">Kết quả hiển thị</h5>
+                    <div class="example-output">
+                        <h4>Machine Learning - Tuần 1</h4>
+                        <h5>Linear Regression</h5>
+                        <p><em>h<sub>θ</sub>(x) = θ<sup>T</sup>x</em></p>
+                        <h5>Cost Function</h5>
+                        <p><em>J(θ) = 1/2m Σ(h<sub>θ</sub>(xⁱ) - yⁱ)²</em></p>
+                        <h5>Gradient Descent</h5>
+                        <p><em>θ<sub>j</sub> := θ<sub>j</sub> - α · ∂/∂θ<sub>j</sub> J(θ)</em></p>
+                        <h5>Code mẫu</h5>
+                        <pre><code class="language-python">import numpy as np
+def predict(X, theta):
+    return X.dot(theta)</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Báo cáo dự án -->
+        <section id="report" class="mb-5">
+            <h2 class="section-heading mb-3"><span class="badge bg-success me-2">5</span>Báo cáo dự án</h2>
+            <p class="text-secondary mb-3">Báo cáo tiến độ với checklist, bảng và biểu đồ.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <pre><code># Báo cáo Sprint #12
+
+**Thời gian:** 01/06 - 14/06/2026
+**Nhóm:** Backend Team
+
+## Tiến độ hoàn thành
+
+| Thành viên | Task | Trạng thái |
+|------------|------|------------|
+| Khoa      | API Auth | ✅ Hoàn thành |
+| Anh       | Database | 🔄 Đang làm |
+| Minh      | Testing  | ⏳ Chờ |
+
+## Checklist
+
+- [x] Thiết kế schema
+- [x] Viết API endpoints
+- [ ] Unit tests
+- [ ] Deploy staging
+
+## Biểu đồ tiến độ
+
+```mermaid
+pie title Sprint Progress
+  "Hoàn thành" : 60
+  "Đang làm" : 25
+  "Chưa làm" : 15
+```
+
+---
+*Cập nhật lần cuối: 14/06/2026*</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light mb-2">Kết quả hiển thị</h5>
+                    <div class="example-output">
+                        <h4>Báo cáo Sprint #12</h4>
+                        <p><strong>Thời gian:</strong> 01/06 - 14/06/2026</p>
+                        <table class="table table-dark table-sm table-bordered">
+                            <thead><tr><th>Thành viên</th><th>Task</th><th>Trạng thái</th></tr></thead>
+                            <tbody>
+                                <tr><td>Khoa</td><td>API Auth</td><td>✅ Hoàn thành</td></tr>
+                                <tr><td>Anh</td><td>Database</td><td>🔄 Đang làm</td></tr>
+                            </tbody>
+                        </table>
+                        <ul>
+                            <li><input type="checkbox" checked disabled> Thiết kế schema</li>
+                            <li><input type="checkbox" checked disabled> Viết API endpoints</li>
+                            <li><input type="checkbox" disabled> Unit tests</li>
+                        </ul>
+                        <p class="text-secondary small">Cập nhật lần cuối: 14/06/2026</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Biên bản họp -->
+        <section id="meeting-minutes" class="mb-5">
+            <h2 class="section-heading mb-3"><span class="badge bg-success me-2">6</span>Biên bản họp</h2>
+            <p class="text-secondary mb-3">Mẫu biên bản họp nhóm với agenda, action items.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <pre><code># Biên bản họp nhóm
+
+**Ngày:** 15/06/2026
+**Người chủ trì:** Khoa Trần
+**Thành viên:** Anh, Minh, Lan
+
+## Agenda
+
+1. Review sprint trước
+2. Kế hoạch sprint mới
+3. Vấn đề tồn đọng
+
+## Nội dung
+
+### 1. Review sprint trước
+
+- ✅ Hoàn thành đúng hạn
+- ❌ Chức năng search chưa xong
+
+### 2. Kế hoạch sprint mới
+
+| Task | Người phụ trách | Deadline |
+|------|----------------|----------|
+| Search | Anh | 20/06 |
+| Pagination | Minh | 22/06 |
+
+## Action Items
+
+- [ ] @Anh: Viết API search
+- [ ] @Minh: Tạo component
+- [ ] @Khoa: Review code
+
+> 💡 *Sprint retrospective vào thứ Sáu tuần này.*</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light mb-2">Kết quả hiển thị</h5>
+                    <div class="example-output">
+                        <h4>Biên bản họp nhóm</h4>
+                        <p><strong>Ngày:</strong> 15/06/2026</p>
+                        <h5>Agenda</h5>
+                        <ol>
+                            <li>Review sprint trước</li>
+                            <li>Kế hoạch sprint mới</li>
+                            <li>Vấn đề tồn đọng</li>
+                        </ol>
+                        <h5>Action Items</h5>
+                        <ul>
+                            <li><input type="checkbox" disabled> @Anh: Viết API search</li>
+                            <li><input type="checkbox" disabled> @Minh: Tạo component</li>
+                            <li><input type="checkbox" disabled> @Khoa: Review code</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. CV / Résumé -->
+        <section id="cv" class="mb-5">
+            <h2 class="section-heading mb-3"><span class="badge bg-success me-2">7</span>CV / Résumé</h2>
+            <p class="text-secondary mb-3">Viết CV chuyên nghiệp bằng Markdown, dễ dàng xuất PDF.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <pre><code># Khoa Trần
+
+*Full-stack Developer*
+
+---
+
+## Kinh nghiệm
+
+### Công ty ABC (2024 - nay)
+*Senior Developer*
+
+- Thiết kế kiến trúc microservices
+- Tối ưu hiệu năng database **giảm 40%** thời gian response
+
+### Công ty XYZ (2022 - 2024)
+*Junior Developer*
+
+### Kỹ năng
+
+| Kỹ năng | Mức độ |
+|---------|--------|
+| JavaScript | ⭐⭐⭐⭐⭐ |
+| Python | ⭐⭐⭐⭐ |
+| Go | ⭐⭐⭐ |
+
+### Học vấn
+
+**Đại học Bách Khoa** — Công nghệ phần mềm (2018-2022)
+
+---
+
+*Liên hệ: khoa@email.com*</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light mb-2">Kết quả hiển thị</h5>
+                    <div class="example-output">
+                        <h4>Khoa Trần</h4>
+                        <p><em>Full-stack Developer</em></p>
+                        <hr>
+                        <h5>Kinh nghiệm</h5>
+                        <p><strong>Công ty ABC (2024 - nay)</strong><br><em>Senior Developer</em></p>
+                        <ul>
+                            <li>Thiết kế kiến trúc microservices</li>
+                            <li>Tối ưu hiệu năng database <strong>giảm 40%</strong></li>
+                        </ul>
+                        <h5>Kỹ năng</h5>
+                        <table class="table table-dark table-sm table-bordered">
+                            <thead><tr><th>Kỹ năng</th><th>Mức độ</th></tr></thead>
+                            <tbody>
+                                <tr><td>JavaScript</td><td>⭐⭐⭐⭐⭐</td></tr>
+                                <tr><td>Python</td><td>⭐⭐⭐⭐</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. Hướng dẫn kỹ thuật -->
+        <section id="technical-guide" class="mb-5">
+            <h2 class="section-heading mb-3"><span class="badge bg-success me-2">8</span>Hướng dẫn kỹ thuật</h2>
+            <p class="text-secondary mb-3">Hướng dẫn cài đặt và cấu hình với code minh họa.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <pre><code># Hướng dẫn cài đặt Docker
+
+## Yêu cầu
+
+- Docker >= 24.0
+- Docker Compose >= v2.20
+
+## Cài đặt
+
+### Ubuntu / Debian
+
+```bash
+sudo apt update
+sudo apt install docker.io
+sudo systemctl start docker
+```
+
+### macOS
+
+Tải Docker Desktop từ [docker.com](https://docker.com).
+
+## Cấu hình
+
+Tạo file `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: secret
+```
+
+## Chạy
+
+```bash
+docker compose up -d
+```
+
+> [!TIP]
+> Dùng `docker compose logs -f` để theo dõi log.</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light mb-2">Kết quả hiển thị</h5>
+                    <div class="example-output">
+                        <h4>Hướng dẫn cài đặt Docker</h4>
+                        <h5>Yêu cầu</h5>
+                        <ul>
+                            <li>Docker >= 24.0</li>
+                            <li>Docker Compose >= v2.20</li>
+                        </ul>
+                        <h5>Ubuntu / Debian</h5>
+                        <pre><code>sudo apt update && sudo apt install docker.io</code></pre>
+                        <div class="alert alert-dark bg-editor border-editor py-2">
+                            <strong>TIP:</strong> Dùng <code>docker compose logs -f</code> để theo dõi log.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. Bài báo khoa học -->
+        <section id="research-paper" class="mb-5">
+            <h2 class="section-heading mb-3"><span class="badge bg-success me-2">9</span>Bài báo khoa học</h2>
+            <p class="text-secondary mb-3">Mẫu bài báo với abstract, công thức, bảng số liệu và tài liệu tham khảo.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <pre><code># Tối ưu thuật toán Neural Network
+
+**Tác giả:** Khoa Trần¹, Anh Nguyễn²
+¹ Đại học Bách Khoa, ² Đại học Công nghệ
+
+## Abstract
+
+Bài báo đề xuất phương pháp tối ưu mới giúp
+tăng tốc độ huấn luyện lên **35%**.
+
+## Phương pháp
+
+Thuật toán đề xuất:
+
+$$
+\theta_{t+1} = \theta_t - \eta \cdot \frac{m_t}{\sqrt{v_t} + \epsilon}
+$$
+
+với $m_t$ và $v_t$ là moment bậc 1 và bậc 2.
+
+## Kết quả thực nghiệm
+
+| Phương pháp | Accuracy | Thời gian (phút) |
+|------------|----------|------------------|
+| SGD        | 92.3%    | 120              |
+| Adam       | 94.1%    | 95               |
+| **Ours**   | **96.7%** | **78**           |
+
+## Tài liệu tham khảo
+
+[1] Kingma, Adam: A Method for Stochastic Optimization
+[2] Loshchilov, Decoupled Weight Decay Regularization</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light mb-2">Kết quả hiển thị</h5>
+                    <div class="example-output">
+                        <h4>Tối ưu thuật toán Neural Network</h4>
+                        <p><strong>Tác giả:</strong> Khoa Trần, Anh Nguyễn</p>
+                        <h5>Abstract</h5>
+                        <p>Bài báo đề xuất phương pháp tối ưu mới giúp tăng tốc độ huấn luyện lên <strong>35%</strong>.</p>
+                        <h5>Kết quả thực nghiệm</h5>
+                        <table class="table table-dark table-sm table-bordered">
+                            <thead><tr><th>Phương pháp</th><th>Accuracy</th><th>Thời gian</th></tr></thead>
+                            <tbody>
+                                <tr><td>SGD</td><td>92.3%</td><td>120 phút</td></tr>
+                                <tr><td><strong>Ours</strong></td><td><strong>96.7%</strong></td><td><strong>78 phút</strong></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. Release Notes -->
+        <section id="release-notes" class="mb-5">
+            <h2 class="section-heading mb-3"><span class="badge bg-success me-2">10</span>Release Notes</h2>
+            <p class="text-secondary mb-3">Thông báo phát hành phiên bản mới với danh sách thay đổi.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <pre><code># Changelog v3.7.0
+
+**Ngày phát hành:** 15/06/2026
+
+## 🚀 Tính năng mới
+
+- Thêm chế độ chỉnh sửa toàn màn hình
+- Hỗ trợ kéo thả sắp xếp tab
+- Tích hợp lưu đám mây qua Firebase
+
+## 🔧 Cải thiện
+
+- Tối ưu hiệu năng render **x2** nhanh hơn
+- Giảm dung lượng cache từ 5MB xuống 2MB
+
+## 🐛 Sửa lỗi
+
+- Sửa lỗi hiển thị Mermaid trên Safari
+- Sửa lỗi mất nội dung khi chuyển tab
+
+## 📦 Ghi chú
+
+> Nâng cấp khuyến nghị cho tất cả người dùng.</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light mb-2">Kết quả hiển thị</h5>
+                    <div class="example-output">
+                        <h4>Changelog v3.7.0</h4>
+                        <p><strong>Ngày phát hành:</strong> 15/06/2026</p>
+                        <h5>🚀 Tính năng mới</h5>
+                        <ul>
+                            <li>Thêm chế độ chỉnh sửa toàn màn hình</li>
+                            <li>Hỗ trợ kéo thả sắp xếp tab</li>
+                        </ul>
+                        <h5>🐛 Sửa lỗi</h5>
+                        <ul>
+                            <li>Sửa lỗi hiển thị Mermaid trên Safari</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 11. Đề xuất dự án -->
+        <section id="proposal" class="mb-5">
+            <h2 class="section-heading mb-3"><span class="badge bg-success me-2">11</span>Đề xuất dự án</h2>
+            <p class="text-secondary mb-3">Mẫu đề xuất dự án với mục tiêu, phạm vi và timeline.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <pre><code># Đề xuất: Hệ thống Quản lý Tài liệu
+
+## 1. Mục tiêu
+
+Xây dựng hệ thống quản lý tài liệu nội bộ.
+
+## 2. Phạm vi
+
+- **Giai đoạn 1:** Upload, tìm kiếm, xem
+- **Giai đoạn 2:** Chia sẻ, phiên bản
+- **Giai đoạn 3:** AI tagging
+
+## 3. Timeline
+
+```mermaid
+gantt
+    title Dự án
+    dateFormat  YYYY-MM-DD
+    section Phase 1
+    Thiết kế     :a1, 2026-07-01, 14d
+    Phát triển   :a2, after a1, 30d
+    Kiểm thử     :a3, after a2, 14d
+```
+
+## 4. Ngân sách
+
+| Hạng mục | Chi phí |
+|----------|---------|
+| Server   | $500/th |
+| Nhân sự  | $3000   |
+| Tổng     | **$3500** |
+
+## 5. Rủi ro
+
+- ⚠️ Thay đổi yêu cầu
+- ⚠️ Nhân sự không đủ
+
+> *Phê duyệt bởi: Ban Giám đốc*</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light mb-2">Kết quả hiển thị</h5>
+                    <div class="example-output">
+                        <h4>Đề xuất: Hệ thống Quản lý Tài liệu</h4>
+                        <h5>1. Mục tiêu</h5>
+                        <p>Xây dựng hệ thống quản lý tài liệu nội bộ.</p>
+                        <h5>2. Timeline</h5>
+                        <p class="text-secondary">Gantt chart sẽ hiển thị tại đây</p>
+                        <h5>3. Ngân sách</h5>
+                        <table class="table table-dark table-sm table-bordered">
+                            <thead><tr><th>Hạng mục</th><th>Chi phí</th></tr></thead>
+                            <tbody>
+                                <tr><td>Server</td><td>$500/th</td></tr>
+                                <tr><td>Nhân sự</td><td>$3000</td></tr>
+                                <tr><td><strong>Tổng</strong></td><td><strong>$3500</strong></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 12. Cheat Sheet cá nhân -->
+        <section id="cheatsheet" class="mb-5">
+            <h2 class="section-heading mb-3"><span class="badge bg-success me-2">12</span>Cheat Sheet cá nhân</h2>
+            <p class="text-secondary mb-3">Ghi chú nhanh các lệnh hay dùng, tra cứu nhanh hàng ngày.</p>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <pre><code># Git Cheat Sheet
+
+## Cơ bản
+
+| Lệnh | Mô tả |
+|------|-------|
+| `git init` | Khởi tạo repo |
+| `git clone &lt;url&gt;` | Clone repo |
+| `git add .` | Stage all |
+| `git commit -m "msg"` | Commit |
+
+## Branch
+
+```bash
+git branch         # Xem branch
+git checkout -b feat/new  # Tạo & chuyển
+git merge feat     # Merge
+git rebase main    # Rebase
+```
+
+## Git Flow
+
+```mermaid
+gitGraph
+    commit
+    branch feature
+    checkout feature
+    commit
+    commit
+    checkout main
+    merge feature
+```
+
+## Mẹo
+
+> [!TIP]
+> Dùng `git log --oneline --graph` để xem lịch sử trực quan.</code></pre>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="text-light mb-2">Kết quả hiển thị</h5>
+                    <div class="example-output">
+                        <h4>Git Cheat Sheet</h4>
+                        <h5>Cơ bản</h5>
+                        <table class="table table-dark table-sm table-bordered">
+                            <thead><tr><th>Lệnh</th><th>Mô tả</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>git init</code></td><td>Khởi tạo repo</td></tr>
+                                <tr><td><code>git commit -m "msg"</code></td><td>Commit</td></tr>
+                            </tbody>
+                        </table>
+                        <h5>Mẹo</h5>
+                        <div class="alert alert-dark bg-editor border-editor py-2">
+                            <strong>TIP:</strong> Dùng <code>git log --oneline --graph</code> để xem lịch sử trực quan.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <hr class="border-secondary my-5">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="text-secondary mb-0">
+                    <i class="bi bi-arrow-left text-success me-1"></i>
+                    <a href="./" class="text-decoration-none">Quay lại Markdown Editor Online</a>
+                </p>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <a href="https://markdown.com.vn/" class="text-decoration-none text-secondary me-3" target="_blank"><i class="bi bi-globe"></i></a>
+                <a href="https://github.com/kh0adev/Markdown-Viewer" class="text-decoration-none text-secondary me-3" target="_blank"><i class="bi bi-github"></i></a>
+                <span class="text-secondary small">© 2026 Markdown Editor Online</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" crossorigin="anonymous"></script>
+    <script>hljs.highlightAll();</script>
+</body>
+</html>
