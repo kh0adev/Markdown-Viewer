@@ -8,7 +8,7 @@ const CRITICAL_ASSETS = [
   './script.js',
   './styles.css',
   './sample.md',
-  './assets/icon.jpg',
+  './assets/icon.png',
   './manifest.json'
 ];
 
