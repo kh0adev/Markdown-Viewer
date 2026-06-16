@@ -2,13 +2,31 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://markdownviewer.pages.dev/</loc>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://markdownviewer.pages.dev/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://markdownviewer.pages.dev/?lang=en" />
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://markdownviewer.pages.dev/?lang=zh" />
-    <xhtml:link rel="alternate" hreflang="ja" href="https://markdownviewer.pages.dev/?lang=ja" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://markdownviewer.pages.dev/?lang=ko" />
+    <loc>https://markdown.com.vn/</loc>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://markdown.com.vn/" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://markdown.com.vn/?lang=vi" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://markdown.com.vn/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://markdown.com.vn/?lang=zh" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://markdown.com.vn/?lang=ja" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://markdown.com.vn/?lang=ko" />
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://markdown.com.vn/?lang=pt" />
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://markdown.com.vn/markdown-cheat-sheet</loc>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://markdown.com.vn/markdown-cheat-sheet" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://markdown.com.vn/markdown-cheat-sheet" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://markdown.com.vn/markdown-cheat-sheet?lang=en" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://markdown.com.vn/markdown-examples</loc>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://markdown.com.vn/markdown-examples" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://markdown.com.vn/markdown-examples" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://markdown.com.vn/markdown-examples?lang=en" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>
