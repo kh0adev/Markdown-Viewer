@@ -63,10 +63,6 @@
         if (window.__scriptAPI && window.__scriptAPI.setViewMode) {
           window.__scriptAPI.setViewMode(viewMode);
         }
-        if (window.history && window.history.replaceState) {
-          var cleanUrl = window.location.origin + window.location.pathname;
-          window.history.replaceState({}, document.title, cleanUrl);
-        }
       })
       .catch(function (err) {
         alert('Bạn không có quyền xem tài liệu này');
@@ -89,8 +85,6 @@
             window.__scriptAPI.newTab(null, '# Chào mừng đến Markdown\n\nStart typing your markdown here...', 'Chào mừng');
           }
         }
-        var cleanUrl = window.location.origin + window.location.pathname;
-          window.history.replaceState({}, document.title, cleanUrl);
         console.error('Failed to load shared document:', err);
       });
   }
