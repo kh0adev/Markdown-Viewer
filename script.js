@@ -6510,6 +6510,12 @@ function updateShareUrlField() {
 
 
   async function openShareModal() {
+  // Reset trạng thái modal từ lần mở trước
+  shareSection.classList.remove('show-only-row');
+  shareSection.classList.add('share-permission-restricted');
+  if (sharePermissionSelect) sharePermissionSelect.value = 'restricted';
+  shareModeView.checked = true;
+
   if (!window.isUserLoggedIn()) {
      if (typeof pako === 'undefined') {
       loadScript(CDN.pako).then(function() {
